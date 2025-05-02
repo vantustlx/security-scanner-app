@@ -18,14 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Eventos para las tarjetas de acceso
     document.getElementById('qr-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate-to', '/qr-scanner');
+        ipcRenderer.send('navigate', '/qr-scanner');
     });
 
     document.getElementById('fingerprint-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate-to', '/fingerprint');
+        ipcRenderer.send('navigate', '/fingerprint');
     });
 
     document.getElementById('vehicle-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate', 'accesovehiculo');
+        ipcRenderer.send('navigate', 'opcionvehiculo');
     });
 });
