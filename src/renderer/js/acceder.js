@@ -22,10 +22,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('fingerprint-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate-to', '/fingerprint');
+        ipcRenderer.send('navigate', '/fingerprint');
     });
 
     document.getElementById('vehicle-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate-to', '/vehicle-access');
+        ipcRenderer.send('navigate', 'opcionvehiculo');
     });
 });

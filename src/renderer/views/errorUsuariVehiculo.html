@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -38,36 +38,8 @@
                     </div>
 
                     <div class="campo">
-                        <label for="fechaNacimiento">Fecha de nacimiento</label>
-                        <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
-                    </div>
-
-                    <div class="campo">
-                        <label for="correo">Correo electrónico</label>
-                        <input type="email" id="correo" name="correo" required>
-                    </div>
-
-                    <div class="campo">
                         <label for="matricula">Matrícula / Número de trabajador</label>
                         <input type="text" id="matricula" name="matricula" required>
-                    </div>
-
-                    <div class="campo">
-                        <label for="turno">Turno</label>
-                        <select id="turno" name="turno" required>
-                            <option value="Matutino">Matutino</option>
-                            <option value="Vespertino" selected>Vespertino</option>
-                            <option value="Mixto">Mixto</option>
-                        </select>
-                    </div>
-
-                    <div class="campo">
-                        <label for="carrera">Carrera</label>
-                        <select id="carrera" name="carrera" required>
-                            <option value="Ingeniería en computación">Ingeniería en computación</option>
-                            <option value="Quimica">Química</option>
-                            <option value="Matematicas">Matemáticas</option>
-                        </select>
                     </div>
 
                     <div class="campo">
@@ -106,6 +78,16 @@
             </div>
         </div>
 
+        <!-- Modal para error de asociación -->
+        <div class="modal-overlay" id="modal-error-asociacion">
+            <div class="modal-content">
+                <h2>Error en la asociación</h2>
+                <hr class="modal-divider">
+                <p>Usuario no encontrado</p>
+                <button class="modal-btn" id="btn-error-aceptar">Aceptar</button>
+            </div>
+        </div>
+
         <!-- Script para asegurar que la onda inferior se muestre correctamente -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -117,10 +99,23 @@
                 // Asegurar que la onda inferior sea visible
                 const bottomWave = document.querySelector('.backgroundwhite-bottom');
                 bottomWave.style.display = 'block';
+
+                // Cierre de modales
+                document.getElementById('btn-aceptar').addEventListener('click', () => {
+                    document.getElementById('modal-usuario-existente').classList.remove('active');
+                });
+
+                document.getElementById('btn-error-aceptar').addEventListener('click', () => {
+                    document.getElementById('modal-error-asociacion').classList.remove('active');
+                });
+
+                // Ejemplo: Mostrar el modal de error manualmente (elimina esto si lo haces con lógica propia)
+                // document.getElementById('modal-error-asociacion').classList.add('active');
             });
         </script>
+
+        <script src="../js/accesovehiculo.js"></script>
     </div>
-    <script src="../js/registrarusuario.js"></script>
 </body>
 
 </html>
