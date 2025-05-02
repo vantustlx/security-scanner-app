@@ -8,15 +8,19 @@ function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   win = new BrowserWindow({
     fullscreenable: true,
-    width,
-    height,
+    maximizable: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false // ¡Necesario para que funcione ipcRenderer!
     }
   });
 
+  win.maximize();
+
   win.loadFile(path.join(__dirname, '..', 'renderer', 'views', 'index.html'));
+  win.once('ready-to-show', () => {
+    win.show();
+  });
   setupRouting(win);
 }
 
