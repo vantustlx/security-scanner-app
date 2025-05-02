@@ -5,6 +5,21 @@ document.getElementById('boton-rojo').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'index'); // Asumiendo que el archivo se llama index.html
 });
 
+// Función para limpiar todos los campos del formulario
+function limpiarFormulario() {
+    document.getElementById('nombre').value = '';
+    document.getElementById('apellidoP').value = '';
+    document.getElementById('apellidoM').value = '';
+    document.getElementById('fechaNacimiento').value = '';
+    document.getElementById('correo').value = '';
+    document.getElementById('matricula').value = '';
+    document.getElementById('telefono').value = '';
+    
+    // Eliminar mensajes de error si existen
+    const errores = document.querySelectorAll('.error');
+    errores.forEach(error => error.remove());
+}
+
 // Botón verde: validar y enviar
 document.getElementById('boton-verde').addEventListener('click', function () {
     const form = document.querySelector('.formulario');
@@ -38,7 +53,7 @@ document.getElementById('boton-verde').addEventListener('click', function () {
         error.style.fontSize = '12px';
         error.textContent = mensaje;
         campo.appendChild(error);
-        valido = false;
+        valido = false; // Corregido: ahora se establece como false cuando hay un error
     }
 
     // Nombre y apellidos
@@ -76,8 +91,50 @@ document.getElementById('boton-verde').addEventListener('click', function () {
     }
 
     if (valido) {
-        // Aquí puedes hacer ipcRenderer.send si el envío es local
-        alert("Formulario válido. Puedes continuar con el registro.");
-        // form.submit(); // O manejarlo con otra lógica según tu app
+        // Simular verificación de usuario existente (esto es una simulación)
+        // En una aplicación real, aquí harías una comprobación en la base de datos
+        
+        // Para simular un usuario ya registrado:
+        const usuarioYaExiste = correo.value.includes('test') || matricula.value === '12345678';
+        
+        if (usuarioYaExiste) {
+            // Mostrar el modal de usuario existente
+            const modal = document.getElementById('modal-usuario-existente');
+            modal.classList.add('active');
+            
+            // No limpiamos el formulario aquí, lo haremos cuando el usuario cierre el modal
+        } else {
+            // Continuar con el registro normal
+            alert("Formulario válido. Puedes continuar con el registro.");
+            // form.submit(); // O manejarlo con otra lógica según tu app
+        }
     }
+});
+
+// Configuración del modal cuando se carga el documento
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('modal-usuario-existente');
+    const btnAceptar = document.getElementById('btn-aceptar');
+    
+    // Evento para cerrar el modal con el botón Aceptar
+    if (btnAceptar) {
+        btnAceptar.addEventListener('click', function() {
+            modal.classList.remove('active');
+            // Limpiar el formulario después de cerrar el modal
+            limpiarFormulario();
+        });
+    }
+    
+    // También puedes cerrar el modal al hacer clic fuera de él
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            // Limpiar el formulario después de cerrar el modal
+            limpiarFormulario();
+        }
+    });
+    
+    // Para pruebas: Si quieres mostrar el modal automáticamente al cargar la página
+    // Descomenta la siguiente línea:
+    // setTimeout(() => modal.classList.add('active'), 1000);
 });

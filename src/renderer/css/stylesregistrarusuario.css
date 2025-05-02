@@ -137,7 +137,6 @@ h1 {
 }
 
 /* Estilos de botones */
-/* Estilos de botones */
 /* Importar fuente Ubuntu */
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500&display=swap');
 
@@ -213,4 +212,78 @@ h1 {
     .registro {
         padding: 15px;
     }
+}
+
+/* ========== ESTILOS PARA EL MODAL ========== */
+
+/* Overlay del modal - cubre toda la pantalla */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.25s, opacity 0.25s 0s;
+}
+
+/* Clase que activa el modal */
+.modal-overlay.active {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+}
+
+/* Contenedor principal del modal */
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Estilo para el título del modal */
+.modal-content h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+/* Estilo para el texto del modal */
+.modal-content p {
+    color: #666;
+    margin-bottom: 30px;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 16px;
+}
+
+/* Estilo para el botón de aceptar */
+.modal-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #5a8f53;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+/* Hover para el botón */
+.modal-btn:hover {
+    background-color: #4a7544;
 }
