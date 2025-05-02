@@ -104,6 +104,17 @@ h1 {
     width: 100%;
     box-sizing: border-box;
 }
+.campo input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 1;
+    cursor: pointer;
+}
+
+.campo input[type="date"]::-moz-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 1;
+    cursor: pointer;
+}
 
 .campo input:focus,
 .campo select:focus {

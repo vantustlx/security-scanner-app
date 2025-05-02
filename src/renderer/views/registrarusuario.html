@@ -96,15 +96,15 @@
         <div class="backgroundwhite-bottom">
             <img src="../assets/backgroundwhite-bottom.png" alt="Decoración inferior">
         </div>
-        
+
         <!-- Script para asegurar que la onda inferior se muestre correctamente -->
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Asegurar que el layout tenga altura completa
                 const layout = document.querySelector('.layout');
                 const vh = window.innerHeight;
                 layout.style.minHeight = vh + 'px';
-                
+
                 // Asegurar que la onda inferior sea visible
                 const bottomWave = document.querySelector('.backgroundwhite-bottom');
                 bottomWave.style.display = 'block';

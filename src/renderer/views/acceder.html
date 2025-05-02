@@ -4,18 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Acceso</title>
     <link rel="stylesheet" href="../css/stylesacceder.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="backgroundwhite">
-        <img src="../assets/backgroundwhite.png">
+    <div class="layout">
+        <div class="backgroundwhite">
+            <img src="../assets/backgroundwhite.png" alt="Decoración superior">
+        </div>
+
+        <main class="container">
+            <div class="access-options">
+                <!-- Opción 1: Código QR -->
+                <div class="access-card" id="qr-access">
+                    <div class="card-icon">
+                        <img src="../assets/qr-code.png">
+                    </div>
+                    <div class="card-content">
+                        <h2>Lectura de código QR</h2>
+                        <p>Escaneo de su código QR enviado directamente a su correo</p>
+                    </div>
+                </div>
+
+                <!-- Opción 2: Huella digital -->
+                <div class="access-card" id="fingerprint-access">
+                    <div class="card-icon">
+                        <img src="../assets/huella.png">
+                    </div>
+                    <div class="card-content">
+                        <h2>Lectura de huella</h2>
+                        <p>Lectura de huella y registros biométricos</p>
+                    </div>
+                </div>
+
+                <!-- Opción 3: Vehículos -->
+                <div class="access-card" id="vehicle-access">
+                    <div class="card-icon">
+                        <img src="../assets/vehiculo.png">
+                    </div>
+                    <div class="card-content">
+                        <h2>Ingreso con vehículos</h2>
+                        <p>Acceso de vehículos</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-volver-accs" class="back-button">
+                <i class="fas fa-arrow-left"></i> Regresar
+            </button>
+        </main>
+
+        <div class="backgroundwhite-bottom">
+            <img src="../assets/backgroundwhite-bottom.png" alt="Decoración inferior">
+        </div>
     </div>
-    <button id="btn-volver">Volver al inicio</button>
-    <div class="backgroundwhite-bottom">
-        <img src="../assets/backgroundwhite-bottom.png">
-    </div>
+
     <script src="../js/acceder.js"></script>
 </body>
 
