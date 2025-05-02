@@ -26,6 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('vehicle-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate-to', '/vehicle-access');
+        ipcRenderer.send('navigate', 'accesovehiculo');
     });
 });
