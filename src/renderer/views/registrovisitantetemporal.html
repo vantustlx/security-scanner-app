@@ -1,0 +1,95 @@
+<!DOCTYPE html> 
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="../css/stylesregistrarusuario.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="layout">
+        <div class="backgroundwhite">
+            <img src="../assets/backgroundwhite.png" alt="Decoración superior">
+        </div>
+
+        <main class="container">
+            <div class="registro">
+                <h1>Registro de nuevo usuario</h1>
+                <form class="formulario" method="POST" action="#">
+
+                    <div class="campo">
+                        <label for="Motivo">Motivo de visita</label>
+                        <input type="text" id="motivo" name="Motivo" required>
+                    </div>
+
+                    <div class="campo">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+
+                    <div class="campo">
+                        <label for="apellidoP">Apellido paterno</label>
+                        <input type="text" id="apellidoP" name="apellidoP" required>
+                    </div>
+
+                    <div class="campo">
+                        <label for="apellidoM">Apellido materno</label>
+                        <input type="text" id="apellidoM" name="apellidoM" required>
+                    </div>
+
+                    <div class="campo">
+                        <label for="correo">Correo electrónico</label>
+                        <input type="email" id="correo" name="correo" required>
+                    </div>
+
+
+                    <div class="campo">
+                        <label for="telefono">Número de teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" required pattern="[0-9+\s-]{10,15}">
+                    </div>
+
+
+                    <div class="botones">
+                        <button type="button" class="btn-rojo" id="boton-rojo">Regresar</button>
+                        <button type="button" class="btn-verde" id="boton-verde">Registrarse</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <div class="backgroundwhite-bottom">
+            <img src="../assets/backgroundwhite-bottom.png" alt="Decoración inferior">
+        </div>
+
+        <!-- Modal para usuario existente -->
+        <div class="modal-overlay" id="modal-usuario-existente">
+            <div class="modal-content">
+                <h2>Registro ya existente</h2>
+                <p>Usuario ya registrado intente cambiar los datos</p>
+                <button class="modal-btn" id="btn-aceptar">Aceptar</button>
+            </div>
+        </div>
+
+        <!-- Script para asegurar que la onda inferior se muestre correctamente -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Asegurar que el layout tenga altura completa
+                const layout = document.querySelector('.layout');
+                const vh = window.innerHeight;
+                layout.style.minHeight = vh + 'px';
+
+                // Asegurar que la onda inferior sea visible
+                const bottomWave = document.querySelector('.backgroundwhite-bottom');
+                bottomWave.style.display = 'block';
+            });
+        </script>
+    </div>
+    <script src="../js/registrovisitantetemporal.js"></script>
+</body>
+
+</html>

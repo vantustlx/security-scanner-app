@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Acceso</title>
+    <link rel="stylesheet" href="../css/stylesacceder.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="layout">
+        <div class="backgroundwhite">
+            <img src="../assets/backgroundwhite.png" alt="Decoración superior">
+        </div>
+
+        <main class="container">
+            <div class="access-options">
+                <!-- Opción 1: Código QR -->
+                <div class="access-card" id="asociar-placas">
+                    <div class="card-icon">
+                        <img src="../assets/huellas.png">
+                    </div>
+                    <div class="card-content">
+                        <h2>Asociacion de biometricos</h2>
+                        <p>Asociacion de datos biometricos de huellas</p>
+                    </div>
+                </div>
+
+                <div class="access-card" id="vehicle-access">
+                    <div class="card-icon">
+                        <img src="../assets/huellita.png">
+                    </div>
+                    <div class="card-content">
+                        <h2>Acceso con huella</h2>
+                        <p>Si ya cuenta con registros biometricos en nuestro sistema</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-volver-accs" class="back-button">
+                <i class="fas fa-arrow-left"></i> Regresar
+            </button>
+        </main>
+
+        <div class="backgroundwhite-bottom">
+            <img src="../assets/backgroundwhite-bottom.png" alt="Decoración inferior">
+        </div>
+    </div>
+
+    <script src="../js/opcionvehiculo.js"></script>
+</body>
+
+</html>
