@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const path = require('path');
 const { ipcMain } = require('electron');
 const http = require('http');
 
@@ -65,7 +66,9 @@ function iniciarServidorConfirmacion() {
       res.end('<h1>Registro confirmado. Puedes cerrar esta ventana.</h1>');
 
       if (mainWindow) {
-        mainWindow.webContents.send('registro-confirmado');
+        const path = require('path');
+        const viewPath = path.join(__dirname, '..', 'renderer', 'views', `termsandconditions.html`);
+        mainWindow.loadFile(viewPath).catch(console.error);
       }
     } else {
       res.writeHead(404);
