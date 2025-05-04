@@ -104,9 +104,7 @@ document.getElementById('boton-verde').addEventListener('click', function () {
             // 🔥 Envío inmediato
             ipcRenderer.send('enviar-correo', { nombre: nombreVal, email: emailVal });
 
-            ipcRenderer.send('navigate', 'esperandoConfirmacion');
-
-            alert("Formulario válido. Puedes continuar con el registro.");
+            ipcRenderer.send('navigate', 'waitconfirm');
         }
     }
 });
