@@ -14,7 +14,7 @@ function limpiarFormulario() {
     document.getElementById('correo').value = '';
     document.getElementById('matricula').value = '';
     document.getElementById('telefono').value = '';
-    
+
     // Eliminar mensajes de error si existen
     const errores = document.querySelectorAll('.error');
     errores.forEach(error => error.remove());
@@ -91,49 +91,49 @@ document.getElementById('boton-verde').addEventListener('click', function () {
     }
 
     if (valido) {
-        // Simular verificación de usuario existente (esto es una simulación)
-        // En una aplicación real, aquí harías una comprobación en la base de datos
-        
-        // Para simular un usuario ya registrado:
         const usuarioYaExiste = correo.value.includes('test') || matricula.value === '12345678';
-        
+
         if (usuarioYaExiste) {
-            // Mostrar el modal de usuario existente
             const modal = document.getElementById('modal-usuario-existente');
             modal.classList.add('active');
-            
-            // No limpiamos el formulario aquí, lo haremos cuando el usuario cierre el modal
         } else {
-            // Continuar con el registro normal
+            console.log('Llegue hasta aqui')
+            const nombreVal = nombre.value;
+            const emailVal = correo.value;
+
+            // 🔥 Envío inmediato
+            ipcRenderer.send('enviar-correo', { nombre: nombreVal, email: emailVal });
+
+            ipcRenderer.send('navigate', 'esperandoConfirmacion');
+
             alert("Formulario válido. Puedes continuar con el registro.");
-            // form.submit(); // O manejarlo con otra lógica según tu app
         }
     }
 });
 
 // Configuración del modal cuando se carga el documento
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('modal-usuario-existente');
     const btnAceptar = document.getElementById('btn-aceptar');
-    
+
     // Evento para cerrar el modal con el botón Aceptar
     if (btnAceptar) {
-        btnAceptar.addEventListener('click', function() {
+        btnAceptar.addEventListener('click', function () {
             modal.classList.remove('active');
             // Limpiar el formulario después de cerrar el modal
             limpiarFormulario();
         });
     }
-    
+
     // También puedes cerrar el modal al hacer clic fuera de él
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             modal.classList.remove('active');
             // Limpiar el formulario después de cerrar el modal
             limpiarFormulario();
         }
     });
-    
+
     // Para pruebas: Si quieres mostrar el modal automáticamente al cargar la página
     // Descomenta la siguiente línea:
     // setTimeout(() => modal.classList.add('active'), 1000);
