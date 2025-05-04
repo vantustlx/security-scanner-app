@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Términos y condiciones</title>
+    <link rel="stylesheet" href="../css/stylestermsandconditions.css" />
+</head>
+<body>
+    <div class="layout">
+        <div class="success-card">
+            <h1>Términos y<br>condiciones</h1>
+            <hr class="divider-line" />
+            <div class="success-message">
+                <p>Al presionar el botón aceptar, usted acepta nuestros términos y condiciones</p>
+            </div>
+            <div class="button-group">
+                <button id="btn-volver-qr-sccs" class="cancel-button">Cancelar</button>
+                <button id="btn-ver-terminos" class="view-button">Ver términos y condiciones</button>
+                <button id="btn-acept-qr-sccs" class="accept-button">Aceptar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal para ver PDF -->
+<div id="pdf-modal" class="modal hidden">
+    <div class="modal-content">
+        <span id="close-pdf-modal" class="close">&times;</span>
+        <iframe id="pdf-frame" src="../assets/TérminosyCondiciones.pdf" frameborder="0"></iframe>
+    </div>
+</div>
+
+    <script src="../js/termsandconditions.js"></script>
+</body>
+</html>

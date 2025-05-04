@@ -1,0 +1,112 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Ubuntu', sans-serif;
+    background-image: url("../assets/waitconfirm.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.success-card {
+    position: fixed;
+    z-index: 2;
+    width: 80%;
+    max-width: 600px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.divider-line {
+    border: none;
+    height: 1px;
+    background-color: #000000;
+    width: 80%;
+    margin: 20px auto;
+}
+.success-card h1 {
+    color: #4A4A4A;
+    font-size: 50px;
+    font-family: Ubuntu;
+    font-weight: 500;
+    letter-spacing: 5px;
+    text-align: center;
+}
+
+.success-message {
+    margin-bottom: 40px;
+}
+
+.success-message p {
+    color: #4A4A4A;
+    font-size: 24px;
+    font-family: Open Sans;
+    font-weight: 400;
+    line-height: 32px;
+    letter-spacing: 0px;
+    text-align: center;
+    margin-bottom: -4%;
+}
+
+
+.accept-button {
+    background-color: #754949;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.accept-button:hover {
+    background-color: #372222;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .success-card {
+        width: 90%;
+        padding: 30px;
+    }
+
+    .success-card h1 {
+        font-size: 28px;
+    }
+
+    .user-name {
+        font-size: 18px;
+    }
+
+    .accept-button {
+        padding: 12px 30px;
+        font-size: 16px;
+    }
+}
