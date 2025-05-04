@@ -1,0 +1,289 @@
+/* Estilos base y layout */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: url('../assets/fondoregistrar.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    justify-content: space-between; /* Distribuye el espacio entre los elementos */
+}
+
+.backgroundwhite,
+.backgroundwhite-bottom {
+    width: 100%;
+    text-align: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    height: auto; /* Asegurarse que la altura se ajuste al contenido */
+}
+
+.backgroundwhite img,
+.backgroundwhite-bottom img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 80px; /* Limitar altura de las imágenes de onda */
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+    overflow-y: auto; /* Permitir scroll si el contenido es muy alto */
+    min-height: 0; /* Corrige problemas de flex en algunos navegadores */
+}
+
+.registro {
+    background-color: transparent;
+    padding: 20px;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* Estilos de tipografía */
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 32px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Estilos del formulario */
+.formulario {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px 40px;
+    margin-bottom: 30px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.campo label {
+    margin-bottom: 5px;
+    font-weight: normal;
+    color: #fff;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.campo input,
+.campo select {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 5px 0;
+    font-size: 16px;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+}
+.campo input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 1;
+    cursor: pointer;
+}
+
+.campo input[type="date"]::-moz-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 1;
+    cursor: pointer;
+}
+
+.campo input:focus,
+.campo select:focus {
+    border-bottom: 1px solid #5cc7da;
+}
+
+::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.campo select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon fill='%23fff' points='70,105 25,40 115,40'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 15px;
+    padding-right: 20px;
+}
+
+/* Estilos de botones */
+/* Importar fuente Ubuntu */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500&display=swap');
+
+.botones {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 30px;
+    grid-column: 1 / -1;
+}
+
+.btn-rojo,
+.btn-verde {
+    padding: 12px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 14px;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    min-width: 100px;
+    min-height: 50px;
+    text-transform: none;
+    letter-spacing: 0.2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-rojo {
+    background-color: #8b4242;
+}
+
+.btn-verde {
+    background-color: #4c8c4e;
+}
+
+.btn-rojo:hover {
+    background-color: #9e4a4a;
+}
+
+.btn-verde:hover {
+    background-color: #56a158;
+}
+
+/* Estilos para los menús desplegables */
+.campo select option {
+    background-color: #141212;
+    color: white;
+}
+
+/* Campo específicos para roles */
+#rol {
+    grid-column: 2;
+}
+
+/* Responsive: ajuste para pantallas pequeñas */
+@media (max-width: 992px) {
+    .formulario {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #rol {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .formulario {
+        grid-template-columns: 1fr;
+    }
+    
+    .registro {
+        padding: 15px;
+    }
+}
+
+/* ========== ESTILOS PARA EL MODAL ========== */
+
+/* Overlay del modal - cubre toda la pantalla */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.25s, opacity 0.25s 0s;
+}
+
+/* Clase que activa el modal */
+.modal-overlay.active {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+}
+
+/* Contenedor principal del modal */
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Estilo para el título del modal */
+.modal-content h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+/* Estilo para el texto del modal */
+.modal-content p {
+    color: #666;
+    margin-bottom: 30px;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 16px;
+}
+
+/* Estilo para el botón de aceptar */
+.modal-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #5a8f53;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+/* Hover para el botón */
+.modal-btn:hover {
+    background-color: #4a7544;
+}
