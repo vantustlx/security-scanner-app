@@ -1,4 +1,4 @@
-registrarusuario.js
+
 /*document.getElementById('boton-verde').addEventListener('click', () => {
         const nombre = document.getElementById('nombre').value;
         ipcRenderer.send('registrar-usuario', { nombre });
@@ -12,9 +12,10 @@ const path = require('path');
 // Crea la conexión a tu base de datos
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'tu_usuario',
-  password: 'tu_contraseña',
-  database: 'nombre_base_datos'
+  user: 'root',
+  password: 'CarlosDani19/#',
+  database: 'sistemaaccesofacultad',
+  port: 3306
 });
 
 function setupDBListeners() {
@@ -68,3 +69,5 @@ function setupDBListeners() {
         });
     });
 }
+
+module.exports = { setupDBListeners };
