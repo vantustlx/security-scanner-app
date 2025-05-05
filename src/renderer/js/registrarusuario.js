@@ -40,6 +40,10 @@ document.getElementById('boton-verde').addEventListener('click', function () {
     const correo = document.getElementById('correo');
     const matricula = document.getElementById('matricula');
     const telefono = document.getElementById('telefono');
+    const turno = document.getElementById('turno');
+    const rol = document.getElementById('rol');
+    const carrera = document.getElementById('carrera');
+    const estatus = "Inactivo";
 
     const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/;
     const soloNumeros = /^\d+$/;
@@ -90,23 +94,42 @@ document.getElementById('boton-verde').addEventListener('click', function () {
         mostrarError(telefono, 'El teléfono debe contener entre 10 y 15 dígitos numéricos');
     }
 
+
+
     if (valido) {
-        const usuarioYaExiste = correo.value.includes('test') || matricula.value === '12345678';
+        // Recopilar datos del formulario
+        const datosUsuario = {
+            matricula: parseInt(matricula.value),
+            nombre: nombre.value,
+            apellido_paterno: apellidoP.value,
+            apellido_materno: apellidoM.value,
+            fecha_nacimiento: fechaNacimiento.value,
+            fecha_registro: new Date().toISOString().split('T')[0],
+            numero_telefono: telefono.value,
+            correo: correo.value,
+            turno: turno.value,
+            rol_facultad: rol.value,
+            id_carrera: parseInt(carrera.value),
+            estatus: estatus,
+        };
 
-        if (usuarioYaExiste) {
-            const modal = document.getElementById('modal-usuario-existente');
-            modal.classList.add('active');
-        } else {
-            console.log('Llegue hasta aqui')
-            const nombreVal = nombre.value;
-            const emailVal = correo.value;
-
-            // 🔥 Envío inmediato
-            ipcRenderer.send('enviar-correo', { nombre: nombreVal, email: emailVal });
-
-            ipcRenderer.send('navigate', 'waitconfirm');
-        }
+        // Enviar datos para registrar
+        ipcRenderer.send('registrar-usuario-completo', datosUsuario);
     }
+
+    // Escuchar respuesta de si ya existe
+    ipcRenderer.on('usuario-ya-existe', () => {
+        const modal = document.getElementById('modal-usuario-existente');
+        if (modal) modal.classList.add('active');
+    });
+
+    // Escuchar si fue exitoso
+    ipcRenderer.on('registro-exitoso', (event, id) => {
+        console.log('Usuario insertado con ID:', id);
+        ipcRenderer.send('enviar-correo', { nombre: nombre.value, email: correo.value });
+        ipcRenderer.send('navigate', 'waitconfirm');
+    });
+
 });
 
 // Configuración del modal cuando se carga el documento

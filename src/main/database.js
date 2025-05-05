@@ -11,27 +11,59 @@ const path = require('path');
 
 // Crea la conexión a tu base de datos
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'CarlosDani19/#',
-  database: 'sistemaaccesofacultad',
-  port: 3306
+    host: 'localhost',
+    user: 'root',
+    password: 'CarlosDani19/#',
+    database: 'sistemaaccesofacultad',
+    port: 3306
 });
 
 function setupDBListeners() {
-    // Insertar usuario
-    ipcMain.on('registrar-usuario', (event, data) => {
-        const query = 'INSERT INTO usuarios (nombre) VALUES (?)';
-        connection.query(query, [data.nombre], (err, results) => {
+    //insertar usuario
+    ipcMain.on('registrar-usuario-completo', (event, data) => {
+        const checkQuery = 'SELECT * FROM usuario WHERE matricula = ?';
+
+        connection.query(checkQuery, [data.matricula], (err, results) => {
             if (err) {
-                console.error('Error al insertar en MySQL:', err);
+                console.error('Error al verificar existencia:', err);
                 event.reply('registro-error', err.message);
-            } else {
-                console.log('Usuario registrado con ID:', results.insertId);
-                event.reply('registro-exitoso', results.insertId);
+                return;
             }
+
+            if (results.length > 0) {
+                console.warn('Matrícula ya registrada:', data.matricula);
+                event.reply('usuario-ya-existe');
+                return;
+            }
+
+            const insertQuery = `
+                INSERT INTO usuario (
+                    matricula, nombre, apellido_paterno, apellido_materno,
+                    fecha_nacimiento, fecha_registro, numero_telefono, correo,
+                    turno, rol_facultad, estatus, id_carrera
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            const valores = [
+                data.matricula, data.nombre, data.apellido_paterno, data.apellido_materno,
+                data.fecha_nacimiento, data.fecha_registro, data.numero_telefono, data.correo,
+                data.turno, data.rol_facultad, data.estatus, data.id_carrera
+            ];
+
+            connection.query(insertQuery, valores, (err, results) => {
+                if (err) {
+                    console.error('Error al insertar:', err);
+                    event.reply('registro-error', err.message);
+                } else {
+                    console.log('Usuario registrado con ID:', results.insertId);
+                    event.reply('registro-exitoso', results.insertId);
+                }
+            });
         });
     });
+
+
+
 
     // Obtener todos los usuarios
     ipcMain.on('obtener-usuarios', (event) => {
