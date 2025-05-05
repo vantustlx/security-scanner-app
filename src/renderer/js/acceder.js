@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('fingerprint-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate', '/fingerprint');
+        ipcRenderer.send('navigate', 'accederhuella');
     });
 
     document.getElementById('vehicle-access').addEventListener('click', () => {
