@@ -2,7 +2,7 @@ const { ipcRenderer } = require('electron');
 
 // Botón rojo: regresar
 document.getElementById('boton-rojo').addEventListener('click', () => {
-    ipcRenderer.send('navigate', 'index'); // Asumiendo que el archivo se llama index.html
+    ipcRenderer.send('navigate', 'registrovisitantes'); // Asumiendo que el archivo se llama index.html
 });
 
 // Función para limpiar todos los campos del formulario
