@@ -17,7 +17,7 @@ document.getElementById('boton-verde').addEventListener('click', () => {
 
   // Si no contiene "test", continúa con la lógica normal
   // Aquí puedes agregar la lógica real de asociación
-  //ipcRenderer.send('navigate', 'waitconfirm'); // o el destino que tengas
+  ipcRenderer.send('navigate', 'asociarhuellalector'); // o el destino que tengas
 });
 
 // Lógica para cerrar el modal con botón aceptar

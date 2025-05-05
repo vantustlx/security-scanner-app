@@ -1,0 +1,49 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Ubuntu', sans-serif;
+    background-image: url("../assets/asociarhuellalectorrojo.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  
+  .layout {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 5%;
+  }
+  
+  .text-zone {
+    color: #333;
+    max-width: 40%;
+  }
+  
+  .text-zone h1 {
+    font-size: 3.8em;
+    margin: 0 0 50px 0;
+    line-height: 1.2;
+  }
+  
+  .text-zone p {
+    font-size: 2em;
+    margin-bottom: 30px;
+  }
+  
+  .cancel-button {
+    padding: 20px 30px;
+    font-size: 16px;
+    background-color: rgba(175, 87, 87, 0);
+    color: #000000;
+    border: 2px solid #000000; /* Cambiado para agregar un borde negro */
+    border-radius: 8px;
+    cursor: pointer;
+}
+  
+  .cancel-button:hover {
+    background-color: #800;
+  }
+  
