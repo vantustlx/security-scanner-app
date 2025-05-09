@@ -1,49 +1,57 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Ubuntu', sans-serif;
-    background-image: url("../assets/accesohuellaconfirm.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  
-  .layout {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding-left: 5%;
-  }
-  
-  .text-zone {
-    color: #333;
-    max-width: 40%;
-  }
-  
-  .text-zone h1 {
-    font-size: 3.8em;
-    margin: 0 0 50px 0;
-    line-height: 1.2;
-  }
-  
-  .text-zone p {
-    font-size: 2em;
-    margin-bottom: 30px;
-  }
-  
-  .aceptar-button {
-    padding: 20px 30px;
-    font-size: 16px;
-    background-color: rgba(83, 117, 73, 1);
-    color: #000000;
-    border: 2px solid #000000; /* Cambiado para agregar un borde negro */
-    border-radius: 8px;
-    cursor: pointer;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Ubuntu', sans-serif;
+  background-image: url("../assets/accesohuellaconfirm.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
-  
-  .aceptar-button:hover {
-    background-color: rgb(127, 161, 113);
-  }
-  
+
+.layout {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 5%;
+}
+
+.text-zone {
+  color: #333;
+  max-width: 40%;
+}
+
+.text-zone h1 {
+  font-family: Ubuntu;
+  font-weight: 700;
+  letter-spacing: 7.5px;
+  text-align: center;
+  font-size: 75px;
+  margin: 0 0 50px 0;
+  line-height: 1.2;
+}
+
+.text-zone p {
+  font-size: 1.75em;
+  margin-bottom: 30px;
+  font-family: Open Sans;
+  font-weight: 300;
+  letter-spacing: 0px;
+}
+
+.aceptar-button {
+  padding: 20px 30px;
+  font-size: 16px;
+  background-color: rgba(83, 117, 73, 1);
+  color: #ffffff;
+  border: 2px solid #ffffff00;
+  /* Cambiado para agregar un borde negro */
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.aceptar-button:hover {
+  background-color: rgb(127, 161, 113);
+}

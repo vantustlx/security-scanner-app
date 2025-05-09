@@ -1,7 +1,7 @@
 /* Mantén todos tus estilos previos y agrega estos */
 html,
 body {
-    background-color: #4A4A4A;
+    background: url('../assets/registrovehiculo.png') no-repeat center center fixed;
     /* Fondo blanco */
     margin: 0;
     color: #000000;
