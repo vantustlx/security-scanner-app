@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leer código QR</title>
+    <link rel="stylesheet" href="../css/styleleerqr.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="layout">
+        <div class="backgroundwhite">
+            <img src="../assets/backgroundwhite.png" alt="Decoración superior">
+        </div>
+
+        <main class="container">
+            <div class="qr-scanner-container">
+                <div class="qr-scanner-frame">
+                    <img id="img-qr" src="../assets/leerqr.png" alt="Lector QR">
+                </div>
+                <div class="qr-instructions">
+                    <p>Presente su
+                        código frente
+                        al lector</p>
+                </div>
+            </div>
+            <button id="btn-volver-qr" class="back-button">
+                Regresar
+            </button>
+        </main>
+
+        <div class="backgroundwhite-bottom">
+            <img src="../assets/backgroundwhite-bottom.png" alt="Decoración inferior">
+        </div>
+    </div>
+
+    <script src="../js/qrlector.js"></script>
+</body>
+
+</html>

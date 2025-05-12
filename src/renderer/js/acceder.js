@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Eventos para las tarjetas de acceso
     document.getElementById('qr-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate', 'lectorqr');
+        ipcRenderer.send('navigate', 'qrlector');
     });
 
     document.getElementById('fingerprint-access').addEventListener('click', () => {
