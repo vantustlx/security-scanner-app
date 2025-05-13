@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Acceso</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
@@ -23,31 +26,51 @@
                 </div>
             </div>
         </header>
-        
+
         <main class="card-container">
             <div class="card" id="login-card-acceder">
                 <div class="card-image" style="background-image: url('../assets/inicioacceder.png');"></div>
             </div>
-        
-            
+
+
             <div class="card" id="login-card-visitantes">
                 <div class="card-image" style="background-image: url('../assets/iniciovisitantes.png');"></div>
             </div>
-            
+
             <div class="card" id="login-card-registro">
                 <div class="card-image" style="background-image: url('../assets/inicioregistro.png');"></div>
             </div>
-            
-            
+
+
             <div class="card" id="login-card-administrador">
                 <div class="card-image" style="background-image: url('../assets/inicioadministrador.png');"></div>
             </div>
         </main>
-        
+
+        <div class="modal-overlay" id="modal-modo-administrador">
+            <div class="modal-content">
+                <h2>Inserte el usuario y contraseña para acceder</h2>
+                <div class="campo">
+                    <label for="usuario">Usuario</label>
+                    <input type="text" id="usuario" name="usuario" required>
+                </div>
+
+                <div class="campo">
+                    <label for="contraseña">Contraseña</label>
+                    <div class="password-container">
+                        <input type="password" id="contraseña" name="contraseña" required>
+                        <i class="fa-solid fa-eye toggle-password" id="toggle-password"></i>
+                    </div>
+                </div>
+
+                <button class="modal-btn" id="btn-aceptar">Ingresar</button>
+            </div>
+        </div>
         <footer class="footer">
             <div class="window-size"></div>
         </footer>
     </div>
     <script src="../js/index.js"></script>
 </body>
+
 </html>

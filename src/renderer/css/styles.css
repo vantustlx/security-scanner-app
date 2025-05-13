@@ -175,3 +175,110 @@ body {
         padding: 15px;
     }
 }
+
+/* ========== ESTILOS PARA EL MODAL ========== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.25s, opacity 0.25s 0s;
+    backdrop-filter: blur(2px); /* efecto borroso suave */
+}
+
+.modal-overlay.active {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.modal-content h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.campo {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.campo label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #444;
+}
+
+.campo input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    font-size: 15px;
+    font-family: 'Segoe UI', sans-serif;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.campo input:focus {
+    border-color: #5a8f53;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(90, 143, 83, 0.2);
+}
+
+.modal-btn {
+    padding: 10px 25px;
+    background-color: #5a8f53;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.modal-btn:hover {
+    background-color: #4a7544;
+}
+
+.password-container {
+    position: relative;
+}
+
+.password-container input {
+    padding-right: 40px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 18px;
+}
