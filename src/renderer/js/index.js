@@ -14,8 +14,7 @@ document.getElementById('login-card-registro').addEventListener('click', () => {
 });
 
 document.getElementById('login-card-administrador').addEventListener('click', () => {
-  const modal = document.getElementById('modal-modo-administrador');
-  if (modal) modal.classList.add('active');
+  document.getElementById("modal-modo-administrador").classList.add("active");
 });
 
 
@@ -39,9 +38,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // Evento para cerrar el modal con el botón Aceptar
   if (btnAceptar) {
     btnAceptar.addEventListener('click', function () {
-      modal.classList.remove('active');
-      // Limpiar el formulario después de cerrar el modal
-      limpiarFormulario();
+      const usuario = document.getElementById('usuario').value.trim();
+      const contraseña = document.getElementById('contraseña').value;
+  
+      if (usuario === 'admin' && contraseña === 'root') {
+          // Enviar señal a Electron para cambiar a pantalla de modo administrador
+          ipcRenderer.send('navigate', 'administradoropciones'); // carga administradoropciones.html
+      } else {
+          alert('Usuario o contraseña incorrectos 🤖');
+          modal.classList.add('active'); // asegurar que sigue activo
+      }
     });
   }
 
@@ -49,8 +55,6 @@ document.addEventListener('DOMContentLoaded', function () {
   modal.addEventListener('click', function (e) {
     if (e.target === modal) {
       modal.classList.remove('active');
-      // Limpiar el formulario después de cerrar el modal
-      limpiarFormulario();
     }
   });
 
