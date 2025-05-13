@@ -17,6 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('img-qr').addEventListener('click', () => {
-        ipcRenderer.send('navigate', 'qrsuccess');
+        ipcRenderer.send('navigate', 'vehiculoqrsuccess');
     });
 });

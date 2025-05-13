@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   const dedoElement = document.getElementById('dedo-actual');
-    const dedos = ['Índice', 'Anular', 'Pulgar', 'Meñique', 'Corazón'];
+    const dedos = ['Pulgar', 'Índice', 'Medio', 'Anular', 'Meñique'];
     let indiceActual = 0;
 
     // Agregar el evento click al h1
