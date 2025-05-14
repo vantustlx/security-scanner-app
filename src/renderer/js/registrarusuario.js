@@ -126,8 +126,11 @@ document.getElementById('boton-verde').addEventListener('click', function () {
     // Escuchar si fue exitoso
     ipcRenderer.on('registro-exitoso', (event, id) => {
         console.log('Usuario insertado con ID:', id);
-        ipcRenderer.send('enviar-correo', { nombre: nombre.value, email: correo.value });
+        ipcRenderer.send('enviar-correo', { nombre: nombre.value, email: correo.value, matricula: matricula.value });
         ipcRenderer.send('navigate', 'waitconfirm');
+        setTimeout(() => {
+            ipcRenderer.send('apuntador-matricula', { matricula: matricula.value });
+        }, 500);
     });
 
 });
