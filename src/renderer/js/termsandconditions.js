@@ -4,10 +4,15 @@ document.addEventListener('DOMContentLoaded', function () {
     layout.style.minHeight = vh + 'px';
 
     const { ipcRenderer } = require('electron');
+    const apuntadormatricula = '';
 
+    /*ipcRenderer.on('apuntador-matricula', async (event, datos) => {
+        apuntadormatricula = datos.matricula;
+    });*/
     // Cancelar
     document.getElementById('btn-volver-qr-sccs').addEventListener('click', () => {
         ipcRenderer.send('navigate', 'registrarusuario');
+        console.log(apuntadormatricula);
     });
 
     // Mostrar modal con PDF
