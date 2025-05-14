@@ -1,7 +1,7 @@
 /* Estilos base y layout */
 body {
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Ubuntu';
     background: url('../assets/registrovehiculo.png') no-repeat center center fixed;
     background-size: cover;
     color: #fff;
@@ -16,7 +16,8 @@ body {
     height: 100vh;
     width: 100vw;
     position: relative;
-    justify-content: space-between; /* Distribuye el espacio entre los elementos */
+    justify-content: space-between;
+    /* Distribuye el espacio entre los elementos */
 }
 
 .backgroundwhite,
@@ -26,7 +27,8 @@ body {
     flex-shrink: 0;
     position: relative;
     z-index: 1;
-    height: auto; /* Asegurarse que la altura se ajuste al contenido */
+    height: auto;
+    /* Asegurarse que la altura se ajuste al contenido */
 }
 
 .backgroundwhite img,
@@ -34,7 +36,8 @@ body {
     width: 100%;
     height: auto;
     display: block;
-    max-height: 80px; /* Limitar altura de las imágenes de onda */
+    max-height: 80px;
+    /* Limitar altura de las imágenes de onda */
 }
 
 .container {
@@ -47,8 +50,10 @@ body {
     box-sizing: border-box;
     position: relative;
     z-index: 2;
-    overflow-y: auto; /* Permitir scroll si el contenido es muy alto */
-    min-height: 0; /* Corrige problemas de flex en algunos navegadores */
+    overflow-y: auto;
+    /* Permitir scroll si el contenido es muy alto */
+    min-height: 0;
+    /* Corrige problemas de flex en algunos navegadores */
 }
 
 .registro {
@@ -62,9 +67,12 @@ body {
 
 /* Estilos de tipografía */
 h1 {
+    font-size: 40px;
+    font-family: Ubuntu;
+    font-weight: 500;
+    letter-spacing: 4px;
     text-align: center;
     margin-bottom: 40px;
-    font-size: 32px;
     color: #fff;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
@@ -104,6 +112,7 @@ h1 {
     width: 100%;
     box-sizing: border-box;
 }
+
 .campo input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     opacity: 1;
@@ -155,14 +164,15 @@ h1 {
     border-radius: 4px;
     color: white;
     font-size: 14px;
-    font-family: 'Ubuntu', sans-serif;
-    font-weight: 500;
+    font-family: Ubuntu;
+    line-height: 21px;
+    letter-spacing: 0px;
+    text-align: center;
     cursor: pointer;
     transition: background-color 0.3s;
     min-width: 100px;
     min-height: 50px;
     text-transform: none;
-    letter-spacing: 0.2px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -198,7 +208,7 @@ h1 {
     .formulario {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     #rol {
         grid-column: auto;
     }
@@ -208,7 +218,7 @@ h1 {
     .formulario {
         grid-template-columns: 1fr;
     }
-    
+
     .registro {
         padding: 15px;
     }
@@ -223,7 +233,7 @@ h1 {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(255, 0, 0, 0.199);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -232,14 +242,52 @@ h1 {
     opacity: 0;
     transition: visibility 0s linear 0.25s, opacity 0.25s 0s;
 }
-
+.modal-overlay2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 0, 0, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.25s, opacity 0.25s 0s;
+}
+.modal-overlay3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 0, 0, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.25s, opacity 0.25s 0s;
+}
 /* Clase que activa el modal */
 .modal-overlay.active {
     visibility: visible;
     opacity: 1;
     transition-delay: 0s;
 }
-
+.modal-overlay2.active {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+}
+.modal-overlay3.active {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+}
 /* Contenedor principal del modal */
 .modal-content {
     background-color: white;
@@ -286,4 +334,47 @@ h1 {
 /* Hover para el botón */
 .modal-btn:hover {
     background-color: #4a7544;
+}
+
+
+.campoplaca {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.campoplaca label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #444;
+}
+
+.campoplaca input {
+    width: 70%;
+    padding: 10px 10px;
+    border-radius: 5px;
+    border: none; 
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-size: 15px;
+    font-family: 'Segoe UI', sans-serif;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    display: inline-block;
+    margin: 0; /* ya no se centra aquí */
+}
+
+.campoplaca input:focus {
+    border-color: #325a57;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(90, 143, 83, 0.2);
+}
+.mensaje-error {
+    color: #b23131;
+    font-size: 14px;
+    margin-top: 5px;
+    text-align: center;
+    font-family: 'Ubuntu', sans-serif;
+}
+#modal-exito-final h2 {
+    color: #2e7d32;
+    font-weight: bold;
 }
