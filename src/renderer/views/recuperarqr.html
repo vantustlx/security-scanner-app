@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recuperar Código QR</title>
+  <link rel="stylesheet" href="../css/stylesrecuperarqr.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="search-card">
+      <div class="header">
+        <img src="../assets/logo.png" alt="Logo" class="logo" />
+        <h1 class="title">RECUPERAR CÓDIGO QR</h1>
+      </div>
+
+      <div class="search-form">
+        <div class="input-group">
+          <label>Nombre</label>
+          <input type="text" id="nombre" placeholder="Nombre" />
+        </div>
+        <div class="input-group">
+          <label>Apellido paterno</label>
+          <input type="text" id="apellidoP" placeholder="App" />
+        </div>
+        <div class="input-group">
+          <label>Apellido materno</label>
+          <input type="text" id="apellidoM" placeholder="Apm" />
+        </div>
+        <button class="search-btn" id="buscarBtn">🔍</button>
+      </div>
+
+      <div class="results">
+        <div class="result-row">
+          <span class="result-id">001 |</span>
+          <span class="result-name">Jose Miguel Gonzales Dávila 20222787</span>
+          <img src="../assets/qr-code.png" alt="QR Code" class="result-qr" />
+        </div>
+        <div class="result-row">
+          <span class="result-id">002 |</span>
+          <span class="result-name">Jose Miguel Gonzales Dávila 20222747</span>
+          <img src="../assets/qr-code.png" alt="QR Code" class="result-qr" />
+        </div>
+        <div class="result-row">
+          <span class="result-id">003 |</span>
+          <span class="result-name">Jose Miguel Gonzales Dávila 20222687</span>
+          <img src="../assets/qr-code.png" alt="QR Code" class="result-qr" />
+        </div>
+        <div class="result-row">
+          <span class="result-id">004 |</span>
+          <span class="result-name">Jose Miguel Gonzales Dávila 20221787</span>
+          <img src="../assets/qr-code.png" alt="QR Code" class="result-qr" />
+        </div>
+      </div>
+    </div>
+    <!--
+    <div class="button-container">
+      <button class="btn btn-back" id="regresarBtn">Regresar</button>
+      <button class="btn btn-recover" id="recuperarBtn">Recuperar QR</button>
+    </div>-->
+
+    <div class="botonera">
+      <button class="btn btn-regresar" id="btn-regresar">Regresar</button>
+      <button class="btn btn-recuperar" id="btn-recuperarqr">Recuperar QR</button>
+    </div>
+
+  </div>
+
+  <script src="../js/recuperarqr.js"></script>
+</body>
+
+</html>
