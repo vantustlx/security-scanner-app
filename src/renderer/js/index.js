@@ -14,16 +14,24 @@ document.getElementById('login-card-registro').addEventListener('click', () => {
 });
 
 document.getElementById('login-card-administrador').addEventListener('click', () => {
-  document.getElementById("modal-modo-administrador").classList.add("active");
+  document.getElementById("modal-modo-noti").classList.add("active");
 });
 
+document.getElementById('notis').addEventListener('click', () => {
+  document.getElementById("modal-modo-noti").classList.add("active");
+});
 
-
+document.getElementById('btn-noti-aceptar').addEventListener('click', () => {
+  document.getElementById("modal-modo-administrador").classList.add("active");
+});
 
 // Configuración del modal cuando se carga el documento
 document.addEventListener('DOMContentLoaded', function () {
   const modal = document.getElementById('modal-modo-administrador');
+  const modalnoti = document.getElementById('modal-modo-noti');
   const btnAceptar = document.getElementById('btn-aceptar');
+  const btnAceptarNoti = document.getElementById('btn-noti-aceptar');
+  const btnCancelar = document.getElementById('btn-cancelar');
   const togglePassword = document.getElementById('toggle-password');
   const passwordInput = document.getElementById('contraseña');
 
@@ -50,11 +58,27 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+  if(btnCancelar) {
+    btnCancelar.addEventListener('click', function(){
+      modal.classList.remove('active');
+    });
+  }
+  if (btnAceptarNoti) {
+    btnAceptarNoti.addEventListener('click', function(){
+      modalnoti.classList.remove('active');
+    }); 
+  }
 
   // También puedes cerrar el modal al hacer clic fuera de él
   modal.addEventListener('click', function (e) {
     if (e.target === modal) {
       modal.classList.remove('active');
+    }
+  });
+
+  modalnoti.addEventListener('click', function (e) {
+    if (e.target === modalnoti) {
+      modalnoti.classList.remove('active');
     }
   });
 

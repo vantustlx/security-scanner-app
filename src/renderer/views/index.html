@@ -19,7 +19,7 @@
             <div class="logo">
                 <img src="../assets/logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/100'">
             </div>
-            <div class="notifications">
+            <div class="notifications" id="notis">
                 <div class="notification-icon">
                     <i class="fas fa-bell"></i>
                     <span class="notification-count">1</span>
@@ -62,10 +62,19 @@
                         <i class="fa-solid fa-eye toggle-password" id="toggle-password"></i>
                     </div>
                 </div>
-
                 <button class="modal-btn" id="btn-aceptar">Ingresar</button>
+                <button class="modal-btn-no" id="btn-cancelar">Cancelar</button>
             </div>
         </div>
+
+         <div class="modal-overlay" id="modal-modo-noti">
+            <div class="modal-content">
+                <h2>Notificaciones</h2>
+                <p>Para hacer uso de estas opciones necesita ingresar al modo administrador</p>
+                <button class="modal-btn" id="btn-noti-aceptar">Aceptar</button>
+            </div>
+        </div>
+
         <footer class="footer">
             <div class="window-size"></div>
         </footer>
