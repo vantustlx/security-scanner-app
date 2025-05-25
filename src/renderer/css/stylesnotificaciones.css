@@ -1,0 +1,166 @@
+.history-container {
+    max-width: 1050px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.history-header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e1e4e8;
+}
+
+.history-item {
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f6f8fa;
+    border-radius: 15px;
+}
+
+.history-item.warning {
+    border-left-color: #f66a0a;
+}
+
+.history-title {
+    font-size: 30px;
+    font-family: Ubuntu;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+p {
+    font-size: 14px;
+    font-family: Open Sans;
+    font-weight: 400;
+    line-height: 32px;
+    letter-spacing: 0px;
+}
+
+.history-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 14px;
+    font-family: Open Sans;
+    font-weight: 400;
+    line-height: 25px;
+    letter-spacing: 0px;
+}
+
+.history-detail {
+    background: white;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.history-detail strong {
+    display: block;
+    color: #586069;
+    font-size: 12px;
+}
+
+.delete-button {
+    display: block;
+    text-align: center;
+    margin-top: 30px;
+    padding: 10px;
+    background: #767676;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-family: Ubuntu;
+}
+
+.delete-button:hover {
+    background-color: #4e4e4e;
+}
+/* Estilos para las notificaciones */
+.notification-item {
+    padding: 12px;
+    border-bottom: 1px solid #eaecef;
+    display: flex;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.notification-item:hover {
+    background: #f6f8fa;
+}
+
+.notification-item.unread {
+    background: #fff8f8;
+}
+
+.notification-icon.error {
+    color: #d73a49;
+}
+
+.notification-icon.warning {
+    color: #f66a0a;
+}
+
+.notification-icon {
+    margin-right: 12px;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: #24292e;
+}
+
+.notification-detail {
+    font-size: 13px;
+    color: #586069;
+    margin: 0;
+}
+
+.notification-count {
+    /* Tus estilos existentes */
+    background: #d73a49;
+}
+
+h2 {
+    font-size: 35px;
+    font-family: Ubuntu;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.back-button {
+    position: fixed;
+    left: 40px;
+    bottom: 50px;
+    background-color: #663535;
+    color: #ffffff;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 500;
+    line-height: 21px;
+    letter-spacing: 0px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    z-index: 10;
+    /* Asegura que esté sobre otros elementos */
+}
+
+.back-button:hover {
+    background-color: #432424;
+}

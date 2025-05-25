@@ -73,13 +73,109 @@ body {
     right: -10px;
     background-color: #ff0000;
     color: white;
-    font-size: 0.7rem;
-    width: 20px;
-    height: 20px;
+    font-size: 1rem;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.notifications-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 320px;
+    max-height: 0;
+    overflow: hidden;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    opacity: 0;
+    z-index: 1000;
+}
+
+.notifications-dropdown.active {
+    max-height: 400px;
+    opacity: 1;
+    border: 1px solid #e1e4e8;
+}
+
+.notification-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eaecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f6f8fa;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.notification-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #24292e;
+}
+
+.mark-all-read {
+    color: #0366d6;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.notification-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eaecef;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.notification-item:hover {
+    background-color: #f6f8fa;
+}
+
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-message {
+    margin: 0;
+    font-size: 13px;
+    color: #24292e;
+    font-weight: 500;
+}
+
+.notification-time {
+    font-size: 11px;
+    color: #6a737d;
+    margin-top: 2px;
+}
+
+.notification-footer {
+    padding: 8px 16px;
+    text-align: center;
+    background: #f6f8fa;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.view-all {
+    color: #0366d6;
+    font-size: 12px;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .card-container {
