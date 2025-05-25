@@ -6,6 +6,9 @@ document.getElementById('btn-volver').addEventListener('click', () => {
 document.getElementById('view-all').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'notificaciones');
 });
+document.getElementById('login-card-recuperar').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'recuperarqr');
+});
 
 document.addEventListener('DOMContentLoaded', function () {
     // Datos de ejemplo basados en tu imagen
@@ -70,4 +73,3 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inicializar
     renderNotifications();
 });
-

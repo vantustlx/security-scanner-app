@@ -17,13 +17,16 @@ function setupEmailListeners(window) {
     window.loadFile(viewPath).catch(console.error);
   });
 
+  // Inicia el servidor de confirmación solo una vez al configurar los listeners
+  iniciarServidorConfirmacion();
+
   ipcMain.on('enviar-correo', async (event, datos) => {
-    const { email, nombre } = datos;
-    const matricula = datos.matricula;
-    // 🧠 Generar el código QR como dataURL
+    const { email, nombre, matricula } = datos;
+
+    // Generar el código QR como dataURL
     const qrDataURL = await QRCode.toDataURL(matricula.toString());
 
-    // 📄 Crear PDF con el QR
+    // Crear PDF con el QR
     const pdfPath = path.join(os.tmpdir(), `${matricula}_qr.pdf`);
     const doc = new PDFDocument();
     const writeStream = fs.createWriteStream(pdfPath);
@@ -42,7 +45,7 @@ function setupEmailListeners(window) {
 
     doc.end();
 
-    await new Promise((resolve) => writeStream.on('finish', resolve)); // Esperar a que termine el PDF
+    await new Promise((resolve) => writeStream.on('finish', resolve));
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -86,22 +89,18 @@ function setupEmailListeners(window) {
       event.reply('correo-enviado', { success: false, error });
     }
   });
-
-  iniciarServidorConfirmacion(matricula);
 }
 
-function iniciarServidorConfirmacion(matricula) {
+function iniciarServidorConfirmacion() {
   const server = http.createServer((req, res) => {
     if (req.url.startsWith('/confirmar')) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
 
-      // Asegurarnos de que el string template se está renderizando correctamente
-      // evitando problemas con los backticks anidados y espacios en blanco
       const htmlContent = `<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Confirmación de Registro</title>
   <style>
     body {
@@ -133,7 +132,6 @@ function iniciarServidorConfirmacion(matricula) {
 
       if (mainWindow) {
         const viewPath = path.join(__dirname, '..', 'renderer', 'views', `termsandconditions.html`);
-        //ipcRenderer.send('apuntador-matricula', matricula);
         mainWindow.loadFile(viewPath).catch(console.error);
       }
     } else {
@@ -148,11 +146,3 @@ function iniciarServidorConfirmacion(matricula) {
 }
 
 module.exports = { setupEmailListeners };
-
-let matriculaTemp = null;
-
-ipcMain.on('apuntador-matricula', (event, data) => {
-    matriculaTemp = data.matricula;
-    // cuando la vista ya esté cargada, se la mandamos
-    mainWindow.webContents.send('matricula-a-waitconfirm', matriculaTemp);
-});
