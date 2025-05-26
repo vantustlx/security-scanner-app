@@ -3,11 +3,17 @@ const { ipcRenderer } = require('electron');
 document.getElementById('btn-volver').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'index');
 });
+
 document.getElementById('view-all').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'notificaciones');
 });
+
 document.getElementById('login-card-recuperar').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'recuperarqr');
+});
+
+document.getElementById('login-card-actualizar').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'actualizardatospersonales');
 });
 
 document.addEventListener('DOMContentLoaded', function () {
