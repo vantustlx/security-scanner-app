@@ -90,15 +90,20 @@ body {
     color: #333;
 }
 
-.back-btn {
-    background: #8b3d3d;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
+.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 213px;
+  width: 150px; /* mismo ancho */
+  height: 50px;  /* mismo alto */
 }
 
-.back-btn:hover {
-    background: #a94c4c;
+.btn-regresar{
+    background-color: #7f4c4c;
 }
