@@ -16,6 +16,10 @@ document.getElementById('login-card-actualizar').addEventListener('click', () =>
     ipcRenderer.send('navigate', 'actualizardatospersonales');
 });
 
+document.getElementById('login-card-buscar').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'buscarusuariosactivos');
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     // Datos de ejemplo basados en tu imagen
     const failedAccessNotifications = [
