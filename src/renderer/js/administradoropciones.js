@@ -3,6 +3,7 @@ const { ipcRenderer } = require('electron');
 document.getElementById('btn-volver').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'index');
 });
+
 document.getElementById('view-all').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'notificaciones');
 });
@@ -13,6 +14,18 @@ document.getElementById('lista').addEventListener('click', () => {
 
 document.getElementById('login-card-recuperar').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'recuperarqr');
+});
+
+document.getElementById('login-card-actualizar').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'actualizardatospersonales');
+});
+
+document.getElementById('login-card-buscar').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'buscarusuariosactivos');
+});
+
+document.getElementById('login-card-generar').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'generarreportes');
 });
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -78,4 +91,3 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inicializar
     renderNotifications();
 });
-

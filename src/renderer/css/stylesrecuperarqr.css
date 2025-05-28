@@ -1,0 +1,156 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", sans-serif;
+    background-image: url("../assets/recuperarqrbackground.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.search-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding-bottom: 20px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.title {
+    color: #4a90e2;
+    font-size: 24px;
+    margin: 0;
+    text-align: center;
+}
+
+.search-form {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 15px;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.input-group {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.input-group input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.search-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.results {
+    margin: 0 15px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.result-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.result-row:last-child {
+    border-bottom: none;
+}
+
+.result-id {
+    width: 40px;
+    color: #777;
+    font-size: 14px;
+}
+
+.result-name {
+    flex: 1;
+    font-size: 14px;
+}
+
+.result-qr {
+    width: 40px;
+    height: 40px;
+}
+
+.botonera {
+  display: flex;
+  justify-content: center; /* centra horizontalmente */
+  gap: 500px; /* espacio entre los botones */
+  margin-top: 50px; /* ajusta según necesites */
+}
+
+.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 150px; /* mismo ancho */
+  height: 50px;  /* mismo alto */
+}
+
+.btn-regresar{
+    background-color: #7f4c4c;
+}
+
+.btn-recuperar{
+    background-color: #417756;
+}
+
+.btn-regresar:hover {
+  background-color: #492c2c;
+}
+
+.btn-recuperar:hover {
+  background-color: #315840;
+}
+

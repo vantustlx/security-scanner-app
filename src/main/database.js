@@ -1,10 +1,4 @@
-
-/*document.getElementById('boton-verde').addEventListener('click', () => {
-        const nombre = document.getElementById('nombre').value;
-        ipcRenderer.send('registrar-usuario', { nombre });
-    });*/
-
-//Sección para manejar la lógica de la base de datos
+// Sección para manejar la lógica de la base de datos
 const { ipcMain } = require('electron');
 const mysql = require('mysql2');
 const path = require('path');
@@ -13,12 +7,21 @@ const path = require('path');
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'CarlosDani19/#',
+    password: 'root',
     database: 'sistemaaccesofacultad',
     port: 3306
 });
 
 function setupDBListeners() {
+    // Verificar la conexión
+    connection.connect((err) => {
+        if (err) {
+            console.error('Error al conectar a la base de datos:', err);
+            return;
+        }
+        console.log('Conexión exitosa a la base de datos MySQL');
+    });
+
     //insertar usuario
     ipcMain.on('registrar-usuario-completo', (event, data) => {
         const checkQuery = 'SELECT * FROM usuario WHERE matricula = ?';
@@ -62,12 +65,9 @@ function setupDBListeners() {
         });
     });
 
-
-
-
-    // Obtener todos los usuarios
+    // Obtener todos los usuarios (CORREGIDO: cambiado "usuarios" a "usuario" para consistencia)
     ipcMain.on('obtener-usuarios', (event) => {
-        connection.query('SELECT * FROM usuarios', (err, results) => {
+        connection.query('SELECT * FROM usuario', (err, results) => {
             if (err) {
                 console.error('Error al obtener usuarios:', err);
                 event.reply('consulta-error', err.message);
@@ -77,9 +77,9 @@ function setupDBListeners() {
         });
     });
 
-    // Eliminar usuario por ID
+    // Eliminar usuario por ID (CORREGIDO: cambiado "usuarios" a "usuario" para consistencia)
     ipcMain.on('eliminar-usuario', (event, id) => {
-        connection.query('DELETE FROM usuarios WHERE id = ?', [id], (err, results) => {
+        connection.query('DELETE FROM usuario WHERE id = ?', [id], (err, results) => {
             if (err) {
                 console.error('Error al eliminar usuario:', err);
                 event.reply('eliminacion-error', err.message);
@@ -89,14 +89,37 @@ function setupDBListeners() {
         });
     });
 
-    // Actualizar nombre de un usuario
+    // Actualizar nombre de un usuario (CORREGIDO: cambiado "usuarios" a "usuario" para consistencia)
     ipcMain.on('actualizar-usuario', (event, data) => {
-        connection.query('UPDATE usuarios SET nombre = ? WHERE id = ?', [data.nombre, data.id], (err, results) => {
+        connection.query('UPDATE usuario SET nombre = ? WHERE id = ?', [data.nombre, data.id], (err, results) => {
             if (err) {
                 console.error('Error al actualizar usuario:', err);
                 event.reply('actualizacion-error', err.message);
             } else {
                 event.reply('usuario-actualizado', results.changedRows);
+            }
+        });
+    });
+
+    // Verificar matrícula escaneada desde QR
+    ipcMain.on('verificar-matricula', (event, matricula) => {
+        const query = 'SELECT * FROM usuario WHERE matricula = ?';
+
+        console.log('Verificando matrícula:', matricula);
+        
+        connection.query(query, [matricula], (err, results) => {
+            if (err) {
+                console.error('Error al consultar matrícula:', err);
+                event.reply('resultado-verificacion', false);
+                return;
+            }
+
+            if (results.length > 0) {
+                console.log('Matrícula válida:', matricula);
+                event.reply('resultado-verificacion', true);
+            } else {
+                console.warn('Matrícula no encontrada:', matricula);
+                event.reply('resultado-verificacion', false);
             }
         });
     });

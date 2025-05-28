@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Actualizar Datos Personales</title>
+    <link rel="stylesheet" href="../css/stylesactualizardatospersonales.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="../assets/logo.png" alt="Logo" class="logo">
+            <h1>ACTUALIZAR DATOS PERSONALES</h1>
+        </div>
+
+        <div class="form-section">
+            <div class="form-field">
+                <label>Nombre</label>
+                <input type="text" placeholder="Ejemplo: Jose">
+            </div>
+            <div class="form-field">
+                <label>Apellido paterno</label>
+                <input type="text" placeholder="Ejemplo: Hernández">
+            </div>
+            <div class="form-field">
+                <label>Apellido materno</label>
+                <input type="text" placeholder="Ejemplo: Vázquez">
+            </div>
+            <button class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+
+        <div class="list-section">
+            <div class="list-item">
+                <span>001 | Jose Miguel Gonzales Dávila 20222787</span>
+                <i class="fas fa-edit edit-icon"></i>
+            </div>
+            <div class="list-item">
+                <span contenteditable="true">002 | Jose Miguel Gonzales Dávila 20222747</span>
+                <i class="fas fa-edit edit-icon"></i>
+            </div>
+            <div class="list-item">
+                <span contenteditable="true">003 | Jose Miguel Gonzales Dávila 20222687</span>
+                <i class="fas fa-edit edit-icon"></i>
+            </div>
+            <div class="list-item">
+                <span contenteditable="true">004 | Jose Miguel Gonzales Dávila 20221787</span>
+                <i class="fas fa-edit edit-icon"></i>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-regresar" id="btn-regresar">Regresar</button>
+    <script src="../js/actualizardatospersonales.js"></script>
+</body>
+</html>
