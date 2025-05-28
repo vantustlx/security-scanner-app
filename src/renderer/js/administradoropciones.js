@@ -20,6 +20,10 @@ document.getElementById('login-card-buscar').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'buscarusuariosactivos');
 });
 
+document.getElementById('login-card-generar').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'generarreportes');
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     // Datos de ejemplo basados en tu imagen
     const failedAccessNotifications = [
