@@ -4,6 +4,19 @@ document.getElementById('btn-volver').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'administradoropciones');
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Botón de marcar como leído
+    const markAllReadButton = document.querySelector('.delete-button');
+    const notifications = document.querySelectorAll('.history-item');
+
+     markAllReadButton.addEventListener('click', function() {
+        notifications.forEach(item => {
+            item.style.backgroundColor = '#f6f8fa'; // Cambia este valor al color que prefieras
+        });
+        markAllReadButton.disabled = true;
+     });
+});
+
 /*async function loadNotifications() {
     try {
         const response = await fetch('/api/notifications');

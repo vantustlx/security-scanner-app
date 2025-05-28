@@ -7,6 +7,14 @@ document.getElementById('view-all').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'notificaciones');
 });
 
+document.getElementById('lista').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'notificaciones');
+}); 
+
+document.getElementById('login-card-recuperar').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'recuperarqr');
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     // Datos de ejemplo basados en tu imagen
     const failedAccessNotifications = [

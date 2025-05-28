@@ -16,7 +16,7 @@
 .history-item {
     padding: 15px;
     margin-bottom: 15px;
-    background: #f6f8fa;
+    background: #e5f0fb;
     border-radius: 15px;
 }
 
@@ -75,6 +75,7 @@ p {
     text-decoration: none;
     font-weight: 500;
     font-family: Ubuntu;
+    cursor: pointer;
 }
 
 .delete-button:hover {
@@ -97,14 +98,6 @@ p {
     background: #fff8f8;
 }
 
-.notification-icon.error {
-    color: #d73a49;
-}
-
-.notification-icon.warning {
-    color: #f66a0a;
-}
-
 .notification-icon {
     margin-right: 12px;
     font-size: 18px;
@@ -124,7 +117,7 @@ p {
 
 .notification-detail {
     font-size: 13px;
-    color: #586069;
+    color: #5E84A5;
     margin: 0;
 }
 
