@@ -8,6 +8,10 @@ document.getElementById('view-all').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'notificaciones');
 });
 
+document.getElementById('lista').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'notificaciones');
+}); 
+
 document.getElementById('login-card-recuperar').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'recuperarqr');
 });
