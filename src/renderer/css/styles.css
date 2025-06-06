@@ -2,7 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Arial', sans-serif, Open Sans;
 }
 
 body {
@@ -69,9 +69,9 @@ body {
     right: -10px;
     background-color: #ff0000;
     color: white;
-    font-size: 0.7rem;
-    width: 20px;
-    height: 20px;
+    font-size: 1rem;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -86,29 +86,33 @@ body {
 }
 
 .card {
-    width: 250px;
-    height: 245px;
+    width: 260px;
+    height: 280px;
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease, box-shadow 0.2s ease;
     cursor: pointer;
-    position: relative; /* Asegura que el contenido interno use este como referencia */
+    position: relative;
+    /* Asegura que el contenido interno use este como referencia */
 }
 
 
 .card:hover {
-    transform: scale(1.05);/*translateY(-10px);*/
+    transform: scale(1.05);
+    /*translateY(-10px);*/
     box-shadow: 0 16px 32px rgba(0, 58, 82, 0.6);
 }
 
 .card-image {
     width: 100%;
     height: 100%;
-    background-size: cover; /* Asegura que la imagen cubra todo */
+    background-size: cover;
+    /* Asegura que la imagen cubra todo */
     background-position: center;
     background-repeat: no-repeat;
-    position: absolute; /* Permite que la imagen se expanda en toda la tarjeta */
+    position: absolute;
+    /* Permite que la imagen se expanda en toda la tarjeta */
     top: 0;
     left: 0;
 }
@@ -154,7 +158,7 @@ body {
     .card-container {
         flex-wrap: wrap;
     }
-    
+
     .card {
         margin-bottom: 20px;
     }
@@ -170,7 +174,7 @@ body {
     .card {
         width: 100%;
     }
-    
+
     .header {
         padding: 15px;
     }
@@ -179,7 +183,8 @@ body {
 /* ========== ESTILOS PARA EL MODAL ========== */
 
 .modal-overlay {
-    pointer-events: none; /* Esto evita interacción cuando está oculto */
+    pointer-events: none;
+    /* Esto evita interacción cuando está oculto */
     position: fixed;
     top: 0;
     left: 0;
@@ -193,7 +198,8 @@ body {
     visibility: hidden;
     opacity: 0;
     transition: visibility 0s linear 0.25s, opacity 0.25s 0s;
-    backdrop-filter: blur(2px); /* efecto borroso suave */
+    backdrop-filter: blur(2px);
+    /* efecto borroso suave */
 }
 
 .modal-overlay.active {
@@ -216,10 +222,22 @@ body {
 .modal-content h2 {
     color: #333;
     margin-bottom: 20px;
-    font-family: 'Ubuntu', sans-serif;
-    font-size: 30px;
+    font-family: Ubuntu;
+    font-size: 35px;
     font-weight: 600;
-    letter-spacing: 3 px;
+    letter-spacing: 1px;
+    text-align: center;
+
+}
+
+p {
+    color: #4A4A4A;
+    font-size: 22px;
+    font-family: Open Sans;
+    font-weight: 400;
+    line-height: 32px;
+    letter-spacing: -1px;
+    text-align: center;
 }
 
 .campo {
@@ -238,13 +256,14 @@ body {
     width: 70%;
     padding: 10px 10px;
     border-radius: 5px;
-    border: none; 
+    border: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     font-size: 15px;
     font-family: 'Segoe UI', sans-serif;
     transition: border-color 0.3s, box-shadow 0.3s;
     display: inline-block;
-    margin: 0; /* ya no se centra aquí */
+    margin: 0;
+    /* ya no se centra aquí */
 }
 
 .campo input:focus {
@@ -254,7 +273,7 @@ body {
 }
 
 .modal-btn {
-    margin-top: 20px; 
+    margin-top: 20px;
     padding: 10px 25px;
     background-color: #537549;
     color: white;
@@ -265,6 +284,20 @@ body {
     font-size: 12px;
     transition: background-color 0.3s ease;
 }
+
+.modal-btn-no {
+    margin-top: 20px;
+    padding: 10px 25px;
+    background-color: #8b4242;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 12px;
+    transition: background-color 0.3s ease;
+}
+
 
 .modal-btn:hover {
     background-color: #4a7544;
@@ -278,8 +311,10 @@ body {
 
 /* Aplica el padding suficiente a la derecha para dejar espacio al ojito */
 .password-container input {
-    width: 100%; /* ya no pongas 70%, lo hereda del container */
-    padding-right: 35px; /* suficiente para el ojito */
+    width: 100%;
+    /* ya no pongas 70%, lo hereda del container */
+    padding-right: 35px;
+    /* suficiente para el ojito */
 }
 
 /* Centra el ojito justo al final del input */

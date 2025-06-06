@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Notificaciones</title>
+    <link rel="stylesheet" href="../css/stylesnotificaciones.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <main class="history-container">
+            <div class="history-header">
+                <h2>Notificaciones</h2>
+            </div>
+            
+            <!-- Ejemplo de item de historial -->
+            <div class="history-item">
+                <div class="history-title">1. Intento de acceso fallido</div>
+                <p>Error inesperado en la matrícula / número de trabajador: 20233782</p>
+                <div class="history-details">
+                    <div class="history-detail">
+                        <strong>Hora</strong>
+                        <span>12:03</span>
+                    </div>
+                    <div class="history-detail">
+                        <strong>Fecha</strong>
+                        <span>22/10/2024</span>
+                    </div>
+                    <div class="history-detail">
+                        <strong>Tipo</strong>
+                        <span>Error de matrícula</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Segundo item -->
+            <div class="history-item warning">
+                <div class="history-title">2. Usuario sin registro de salida</div>
+                <p>Error inesperado en la matrícula / número de trabajador: 4032</p>
+                <div class="history-details">
+                    <div class="history-detail">
+                        <strong>Hora</strong>
+                        <span>20:39</span>
+                    </div>
+                    <div class="history-detail">
+                        <strong>Fecha</strong>
+                        <span>21/10/2024</span>
+                    </div>
+                    <div class="history-detail">
+                        <strong>Tipo</strong>
+                        <span>Registro incompleto</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tercer item -->
+            <div class="history-item">
+                <div class="history-title">3. Intento de acceso fallido</div>
+                <p>Error código QR no válido</p>
+                <div class="history-details">
+                    <div class="history-detail">
+                        <strong>Hora</strong>
+                        <span>16:08</span>
+                    </div>
+                    <div class="history-detail">
+                        <strong>Fecha</strong>
+                        <span>21/10/2024</span>
+                    </div>
+                    <div class="history-detail">
+                        <strong>Tipo</strong>
+                        <span>QR inválido</span>
+                    </div>
+                </div>
+            </div>
+             <div class="history-item warning">
+                <div class="history-title">4. Usuario sin registro de salida</div>
+                <p>Error inesperado en la matrícula / número de trabajador: 20222787</p>
+                <div class="history-details">
+                    <div class="history-detail">
+                        <strong>Hora</strong>
+                        <span>19:25</span>
+                    </div>
+                    <div class="history-detail">
+                        <strong>Fecha</strong>
+                        <span>20/10/2024</span>
+                    </div>
+                    <div class="history-detail">
+                        <strong>Tipo</strong>
+                        <span>Registro incompleto</span>
+                    </div>
+                </div>
+            </div>
+            <a class="delete-button">Marcar todo como leído</a>
+            <button id="btn-volver" class="back-button">
+                Regresar
+            </button>
+        </main>
+    </div>
+      <script src="../js/notificaciones.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Acceso</title>
+    <link rel="stylesheet" href="../css/stylesacceder.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="layout">
+        <div class="backgroundwhite">
+            <img src="../assets/backgroundwhite.png" alt="Decoración superior">
+        </div>
+
+        <main class="container">
+            <div class="access-options">
+                <!-- Opción 1: Código QR -->
+                <div class="access-card" id="grupodeusuarios">
+                    <div class="card-icon">
+                        <img src="../assets/grupodeusuarios.png">
+                    </div>
+                    <div class="card-content">
+                        <h2>Buscar grupo de usuarios</h2>
+                    </div>
+                </div>
+
+                <div class="access-card" id="usuarioespecifico">
+                    <div class="card-icon">
+                        <img src="../assets/buscarusuarioespecifico.png">
+                    </div>
+                    <div class="card-content">a
+                        <h2>Buscar usuario específico</h2>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-volver" class="back-button">
+                Regresar
+            </button>
+        </main>
+
+        <div class="backgroundwhite-bottom">
+            <img src="../assets/backgroundwhite-bottom.png" alt="Decoración inferior">
+        </div>
+    </div>
+
+    <script src="../js/buscarusuariosactivos.js"></script>
+</body>
+
+</html>
