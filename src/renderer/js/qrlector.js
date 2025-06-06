@@ -53,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const qrScanner = new Html5QrcodeScanner.Html5Qrcode("img-qr");
                 
                 const config = {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
+                    fps: 30,
+                    qrbox: { width: 300, height: 300 },
                     aspectRatio: 1.0
                 };
                 
@@ -100,11 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Escuchar el resultado de la verificación
-    ipcRenderer.on('resultado-verificacion', (event, resultado) => {
-        if (resultado === true) {
+    ipcRenderer.on('resultado-verificacion', (event, respuesta) => {
+      
+       if (respuesta.success === true) {
             ipcRenderer.send('navigate', 'qrsuccess');
         } else {
             ipcRenderer.send('navigate', 'qrdontsucces');
         }
+         
     });
+    
 });
