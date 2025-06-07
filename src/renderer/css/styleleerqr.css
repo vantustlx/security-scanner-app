@@ -50,7 +50,7 @@ body {
 
 .qr-instructions {
     position: absolute;
-    left: 100px; /* Alineado a la izquierda */
+    left: 150px; /* Alineado a la izquierda */
     top: 50%;
     transform: translateY(-50%);
     color: white;
