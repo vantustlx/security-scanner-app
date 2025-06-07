@@ -84,6 +84,11 @@ body {
     border-bottom: none;
 }
 
+.list-item:hover {
+    background-color: #b3b3b3;
+    cursor: pointer;
+}
+
 .edit-icon {
     cursor: pointer;
     font-size: 20px;
