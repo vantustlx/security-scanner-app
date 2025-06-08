@@ -68,32 +68,6 @@ body {
     flex-shrink: 0; /* Evitar que se encoja */
 }
 
-.formulario-filtros {
-    display: flex;
-    align-items: flex-end;
-    gap: 12px;
-    background: #292929;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    width: 100%;
-    flex-wrap: wrap;
-    box-sizing: border-box; /* Incluir padding en el cálculo del ancho */
-}
-
-.campo {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 160px;
-    position: relative;
-}
-
-.formulario-filtros .campo:nth-child(2) {
-    flex: 1.5;
-    min-width: 220px;
-}
-
 /* Nuevo: Campo del botón buscar */
 .boton-buscar {
     flex: 0 0 auto; /* No crecer ni encogerse, usar tamaño automático */
@@ -101,81 +75,32 @@ body {
     align-self: flex-end;
 }
 
-.campo label {
-    margin-bottom: 5px;
-    font-weight: normal;
-    color: #fff;
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-.campo input,
-.campo select {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-    padding: 5px 0;
-    font-size: 16px;
-    color: #fff;
-    outline: none;
-    width: 100%;
-    box-sizing: border-box;
-    transition: border-color 0.3s;
-}
-
-.campo input[type="date"]::-webkit-calendar-picker-indicator,
-.campo input[type="date"]::-moz-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 1;
-    cursor: pointer;
-}
-
-.campo input:focus,
-.campo select:focus {
-    border-bottom-color: #5cc7da;
-}
-
 ::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
-
-.formulario-filtros .campo select {
-    background-color: #333;
-    border: 1px solid #585858;
-    border-radius: 4px;
-    padding: 10px 35px 10px 12px;
-    appearance: none;
-    color: white;
-    font-size: 14px;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon fill='%23ffffff' points='70,105 25,40 115,40'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 12px;
-    transition: all 0.3s;
-    cursor: pointer;
+.form-section {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.formulario-filtros .campo select:hover,
-.formulario-filtros .campo select:focus {
-    border-color: #5cc7da;
+.form-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-.formulario-filtros .campo select:focus {
-    box-shadow: 0 0 0 2px rgba(92, 199, 218, 0.3);
+.form-field label {
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
-.formulario-filtros .campo select option {
-    background: #333;
-    color: white;
-    padding: 8px;
-}
-
-.list-section {
-    background: #f9f9f9;
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 80px; /* Espacio para el botón regresar */
-    overflow-x: auto; /* Scroll horizontal si la tabla es muy ancha */
+.form-field input {
+    border: none;
+    border-bottom: 1px solid #ccc;
+    padding: 5px;
+    background: transparent;
 }
 
 /* Estilos para la tabla */

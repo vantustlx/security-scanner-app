@@ -7,3 +7,7 @@ document.getElementById('btn-volver').addEventListener('click', () => {
 document.getElementById('grupodeusuarios').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'buscargrupodeusuarios');
 });
+
+document.getElementById('usuarioespecifico').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'buscarusuarioespecifico');
+});

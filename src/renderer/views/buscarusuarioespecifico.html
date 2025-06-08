@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Actualizar Datos Personales</title>
+    <link rel="stylesheet" href="../css/stylesbuscarusuariosespecifico.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="../assets/logo.png" alt="Logo" class="logo">
+            <h1>BUSQUEDA DE USUARIO ACTIVO</h1>
+        </div>
+
+        <div class="formulario-filtros">
+            <div class="form-section">
+                <div class="form-field">
+                    <label>Nombre</label>
+                    <input type="text" placeholder="Ejemplo: Jose">
+                </div>
+                <div class="form-field">
+                    <label>Apellido paterno</label>
+                    <input type="text" placeholder="Ejemplo: Hernández">
+                </div>
+                <div class="form-field">
+                    <label>Apellido materno</label>
+                    <input type="text" placeholder="Ejemplo: Vázquez">
+                </div>
+                <div class="campo boton-buscar">
+                    <button class="btn btn-buscar">Buscar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido paterno</th>
+                        <th>Apellido materno</th>
+                        <th>Matrícula</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th>Fecha ▽</th>
+                        <th>Hora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí van los resultados -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="btn btn-regresar" id="btn-regresar">Regresar</button>
+    <script src="../js/buscarusuarioespecifico.js"></script>
+</body>
+
+</html>
