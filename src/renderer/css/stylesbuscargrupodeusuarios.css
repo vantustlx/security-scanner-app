@@ -1,0 +1,260 @@
+body {
+    font-family: Arial, sans-serif;
+    background: url('../assets/updateinfoadmin.png') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 20px; /* Añadido padding para evitar que el contenido toque los bordes */
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 30px auto;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    position: relative; /* Para contener el botón regresar */
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.header .logo {
+    width: 60px;
+    height: 60px;
+}
+
+.header h1 {
+    color: #6aaefc;
+    font-size: 28px;
+    margin: 0; /* Eliminar margen por defecto */
+}
+
+.btn, .btn-buscar {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn {
+    background-color: #007bff;
+    width: 150px;
+    height: 50px;
+    /* Eliminar margin-left fijo que causaba desbordamiento */
+}
+
+.btn-regresar {
+    background-color: #7f4c4c;
+    position: absolute; /* Posicionamiento absoluto dentro del container */
+    bottom: 150px; /* Distancia desde el fondo */
+    left: 222px; /* Distancia desde la derecha */
+    margin: 0; /* Eliminar cualquier margen */
+}
+
+.btn-buscar {
+    background: #5f7359;
+    height: 40px;
+    min-width: 100px;
+    flex-shrink: 0; /* Evitar que se encoja */
+}
+
+.formulario-filtros {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    background: #292929;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    width: 100%;
+    flex-wrap: wrap;
+    box-sizing: border-box; /* Incluir padding en el cálculo del ancho */
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 160px;
+    position: relative;
+}
+
+.formulario-filtros .campo:nth-child(2) {
+    flex: 1.5;
+    min-width: 220px;
+}
+
+/* Nuevo: Campo del botón buscar */
+.boton-buscar {
+    flex: 0 0 auto; /* No crecer ni encogerse, usar tamaño automático */
+    min-width: auto;
+    align-self: flex-end;
+}
+
+.campo label {
+    margin-bottom: 5px;
+    font-weight: normal;
+    color: #fff;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.campo input,
+.campo select {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 5px 0;
+    font-size: 16px;
+    color: #fff;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.campo input[type="date"]::-webkit-calendar-picker-indicator,
+.campo input[type="date"]::-moz-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 1;
+    cursor: pointer;
+}
+
+.campo input:focus,
+.campo select:focus {
+    border-bottom-color: #5cc7da;
+}
+
+::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.formulario-filtros .campo select {
+    background-color: #333;
+    border: 1px solid #585858;
+    border-radius: 4px;
+    padding: 10px 35px 10px 12px;
+    appearance: none;
+    color: white;
+    font-size: 14px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon fill='%23ffffff' points='70,105 25,40 115,40'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.formulario-filtros .campo select:hover,
+.formulario-filtros .campo select:focus {
+    border-color: #5cc7da;
+}
+
+.formulario-filtros .campo select:focus {
+    box-shadow: 0 0 0 2px rgba(92, 199, 218, 0.3);
+}
+
+.formulario-filtros .campo select option {
+    background: #333;
+    color: white;
+    padding: 8px;
+}
+
+.list-section {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 80px; /* Espacio para el botón regresar */
+    overflow-x: auto; /* Scroll horizontal si la tabla es muy ancha */
+}
+
+/* Estilos para la tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Ancho mínimo para la tabla */
+}
+
+table th,
+table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.list-item:last-child {
+    border-bottom: none;
+}
+
+.list-item:hover {
+    background-color: #b3b3b3;
+    cursor: pointer;
+}
+
+.edit-icon {
+    cursor: pointer;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .formulario-filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .campo {
+        min-width: auto;
+        margin-bottom: 10px;
+    }
+    
+    .boton-buscar {
+        align-self: center;
+        margin-top: 10px;
+    }
+    
+    .header h1 {
+        font-size: 20px;
+    }
+    
+    .btn-regresar {
+        position: static;
+        margin: 20px auto 0;
+        display: block;
+    }
+}
+
+.newclass {
+    position: absolute;
+    dominant-baseline: 50px;
+    stroke-dashoffset: 0cqw;
+}
