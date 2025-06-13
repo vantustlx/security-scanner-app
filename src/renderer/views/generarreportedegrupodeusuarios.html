@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Actualizar Datos Personales</title>
+    <link rel="stylesheet" href="../css/stylesgenerarreportedegrupodeusuarios.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="../assets/logo.png" alt="Logo" class="logo">
+            <h1>REPORTE DE GRUPO DE USUARIOS</h1>
+        </div>
+
+        <div class="formulario-filtros">
+            <div class="campo">
+                <label for="rol">Rol en la facultad</label>
+                <select id="rol" name="rol" required>
+                    <option value="Estudiante" selected>Estudiante</option>
+                    <option value="Docente">Docente</option>
+                    <option value="Administrativo">Administrativo</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="carrera">Carrera</label>
+                <select id="carrera" name="carrera" required>
+                    <option value="1">Ingeniería en computación</option>
+                    <option value="2">Ingeniería Química</option>
+                    <option value="3">Ingeniería Mecánica</option>
+                    <option value="4">Ingeniería en Sistemas Electrónicos</option>
+                    <option value="5">Química Industrial</option>
+                    <option value="6">Matemáticas Aplicadas</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="turno">Turno</label>
+                <select id="turno" name="turno" required>
+                    <option value="Matutino">Matutino</option>
+                    <option value="Vespertino" selected>Vespertino</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="fechaNacimiento">Fecha de inicio</label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+            </div>
+            
+            <div class="campo">
+                <label for="fechaNacimiento">Fecha fin</label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-regresar" id="btn-regresar">Regresar</button>
+    <button id="btn-volver-accs" class="btn-generar">
+        Generar reporte
+    </button>
+    <script src="../js/generarreportedegrupodeusuarios.js"></script>
+</body>
+
+</html>
