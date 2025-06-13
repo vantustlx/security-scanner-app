@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Actualizar Datos Personales</title>
+    <link rel="stylesheet" href="../css/stylesgenerarreporteusuariosespecifico.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="../assets/logo.png" alt="Logo" class="logo">
+            <h1>REPORTE DE USUARIO ESPECIFICO</h1>
+        </div>
+
+        <div class="formulario-filtros">
+            <div class="campo">
+                <label>Nombre</label>
+                <input type="text" placeholder="Ejemplo: Jose">
+            </div>
+            <div class="campo">
+                <label>Apellido paterno</label>
+                <input type="text" placeholder="Ejemplo: Hernández">
+            </div>
+            <div class="campo">
+                <label>Apellido materno</label>
+                <input type="text" placeholder="Ejemplo: Vázquez">
+            </div>
+            <div class="campo">
+                <label for="fechaNacimiento">Fecha de inicio</label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+            </div>
+            
+            <div class="campo">
+                <label for="fechaNacimiento">Fecha fin</label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-regresar" id="btn-regresar">Regresar</button>
+    <button id="btn-volver-accs" class="btn-generar">
+        Generar reporte
+    </button>
+    <script src="../js/generarreporteusuarioespecifico.js"></script>
+</body>
+
+</html>
