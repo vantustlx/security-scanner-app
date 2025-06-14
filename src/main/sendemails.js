@@ -89,6 +89,20 @@ function setupEmailListeners(window) {
       event.reply('correo-enviado', { success: false, error });
     }
   });
+
+  ipcMain.on('recuperar-qr', async (event, { matricula, email, nombre }) => {
+    try {
+        const resultado = await enviarCorreoRecuperacion(email, nombre, matricula);
+        if (resultado.success) {
+            event.reply('recuperar-qr-respuesta', { success: true, matricula });
+        } else {
+            event.reply('recuperar-qr-respuesta', { success: false, matricula, error: resultado.error });
+        }
+    } catch (error) {
+        console.error('Error en recuperar-qr:', error);
+        event.reply('recuperar-qr-respuesta', { success: false, matricula, error });
+    }
+});
 }
 
 function iniciarServidorConfirmacion() {
@@ -143,6 +157,62 @@ function iniciarServidorConfirmacion() {
   server.listen(3000, () => {
     console.log('Servidor de confirmación escuchando en http://localhost:3000');
   });
+}
+
+async function enviarCorreoRecuperacion(email, nombre, matricula) {
+    const qrDataURL = await QRCode.toDataURL(matricula.toString());
+    const pdfPath = path.join(os.tmpdir(), `${matricula}_qr.pdf`);
+    
+    // Crear PDF con el QR
+    const doc = new PDFDocument();
+    const writeStream = fs.createWriteStream(pdfPath);
+    doc.pipe(writeStream);
+
+    doc.fontSize(20).text(`Recuperación de código QR para: ${nombre}`, { align: 'center' });
+    doc.moveDown();
+    doc.text(`Matrícula: ${matricula}`, { align: 'center' });
+
+    doc.image(qrDataURL, {
+        fit: [200, 200],
+        align: 'center',
+        valign: 'center'
+    });
+
+    doc.end();
+    await new Promise((resolve) => writeStream.on('finish', resolve));
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'dangonzares@gmail.com',
+            pass: 'itkhozuwhujqvmqu'
+        }
+    });
+
+    const htmlContent = `
+        <h2>Hola ${nombre}</h2>
+        <p>Adjunto encontrarás tu código QR personal para el sistema de acceso.</p>
+        <p>Si no solicitaste este correo, por favor ignóralo.</p>
+    `;
+
+    const mailOptions = {
+        from: 'dangonzares@gmail.com',
+        to: email,
+        subject: 'Recuperación de código QR',
+        html: htmlContent,
+        attachments: [{
+            filename: `${matricula}_qr.pdf`,
+            path: pdfPath
+        }]
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        return { success: true };
+    } catch (error) {
+        console.error('Error enviando correo de recuperación:', error);
+        return { success: false, error };
+    }
 }
 
 module.exports = { setupEmailListeners };
