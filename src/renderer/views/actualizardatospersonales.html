@@ -1,56 +1,136 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Actualizar Datos Personales</title>
     <link rel="stylesheet" href="../css/stylesactualizardatospersonales.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
-        <div class="header">
-            <img src="../assets/logo.png" alt="Logo" class="logo">
-            <h1>ACTUALIZAR DATOS PERSONALES</h1>
+        <div class="search-section">
+            <div class="header">
+                <img src="../assets/logo.png" alt="Logo" class="logo">
+                <h1 class="title">ACTUALIZAR DATOS PERSONALES</h1>
+            </div>
+
+            <div class="form-section">
+                <div class="form-field">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" placeholder="Ejemplo: José">
+                </div>
+                <div class="form-field">
+                    <label for="apellidoP">Apellido paterno</label>
+                    <input type="text" id="apellidoP" placeholder="Ejemplo: Hernández">
+                </div>
+                <div class="form-field">
+                    <label for="apellidoM">Apellido materno</label>
+                    <input type="text" id="apellidoM" placeholder="Ejemplo: Vázquez">
+                </div>
+                <button class="search-btn" id="buscarBtn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div class="list-section">
+                
+            </div>
         </div>
 
-        <div class="form-section">
-            <div class="form-field">
-                <label>Nombre</label>
-                <input type="text" placeholder="Ejemplo: Jose">
-            </div>
-            <div class="form-field">
-                <label>Apellido paterno</label>
-                <input type="text" placeholder="Ejemplo: Hernández">
-            </div>
-            <div class="form-field">
-                <label>Apellido materno</label>
-                <input type="text" placeholder="Ejemplo: Vázquez">
-            </div>
-            <button class="search-btn">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
+        <button class="btn-regresar" id="btn-regresar">Regresar</button>
+    </div>
 
-        <div class="list-section">
-            <div class="list-item">
-                <span>001 | Jose Miguel Gonzales Dávila 20222787</span>
-                <i class="fas fa-edit edit-icon"></i>
+    <!-- Modal de edición -->
+    <div class="modal-overlay" id="modal-edicion">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Datos Personales</h2>
+                <button class="close-modal">&times;</button>
             </div>
-            <div class="list-item">
-                <span>002 | Jose Miguel Gonzales Dávila 20222747</span>
-                <i class="fas fa-edit edit-icon"></i>
+
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="edit-nombre">Nombre</label>
+                    <input type="text" id="edit-nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-apellidoP">Apellido paterno</label>
+                    <input type="text" id="edit-apellidoP" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-apellidoM">Apellido materno</label>
+                    <input type="text" id="edit-apellidoM" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-fechaNacimiento">Fecha de nacimiento</label>
+                    <input type="date" id="edit-fechaNacimiento" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-correo">Correo electrónico</label>
+                    <input type="email" id="edit-correo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-matricula">Matrícula</label>
+                    <input type="text" id="edit-matricula" required readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-turno">Turno</label>
+                    <select id="edit-turno" required>
+                        <option value="Matutino">Matutino</option>
+                        <option value="Vespertino" selected>Vespertino</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-carrera">Carrera</label>
+                    <select id="edit-carrera" required>
+                        <option value="1">Ingeniería en computación</option>
+                        <option value="2">Ingeniería Química</option>
+                        <option value="3">Ingeniería Mecánica</option>
+                        <option value="4">Ingeniería en Sistemas Electrónicos</option>
+                        <option value="5">Quimica Industrial</option>
+                        <option value="6">Matematicas aplicadas</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-telefono">Número de teléfono</label>
+                    <input type="tel" id="edit-telefono" required pattern="[0-9+\s-]{10,15}">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-rol">Rol en la facultad</label>
+                    <select id="edit-rol" required>
+                        <option value="Estudiante" selected>Estudiante</option>
+                        <option value="Docente">Docente</option>
+                        <option value="Administrativo">Administrativo</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-estatus">Estatus</label>
+                    <select id="edit-estatus" required>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
             </div>
-            <div class="list-item">
-                <span>003 | Jose Miguel Gonzales Dávila 20222687</span>
-                <i class="fas fa-edit edit-icon"></i>
-            </div>
-            <div class="list-item">
-                <span>004 | Jose Miguel Gonzales Dávila 20221787</span>
-                <i class="fas fa-edit edit-icon"></i>
+
+            <div class="modal-buttons">
+                <button class="btn-cancelar" id="btn-cancelar">Cancelar</button>
+                <button class="btn-actualizar" id="btn-actualizar">Actualizar</button>
             </div>
         </div>
     </div>
-    <button class="btn btn-regresar" id="btn-regresar">Regresar</button>
     <script src="../js/actualizardatospersonales.js"></script>
 </body>
+
 </html>

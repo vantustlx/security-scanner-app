@@ -102,84 +102,124 @@ body {
     padding: 5px;
     background: transparent;
 }
-
 /* Estilos para la tabla */
 table {
     width: 100%;
     border-collapse: collapse;
     min-width: 600px; /* Ancho mínimo para la tabla */
-}
-
-table th,
-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 table th {
-    background-color: #f0f0f0;
-    font-weight: bold;
+    background-color: #2c6ecb;
+    color: white;
+    font-weight: 500;
+    padding: 12px 15px;
+    text-align: left;
+    position: sticky;
+    top: 0;
 }
 
-.list-item {
+table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+table tbody tr:hover {
+    background-color: #e9f0ff;
+    cursor: pointer;
+}
+
+/* Mensaje de sistema */
+#mensaje-sistema {
+    border-left: 4px solid rgba(255,255,255,0.8);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* Contenedor de la tabla con scroll */
+.list-section {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+/* Scrollbar styling */
+.list-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.list-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.list-section::-webkit-scrollbar-thumb {
+    background: #a0aec0;
+    border-radius: 10px;
+}
+
+.list-section::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+}
+
+/* Estilo para botón de búsqueda */
+.btn-buscar {
+    background: #5f7359;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    height: 40px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+}
+
+.btn-buscar:hover {
+    background: #4a5a45;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para los campos de entrada */
+.form-field input {
+    border: none;
+    border-bottom: 1px solid #ccc;
     padding: 8px 0;
-    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    width: 100%;
 }
 
-.list-item:last-child {
-    border-bottom: none;
+.form-field input:focus {
+    border-bottom-color: #2c6ecb;
+    outline: none;
 }
 
-.list-item:hover {
-    background-color: #b3b3b3;
-    cursor: pointer;
+/* Estilo para el contenedor del formulario */
+.formulario-filtros {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
 }
 
-.edit-icon {
-    cursor: pointer;
-    font-size: 20px;
-    color: #333;
+.form-section {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-/* Media queries para responsividad */
-@media (max-width: 768px) {
-    .container {
-        margin: 10px;
-        padding: 15px;
-    }
-    
-    .formulario-filtros {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .campo {
-        min-width: auto;
-        margin-bottom: 10px;
-    }
-    
-    .boton-buscar {
-        align-self: center;
-        margin-top: 10px;
-    }
-    
-    .header h1 {
-        font-size: 20px;
-    }
-    
-    .btn-regresar {
-        position: static;
-        margin: 20px auto 0;
-        display: block;
-    }
-}
-
-.newclass {
-    position: absolute;
-    dominant-baseline: 50px;
-    stroke-dashoffset: 0cqw;
+.form-field {
+    flex: 1;
+    min-width: 200px;
 }
