@@ -89,24 +89,13 @@ function setupDBListeners() {
         });
     });
 
-    // Actualizar nombre de un usuario (CORREGIDO: cambiado "usuarios" a "usuario" para consistencia)
-    ipcMain.on('actualizar-usuario', (event, data) => {
-        connection.query('UPDATE usuario SET nombre = ? WHERE id = ?', [data.nombre, data.id], (err, results) => {
-            if (err) {
-                console.error('Error al actualizar usuario:', err);
-                event.reply('actualizacion-error', err.message);
-            } else {
-                event.reply('usuario-actualizado', results.changedRows);
-            }
-        });
-    });
 
     // Verificar matrícula escaneada desde QR
     ipcMain.on('verificar-matricula', (event, matricula) => {
         const query = 'SELECT * FROM usuario WHERE matricula = ?';
 
         console.log('Verificando matrícula:', matricula);
-        
+
         connection.query(query, [matricula], (err, results) => {
             if (err) {
                 console.error('Error al consultar matrícula:', err);
@@ -125,18 +114,19 @@ function setupDBListeners() {
     });
 
 
-     // NUEVA FUNCIÓN: Buscar usuarios por nombre y apellidos
+    // NUEVA FUNCIÓN: Buscar usuarios por nombre y apellidos
     ipcMain.on('buscar-usuarios', (event, parametros) => {
         const { nombre, apellido_paterno, apellido_materno } = parametros;
-        
+
         console.log('Buscando usuarios con parámetros:', parametros);
-        
+
         const query = `
             SELECT 
                 matricula,
                 nombre,
                 apellido_paterno,
                 apellido_materno,
+                numero_telefono,
                 correo,
                 CONCAT(nombre, ' ', apellido_paterno, ' ', apellido_materno, ' ', matricula) as nombre_completo
             FROM usuario 
@@ -146,13 +136,13 @@ function setupDBListeners() {
                 AND (apellido_materno LIKE CONCAT('%', ?, '%') OR ? = '') 
             ORDER BY apellido_paterno, apellido_materno, nombre
         `;
-        
+
         const parametrosQuery = [
             nombre, nombre,
             apellido_paterno, apellido_paterno,
             apellido_materno, apellido_materno
         ];
-        
+
         connection.query(query, parametrosQuery, (err, results) => {
             if (err) {
                 console.error('Error al buscar usuarios:', err);
@@ -166,6 +156,145 @@ function setupDBListeners() {
             }
         });
     });
+
+
+    // En setupDBListeners(), después de la función de búsqueda
+    ipcMain.on('actualizar-usuario', (event, data) => {
+        console.log('Recibida solicitud para actualizar usuario:', data);
+
+        const updateQuery = `
+        UPDATE usuario 
+        SET 
+            nombre = ?,
+            apellido_paterno = ?,
+            apellido_materno = ?,
+            fecha_nacimiento = ?,
+            numero_telefono = ?,
+            correo = ?,
+            turno = ?,
+            rol_facultad = ?,
+            estatus = ?,
+            id_carrera = ?
+        WHERE matricula = ?
+    `;
+
+        const valores = [
+            data.nombre,
+            data.apellido_paterno,
+            data.apellido_materno,
+            data.fecha_nacimiento,
+            data.numero_telefono,
+            data.correo,
+            data.turno,
+            data.rol_facultad,
+            data.estatus,
+            data.id_carrera,
+            data.matricula
+        ];
+
+        connection.query(updateQuery, valores, (err, results) => {
+            if (err) {
+                console.error('Error al actualizar usuario:', err);
+                event.reply('actualizacion-error', {
+                    success: false,
+                    error: err.message
+                });
+            } else {
+                if (results.affectedRows > 0) {
+                    console.log('Usuario actualizado con éxito');
+                    event.reply('actualizacion-exitosa', {
+                        success: true,
+                        matricula: data.matricula,
+                        affectedRows: results.affectedRows
+                    });
+                } else {
+                    console.log('No se encontró el usuario para actualizar');
+                    event.reply('actualizacion-no-encontrada', {
+                        success: false,
+                        matricula: data.matricula,
+                        message: 'Usuario no encontrado'
+                    });
+                }
+            }
+        });
+    });
 }
+
+// En setupDBListeners() en database.js
+ipcMain.on('buscar-grupo-usuarios', (event, filtros) => {
+    const { rol, carrera, turno } = filtros;
+    
+    console.log('Buscando grupo de usuarios con filtros:', filtros);
+    
+    const query = `
+        SELECT 
+            nombre, 
+            apellido_paterno, 
+            apellido_materno, 
+            matricula, 
+            numero_telefono, 
+            estatus, 
+            fecha_registro
+        FROM usuario
+        WHERE 
+            estatus = 'Activo'
+            AND rol_facultad = ?
+            AND id_carrera = ?
+            AND turno = ?
+        ORDER BY apellido_paterno, apellido_materno, nombre
+    `;
+    
+    connection.query(query, [rol, carrera, turno], (err, results) => {
+        if (err) {
+            console.error('Error al buscar grupo de usuarios:', err);
+            event.reply('busqueda-grupo-error', err.message);
+        } else {
+            console.log(`Búsqueda de grupo completada. Encontrados: ${results.length} usuarios`);
+            event.reply('resultados-grupo-usuarios', results);
+        }
+    });
+}); 
+
+
+// En setupDBListeners() en database.js
+ipcMain.on('buscar-usuario-especifico', (event, filtros) => {
+    const { nombre, apellidoP, apellidoM } = filtros;
+    
+    console.log('Buscando usuario específico con filtros:', filtros);
+    
+    const query = `
+        SELECT 
+            nombre, 
+            apellido_paterno, 
+            apellido_materno, 
+            matricula, 
+            numero_telefono, 
+            estatus, 
+            fecha_registro
+        FROM usuario
+        WHERE 
+            estatus = 'Activo'
+            AND nombre LIKE CONCAT('%', ?, '%')
+            AND apellido_paterno LIKE CONCAT('%', ?, '%')
+            AND apellido_materno LIKE CONCAT('%', ?, '%')
+        ORDER BY apellido_paterno, apellido_materno, nombre
+        LIMIT 1  -- Solo devolver un resultado
+    `;
+    
+    connection.query(query, [nombre, apellidoP, apellidoM], (err, results) => {
+        if (err) {
+            console.error('Error al buscar usuario específico:', err);
+            event.reply('busqueda-especifica-error', err.message);
+        } else {
+            if (results.length > 0) {
+                console.log('Usuario específico encontrado');
+                event.reply('resultados-usuario-especifico', results);
+            } else {
+                console.log('No se encontró usuario específico');
+                event.reply('resultados-usuario-especifico', []);
+            }
+        }
+    });
+});
 
 module.exports = { setupDBListeners };
