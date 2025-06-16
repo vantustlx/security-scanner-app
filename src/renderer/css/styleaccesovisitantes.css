@@ -1,3 +1,6 @@
+/* styleaccesovisitantes.css */
+
+/* Body y layout base */
 body {
     margin: 0;
     padding: 0;
@@ -9,80 +12,200 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: 'Ubuntu', sans-serif;
 }
 
+/* Contenedor principal para oleadas y tarjeta */
+.layout {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ondas blancas: superior e inferior */
+.backgroundwhite,
+.backgroundwhite-bottom {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: 0;
+}
+.backgroundwhite {
+    top: 0;
+}
+.backgroundwhite-bottom {
+    bottom: 0;
+}
+.backgroundwhite img,
+.backgroundwhite-bottom img {
+    width: 100%;
+    display: block;
+}
+
+/* Tarjeta centrada */
 .card {
-    position: fixed;
+    position: relative;    /* ya no es fixed */
     z-index: 2;
     width: 80%;
     max-width: 600px;
-    background-color: white;
-    border-radius: 10px;
-    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 40px 30px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 0.5s ease-out both;
 }
 
-.divider-line {
-    border: none;
-    height: 1px;
-    background-color: #000000;
-    width: 80%;
-    margin: 10px auto;
-}
+/* Título */
 .card h1 {
     color: #4A4A4A;
-    font-size: 50px;
-    font-family: Ubuntu;
+    font-size: 48px;
     font-weight: 500;
-    letter-spacing: 5px;
-    text-align: center;
+    letter-spacing: 4px;
+    margin-bottom: 10px;
 }
 
+/* Línea divisoria */
+.divider-line {
+    border: none;
+    height: 2px;
+    background-color: #E0E0E0;
+    width: 60%;
+    margin: 15px auto;
+}
+
+/* Texto descriptivo */
 .message {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
-
 .message p {
     color: #4A4A4A;
-    font-size: 24px;
-    font-family: Open Sans;
+    font-size: 20px;
     font-weight: 400;
-    line-height: 32px;
-    letter-spacing: 0px;
-    text-align: center;
-    margin-bottom: 4%;
+    line-height: 1.4;
+    margin: 0;
 }
 
-
-.accept-button {
+/* Grupo de input y botón de verificación */
+.input-group {
+    display: flex;
+    justify-content: center;
+    margin: 25px 0;
+}
+.input-group input {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 1px solid #CCC;
+    border-radius: 6px 0 0 6px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+.input-group input:focus {
+    border-color: #537549;
+}
+.input-group button {
     background-color: #537549;
-    color: white;
+    color: #fff;
     border: none;
-    padding: 15px 40px;
-    border-radius: 10px;
+    padding: 0 24px;
+    border-radius: 0 6px 6px 0;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+.input-group button:hover {
+    background-color: #3e533a;
+    transform: translateY(-1px);
+}
+
+/* Botones generales */
+.accept-button {
+    display: inline-block;
+    background-color: #537549;
+    color: #fff;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 8px;
     font-size: 18px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 8px;
 }
-
 .accept-button:hover {
-    background-color: #273722;
+    background-color: #3e533a;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+/* Botón secundario “Volver” */
+.accept-button.secondary {
+    background-color: #AAA;
+}
+.accept-button.secondary:hover {
+    background-color: #888;
 }
 
+/* Modales */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+.modal-overlay.active {
+    display: flex;
+}
+.modal-content {
+    background-color: #ffffff;
+    padding: 30px 25px;
+    border-radius: 8px;
+    max-width: 90%;
+    width: 360px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    animation: fadeInUp 0.4s ease-out both;
+}
+.modal-content h2 {
+    margin-top: 0;
+    font-size: 24px;
+    color: #333;
+}
+.modal-content p {
+    font-size: 16px;
+    color: #555;
+    margin: 15px 0;
+}
+.modal-btn {
+    background-color: #537549;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.modal-btn:hover {
+    background-color: #3e533a;
+}
+
+/* Animación fadeInUp */
 @keyframes fadeInUp {
     from {
         opacity: 0;
         transform: translateY(20px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -91,21 +214,31 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .success-card {
+    .card {
         width: 90%;
-        padding: 30px;
+        padding: 30px 20px;
     }
-
-    .success-card h1 {
-        font-size: 28px;
+    .card h1 {
+        font-size: 32px;
     }
-
-    .user-name {
-        font-size: 18px;
+    .input-group input {
+        font-size: 14px;
+        padding: 10px;
     }
-
+    .input-group button,
     .accept-button {
-        padding: 12px 30px;
+        padding: 12px 28px;
         font-size: 16px;
+    }
+    .modal-content {
+        width: 85%;
+        padding: 20px;
+    }
+    .modal-content h2 {
+        font-size: 20px;
+    }
+    .modal-btn {
+        padding: 8px 20px;
+        font-size: 14px;
     }
 }

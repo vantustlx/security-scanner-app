@@ -2,25 +2,47 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qr exito</title>
-    <link rel="stylesheet" href="../css/styleaccesovisitantes.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso Visitantes</title>
+  <link rel="stylesheet" href="../css/styleaccesovisitantes.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="layout">
-        <div class="card">
-            <h1>Presente su folio</h1>
-            <hr class="divider-line">
-            <div class="message">
-                <p>Si usted ya cuenta con un registro</p>
-            </div>
-            <button id="btn-volver-gst-accs" class="accept-button">Aceptar</button>
-        </div>
+  <div class="layout">
+    <div class="card">
+      <h1>Presente su folio</h1>
+      <hr class="divider-line">
+
+      <div class="input-group">
+        <input type="text" id="codigo" placeholder="Introduce o escanea tu folio">
+        <button id="btn-verificar" class="accept-button">Verificar folio</button>
+      </div>
+
+      <button id="btn-volver-gst-accs" class="accept-button secondary">Volver</button>
     </div>
-    <script src="../js/accesovisitantes.js"></script>
+  </div>
+
+  <!-- Modal: acceso denegado -->
+  <div class="modal-overlay" id="modal-acceso-fallido">
+    <div class="modal-content">
+      <h2>Acceso denegado</h2>
+      <p>Folio inválido o caducado</p>
+      <button class="modal-btn" id="btn-fallido">Aceptar</button>
+    </div>
+  </div>
+
+  <!-- Modal: acceso exitoso -->
+  <div class="modal-overlay" id="modal-acceso-exito">
+    <div class="modal-content">
+      <h2>¡Bienvenido!</h2>
+      <p id="texto-acceso"></p>
+      <button class="modal-btn" id="btn-exito">Aceptar</button>
+    </div>
+  </div>
+
+  <script src="../js/accesovisitantes.js"></script>
 </body>
 
 </html>
