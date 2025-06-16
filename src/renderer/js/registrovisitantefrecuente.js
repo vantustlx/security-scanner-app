@@ -1,140 +1,131 @@
 const { ipcRenderer } = require('electron');
 
-// Botón rojo: regresar
-document.getElementById('boton-rojo').addEventListener('click', () => {
-    ipcRenderer.send('navigate', 'registrovisitantes'); // Asumiendo que el archivo se llama index.html
-});
+document.addEventListener('DOMContentLoaded', () => {
+  // Referencias
+  const btnRegresar = document.getElementById('boton-rojo');
+  const btnRegistrar = document.getElementById('boton-verde');
+  const form = document.querySelector('.formulario');
 
-// Función para limpiar todos los campos del formulario
-function limpiarFormulario() {
-    document.getElementById('nombre').value = '';
-    document.getElementById('apellidoP').value = '';
-    document.getElementById('apellidoM').value = '';
-    document.getElementById('fechaNacimiento').value = '';
-    document.getElementById('correo').value = '';
-    document.getElementById('matricula').value = '';
-    document.getElementById('telefono').value = '';
-    
-    // Eliminar mensajes de error si existen
-    const errores = document.querySelectorAll('.error');
-    errores.forEach(error => error.remove());
-}
+  const inputMotivo   = document.getElementById('motivo');
+  const inputNombre   = document.getElementById('nombre');
+  const inputApellidoP= document.getElementById('apellidoP');
+  const inputApellidoM= document.getElementById('apellidoM');
+  const inputCorreo   = document.getElementById('correo');
+  const inputTelefono = document.getElementById('telefono');
 
-// Botón verde: validar y enviar
-document.getElementById('boton-verde').addEventListener('click', function () {
-    const form = document.querySelector('.formulario');
-    const campos = form.querySelectorAll('.campo');
+  const modalExistente = document.getElementById('modal-usuario-existente');
+  const btnAceptarExistente = document.getElementById('btn-aceptar');
+
+  const modalExito    = document.getElementById('modal-visitante-exito');
+  const textoFolio    = document.getElementById('texto-folio');
+  const btnAceptarExito = document.getElementById('btn-aceptar-exito');
+
+  // Función para limpiar formulario y errores
+  function limpiarFormulario() {
+    [ inputMotivo, inputNombre, inputApellidoP, inputApellidoM, inputCorreo, inputTelefono ]
+      .forEach(i => i.value = '');
+    form.querySelectorAll('.error').forEach(e => e.remove());
+  }
+
+  // Navegar atrás
+  btnRegresar.addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'registrovisitantes');
+  });
+
+  // Validación y envío
+  btnRegistrar.addEventListener('click', () => {
+    // Limpio errores previos
+    form.querySelectorAll('.error').forEach(e => e.remove());
     let valido = true;
 
-    // Limpiar mensajes previos
-    campos.forEach(campo => {
-        const error = campo.querySelector('.error');
-        if (error) error.remove();
-    });
-
-    // Validaciones
-    const nombre = document.getElementById('nombre');
-    const apellidoP = document.getElementById('apellidoP');
-    const apellidoM = document.getElementById('apellidoM');
-    const fechaNacimiento = document.getElementById('fechaNacimiento');
-    const correo = document.getElementById('correo');
-    const matricula = document.getElementById('matricula');
-    const telefono = document.getElementById('telefono');
-
-    const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/;
+    const soloLetras  = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/;
+    const correoValido= /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const soloNumeros = /^\d+$/;
-    const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    function mostrarError(input, mensaje) {
-        const campo = input.parentElement;
-        const error = document.createElement('span');
-        error.className = 'error';
-        error.style.color = '#f77474';
-        error.style.fontSize = '12px';
-        error.textContent = mensaje;
-        campo.appendChild(error);
-        valido = false; // Corregido: ahora se establece como false cuando hay un error
+    function mostrarError(input, msg) {
+      const span = document.createElement('span');
+      span.className = 'error';
+      span.style.color = '#f77474';
+      span.style.fontSize = '12px';
+      span.textContent = msg;
+      input.parentElement.appendChild(span);
+      valido = false;
     }
 
-    // Nombre y apellidos
-    if (!soloLetras.test(nombre.value)) {
-        mostrarError(nombre, 'Ingrese un nombre válido (solo letras, 2-50 caracteres)');
-    }
-    if (!soloLetras.test(apellidoP.value)) {
-        mostrarError(apellidoP, 'Ingrese un apellido válido');
-    }
-    if (!soloLetras.test(apellidoM.value)) {
-        mostrarError(apellidoM, 'Ingrese un apellido válido');
-    }
+    if (inputMotivo.value.trim().length < 3)
+      mostrarError(inputMotivo, 'Motivo de al menos 3 caracteres');
 
-    // Fecha de nacimiento (5 a 100 años)
-    const hoy = new Date();
-    const fecha = new Date(fechaNacimiento.value);
-    const edad = hoy.getFullYear() - fecha.getFullYear();
-    if (edad < 5 || edad > 100 || isNaN(edad)) {
-        mostrarError(fechaNacimiento, 'Debe tener entre 5 y 100 años');
-    }
+    if (!soloLetras.test(inputNombre.value))
+      mostrarError(inputNombre, 'Nombre inválido');
 
-    // Correo electrónico
-    if (!correoValido.test(correo.value)) {
-        mostrarError(correo, 'Ingrese un correo válido');
-    }
+    if (!soloLetras.test(inputApellidoP.value))
+      mostrarError(inputApellidoP, 'Apellido paterno inválido');
 
-    // Matrícula: 8 dígitos
-    if (!/^\d{8}$/.test(matricula.value)) {
-        mostrarError(matricula, 'La matrícula debe tener exactamente 8 dígitos numéricos');
-    }
+    if (!soloLetras.test(inputApellidoM.value))
+      mostrarError(inputApellidoM, 'Apellido materno inválido');
 
-    // Teléfono: solo números, 10 a 15 dígitos
-    if (!soloNumeros.test(telefono.value) || telefono.value.length < 10 || telefono.value.length > 15) {
-        mostrarError(telefono, 'El teléfono debe contener entre 10 y 15 dígitos numéricos');
-    }
+    if (!correoValido.test(inputCorreo.value))
+      mostrarError(inputCorreo, 'Correo electrónico inválido');
 
-    if (valido) {
-        // Simular verificación de usuario existente (esto es una simulación)
-        // En una aplicación real, aquí harías una comprobación en la base de datos
-        
-        // Para simular un usuario ya registrado:
-        const usuarioYaExiste = correo.value.includes('test') || matricula.value === '12345678';
-        
-        if (usuarioYaExiste) {
-            // Mostrar el modal de usuario existente
-            const modal = document.getElementById('modal-usuario-existente');
-            modal.classList.add('active');
-            
-            // No limpiamos el formulario aquí, lo haremos cuando el usuario cierre el modal
-        } else {
-            // Continuar con el registro normal
-            alert("Formulario válido. Puedes continuar con el registro.");
-            // form.submit(); // O manejarlo con otra lógica según tu app
-        }
-    }
-});
+    if (!soloNumeros.test(inputTelefono.value)
+      || inputTelefono.value.length < 10
+      || inputTelefono.value.length > 15)
+      mostrarError(inputTelefono, 'Teléfono debe tener 10–15 dígitos');
 
-// Configuración del modal cuando se carga el documento
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('modal-usuario-existente');
-    const btnAceptar = document.getElementById('btn-aceptar');
-    
-    // Evento para cerrar el modal con el botón Aceptar
-    if (btnAceptar) {
-        btnAceptar.addEventListener('click', function() {
-            modal.classList.remove('active');
-            // Limpiar el formulario después de cerrar el modal
-            limpiarFormulario();
-        });
+    if (!valido) return;
+
+    const datos = {
+      motivo:    inputMotivo.value.trim(),
+      nombre:    inputNombre.value.trim(),
+      apellidoP: inputApellidoP.value.trim(),
+      apellidoM: inputApellidoM.value.trim(),
+      correo:    inputCorreo.value.trim(),
+      telefono:  inputTelefono.value.trim()
+    };
+
+    ipcRenderer.send('registrar-visitante-frecuente', datos);
+  });
+
+  // 4.1 Ya existe → modal de existente
+  ipcRenderer.on('registro-visitante-existente', (ev, { folio }) => {
+    modalExistente.querySelector('h2').textContent = 'Visitante ya registrado';
+    modalExistente.querySelector('p').textContent =
+      `Ya tienes un folio permanente: ${folio}`;
+    modalExistente.classList.add('active');
+  });
+
+  // 4.2 Registro exitoso → modal de éxito
+  ipcRenderer.on('registro-visitante-exitoso', (ev, { folio }) => {
+    textoFolio.textContent = `Tu folio permanente es: ${folio}`;
+    modalExito.classList.add('active');
+  });
+
+  // 4.3 Error en backend
+  ipcRenderer.on('registro-visitante-error', (ev, err) => {
+    alert(`Error al registrar visitante: ${err}`);
+  });
+
+  // Cierre de modal “existente”
+  btnAceptarExistente.addEventListener('click', () => {
+    modalExistente.classList.remove('active');
+    limpiarFormulario();
+  });
+  modalExistente.addEventListener('click', e => {
+    if (e.target === modalExistente) {
+      modalExistente.classList.remove('active');
+      limpiarFormulario();
     }
-    
-    // También puedes cerrar el modal al hacer clic fuera de él
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.classList.remove('active');
-            // Limpiar el formulario después de cerrar el modal
-            limpiarFormulario();
-        }
-    });
-    
-    // Para pruebas: Si quieres mostrar el modal automáticamente al cargar la página
-    // Descomenta la siguiente línea:
-    // setTimeout(() => modal.classList.add('active'), 1000);
+  });
+
+  // Cierre de modal “éxito”
+  btnAceptarExito.addEventListener('click', () => {
+    modalExito.classList.remove('active');
+    limpiarFormulario();
+  });
+  modalExito.addEventListener('click', e => {
+    if (e.target === modalExito) {
+      modalExito.classList.remove('active');
+      limpiarFormulario();
+    }
+  });
 });
