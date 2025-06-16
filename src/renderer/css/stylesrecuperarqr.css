@@ -24,7 +24,7 @@ body {
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-      padding-bottom: 20px;
+      padding: 20px;
     }
 
     .header {
@@ -32,12 +32,12 @@ body {
       align-items: center;
       justify-content: center;
       padding: 20px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 2px solid #eee;
     }
 
     .logo {
-      width: 40px;
-      height: 40px;
+      width: 55px;
+      height: 55px;
       position: absolute;
       right: 90%;
     }
@@ -250,7 +250,7 @@ body {
     }
 
     .btn-recuperar {
-      background-color: #417756;
+      background-color: #537549;
       font-family: Ubuntu;
     }
 

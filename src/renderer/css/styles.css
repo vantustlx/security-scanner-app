@@ -41,8 +41,10 @@ body {
 
 .logo {
     margin-top: 80px;
+    left: 45%;
     display: flex;
     justify-content: center;
+    position: sticky;
 }
 
 .logo img {
