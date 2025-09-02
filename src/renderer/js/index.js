@@ -46,18 +46,45 @@ document.addEventListener('DOMContentLoaded', function () {
   // Evento para cerrar el modal con el botón Aceptar
   if (btnAceptar) {
     btnAceptar.addEventListener('click', function () {
-      const usuario = document.getElementById('usuario').value.trim();
-      const contraseña = document.getElementById('contraseña').value;
-  
-      if (usuario === 'admin' && contraseña === 'root') {
-          // Enviar señal a Electron para cambiar a pantalla de modo administrador
-          ipcRenderer.send('navigate', 'administradoropciones'); // carga administradoropciones.html
-      } else {
-          alert('Usuario o contraseña incorrectos 🤖');
-          modal.classList.add('active'); // asegurar que sigue activo
-      }
+        const usuario = document.getElementById('usuario').value.trim();
+        const contraseña = document.getElementById('contraseña').value;
+
+        if (usuario === 'admin' && contraseña === 'root') {
+            ipcRenderer.send('navigate', 'administradoropciones');
+        } else {
+            mostrarNotificacion('Usuario o contraseña incorrectos 🤖');
+            modal.classList.add('active');
+            
+            // Enfocar inmediatamente en el campo de contraseña
+            setTimeout(() => {
+                document.getElementById('contraseña').focus();
+                document.getElementById('contraseña').select();
+            }, 0);
+        }
     });
-  }
+}
+
+function mostrarNotificacion(mensaje) {
+    // Crear elemento de notificación tipo toast
+    const toast = document.createElement('div');
+    toast.textContent = mensaje;
+    toast.style.position = 'fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.backgroundColor = '#ff4444';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 20px';
+    toast.style.borderRadius = '5px';
+    toast.style.zIndex = '10000';
+    toast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remover después de 3 segundos
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
   if(btnCancelar) {
     btnCancelar.addEventListener('click', function(){
       modal.classList.remove('active');
