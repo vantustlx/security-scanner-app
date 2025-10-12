@@ -20,13 +20,16 @@ body {
 .header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    justify-content: center;
+    padding: 20px;
+    border-bottom: 2px solid #eee;
 }
 
-.header .logo {
-    width: 60px;
-    height: 60px;
+.logo {
+    width: 55px;
+    height: 55px;
+    position: absolute;
+    right: 90%;
 }
 
 .header h1 {
@@ -38,6 +41,7 @@ body {
     position: sticky;
     right: 35%;
 }
+
 
 .btn, .btn-buscar {
     padding: 10px 20px;
@@ -58,10 +62,10 @@ body {
 
 .btn-regresar {
     background-color: #7f4c4c;
-    position: absolute; /* Posicionamiento absoluto dentro del container */
-    bottom: 150px; /* Distancia desde el fondo */
-    left: 225px; /* Distancia desde la derecha */
-    margin: 0; /* Eliminar cualquier margen */
+    position: static;
+    bottom: 300px;
+    left: 270px;
+    margin: 0; 
 }
 
 
@@ -75,7 +79,7 @@ body {
     margin-bottom: 20px;
     width: 100%;
     flex-wrap: wrap;
-    box-sizing: border-box; /* Incluir padding en el cálculo del ancho */
+    box-sizing: border-box;
 }
 
 .campo {
@@ -84,6 +88,7 @@ body {
     flex: 1;
     min-width: 160px;
     position: relative;
+    padding: 1%;
 }
 
 .formulario-filtros .campo:nth-child(2) {
@@ -111,6 +116,7 @@ body {
     width: 100%;
     box-sizing: border-box;
     transition: border-color 0.3s;
+    font-family: Open Sans;
 }
 
 .campo input[type="date"]::-webkit-calendar-picker-indicator,

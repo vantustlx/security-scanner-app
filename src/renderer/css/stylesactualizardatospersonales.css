@@ -15,6 +15,10 @@ body {
     color: #333;
 }
 
+h1 {
+    font: Ubuntu;
+}
+
 .container {
     width: 90%;
     max-width: 1000px;
@@ -43,8 +47,10 @@ body {
 }
 
 .logo {
-    width: 70px;
-    height: 70px;
+    width: 55px;
+    height: 55px;
+    position: absolute;
+    right: 90%;
 }
 
 .title {
@@ -70,10 +76,11 @@ body {
 
 .form-field {
     flex: 1;
-    min-width: 200px;
+    position: relative;
 }
 
 .form-field label {
+    font: Ubuntu;
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
@@ -93,9 +100,8 @@ body {
 }
 
 .form-field input:focus {
-    border-color: #2c6ecb;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(44, 110, 203, 0.2);
+    border-bottom-color: #4a90e2; /* Color azul al enfocar */
 }
 
 .search-btn {

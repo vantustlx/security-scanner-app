@@ -94,7 +94,7 @@ body {
 
 
 .back-button {
-    position: absolute;
+    position: fixed;
     left: 40px;
     bottom: 50px;
     background-color: #537549;

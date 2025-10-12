@@ -85,10 +85,9 @@ document.getElementById('boton-verde').addEventListener('click', function () {
     }
 
     // Matrícula: 8 dígitos
-    if (!/^\d{8}$/.test(matricula.value)) {
-        mostrarError(matricula, 'La matrícula debe tener exactamente 8 dígitos numéricos');
+if (!/^(\d{4}|\d{8})$/.test(matricula.value)) {
+    mostrarError(matricula, 'La matrícula debe tener 4 u 8 dígitos numéricos');
     }
-
     // Teléfono: solo números, 10 a 15 dígitos
     if (!soloNumeros.test(telefono.value) || telefono.value.length < 10 || telefono.value.length > 15) {
         mostrarError(telefono, 'El teléfono debe contener entre 10 y 15 dígitos numéricos');

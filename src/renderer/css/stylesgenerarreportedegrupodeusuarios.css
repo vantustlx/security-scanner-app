@@ -3,7 +3,8 @@ body {
     background: url('../assets/updateinfoadmin.png') no-repeat center center fixed;
     background-size: cover;
     margin: 0;
-    padding: 20px; /* Añadido padding para evitar que el contenido toque los bordes */
+    padding: 20px;
+    /* Añadido padding para evitar que el contenido toque los bordes */
     box-sizing: border-box;
 }
 
@@ -13,7 +14,8 @@ body {
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    position: relative; /* Para contener el botón regresar */
+    position: relative;
+    /* Para contener el botón regresar */
     box-sizing: border-box;
 }
 
@@ -28,13 +30,16 @@ body {
 .header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    justify-content: center;
+    padding: 20px;
+    border-bottom: 2px solid #eee;
 }
 
-.header .logo {
-    width: 60px;
-    height: 60px;
+.logo {
+    width: 55px;
+    height: 55px;
+    position: absolute;
+    right: 90%;
 }
 
 .header h1 {
@@ -56,7 +61,8 @@ body {
     border-bottom: 1px solid #e0e0e0;
 }
 
-.btn, .btn-buscar {
+.btn,
+.btn-buscar {
     padding: 10px 20px;
     font-size: 16px;
     color: white;
@@ -100,7 +106,8 @@ body {
     margin-bottom: 20px;
     width: 100%;
     flex-wrap: wrap;
-    box-sizing: border-box; /* Incluir padding en el cálculo del ancho */
+    box-sizing: border-box;
+    /* Incluir padding en el cálculo del ancho */
 }
 
 .campo {
@@ -109,6 +116,7 @@ body {
     flex: 1;
     min-width: 160px;
     position: relative;
+    padding: 1%;
 }
 
 .formulario-filtros .campo:nth-child(2) {
@@ -134,7 +142,10 @@ body {
     color: #000000;
     outline: none;
     width: 100%;
-    box-sizing: border-box;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    background: transparent;
     transition: border-color 0.3s;
 }
 
@@ -218,26 +229,26 @@ table th {
         margin: 10px;
         padding: 15px;
     }
-    
+
     .formulario-filtros {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .campo {
         min-width: auto;
         margin-bottom: 10px;
     }
-    
+
     .boton-buscar {
         align-self: center;
         margin-top: 10px;
     }
-    
+
     .header h1 {
         font-size: 20px;
     }
-    
+
     .btn-regresar {
         position: static;
         margin: 20px auto 0;
