@@ -3,7 +3,8 @@ body {
     background: url('../assets/updateinfoadmin.png') no-repeat center center fixed;
     background-size: cover;
     margin: 0;
-    padding: 20px; /* Añadido padding para evitar que el contenido toque los bordes */
+    padding: 20px;
+    /* Añadido padding para evitar que el contenido toque los bordes */
     box-sizing: border-box;
 }
 
@@ -14,29 +15,38 @@ body {
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    position: relative; /* Para contener el botón regresar */
+    position: relative;
+    /* Para contener el botón regresar */
     box-sizing: border-box;
 }
 
 .header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    justify-content: center;
+    padding: 20px;
+    border-bottom: 2px solid #eee;
 }
 
-.header .logo {
-    width: 60px;
-    height: 60px;
+.logo {
+    width: 55px;
+    height: 55px;
+    position: absolute;
+    right: 90%;
 }
 
 .header h1 {
-    color: #6aaefc;
-    font-size: 28px;
-    margin: 0; /* Eliminar margen por defecto */
+    color: #4a90e2;
+    font-size: 24px;
+    margin: 0;
+    text-align: center;
+    font-family: Ubuntu;
+    position: sticky;
+    right: 35%;
 }
 
-.btn, .btn-buscar {
+.btn,
+.btn-buscar {
     padding: 10px 20px;
     font-size: 16px;
     color: white;
@@ -55,22 +65,24 @@ body {
 
 .btn-regresar {
     background-color: #7f4c4c;
-    position: absolute; /* Posicionamiento absoluto dentro del container */
-    bottom: 150px; /* Distancia desde el fondo */
-    left: 222px; /* Distancia desde la derecha */
-    margin: 0; /* Eliminar cualquier margen */
+    position: absolute;
+    bottom: 50px;
+    left: 40px;
+    margin: 0;
 }
 
 .btn-buscar {
-    background: #5f7359;
+    background: #537549;
     height: 40px;
     min-width: 100px;
-    flex-shrink: 0; /* Evitar que se encoja */
+    flex-shrink: 0;
+    /* Evitar que se encoja */
 }
 
 /* Nuevo: Campo del botón buscar */
 .boton-buscar {
-    flex: 0 0 auto; /* No crecer ni encogerse, usar tamaño automático */
+    flex: 0 0 auto;
+    /* No crecer ni encogerse, usar tamaño automático */
     min-width: auto;
     align-self: flex-end;
 }
@@ -78,6 +90,7 @@ body {
 ::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
+
 .form-section {
     display: flex;
     align-items: flex-end;
@@ -102,17 +115,19 @@ body {
     padding: 5px;
     background: transparent;
 }
+
 /* Estilos para la tabla */
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Ancho mínimo para la tabla */
+    min-width: 600px;
+    /* Ancho mínimo para la tabla */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 table th {
-    background-color: #2c6ecb;
-    color: white;
+    background-color: #f8f9fa;
+    color: black;
     font-weight: 500;
     padding: 12px 15px;
     text-align: left;
@@ -136,8 +151,8 @@ table tbody tr:hover {
 
 /* Mensaje de sistema */
 #mensaje-sistema {
-    border-left: 4px solid rgba(255,255,255,0.8);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    border-left: 4px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Contenedor de la tabla con scroll */
@@ -187,7 +202,7 @@ table tbody tr:hover {
 .btn-buscar:hover {
     background: #4a5a45;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Estilos para los campos de entrada */
@@ -200,6 +215,10 @@ table tbody tr:hover {
     width: 100%;
 }
 
+::placeholder {
+    color: black;
+}
+
 .form-field input:focus {
     border-bottom-color: #2c6ecb;
     outline: none;
@@ -209,7 +228,7 @@ table tbody tr:hover {
 .formulario-filtros {
     background: #f8f9fa;
     border-radius: 8px;
-    padding: 20px;
+    padding: 25px;
     margin-bottom: 20px;
 }
 
