@@ -8,6 +8,10 @@ const fs = require('fs');
 const os = require('os');
 
 let mainWindow;
+function validarEmail(email) {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
 
 function setupEmailListeners(window) {
   mainWindow = window;
@@ -215,4 +219,4 @@ async function enviarCorreoRecuperacion(email, nombre, matricula) {
     }
 }
 
-module.exports = { setupEmailListeners };
+module.exports = { setupEmailListeners,validarEmail,enviarCorreoRecuperacion, iniciarServidorConfirmacion};

@@ -40,8 +40,10 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    border-bottom: 2px solid #eee;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
 }
 
 .logo {
@@ -52,12 +54,14 @@ h1 {
 }
 
 .title {
-    color: #4a90e2;
-    font-size: 24px;
+    align-items: center;
+    color: #2c6ecb;
+    font-size: 28px;
+    flex: 1;
     margin: 0;
     text-align: center;
-    font-family: Ubuntu;
     position: sticky;
+    right: 35%;
 }
 
 .form-section {

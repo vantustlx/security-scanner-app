@@ -3,7 +3,7 @@ const { ipcRenderer } = require('electron');
 document.addEventListener('DOMContentLoaded', function() {
     // Botón de regresar
     document.getElementById('btn-regresar').addEventListener('click', () => {
-        ipcRenderer.send('navigate', 'administradoropciones');
+        ipcRenderer.send('navigate', 'buscarusuariosactivos');
     });
     
     // Botón de buscar

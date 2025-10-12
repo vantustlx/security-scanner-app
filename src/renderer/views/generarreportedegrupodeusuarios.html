@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Actualizar Datos Personales</title>
+    <title>Reporte de Grupo de Usuarios</title>
     <link rel="stylesheet" href="../css/stylesgenerarreportedegrupodeusuarios.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -19,7 +19,8 @@
             <div class="campo">
                 <label for="rol">Rol en la facultad</label>
                 <select id="rol" name="rol" required>
-                    <option value="Estudiante" selected>Estudiante</option>
+                    <option value="">Seleccionar rol</option>
+                    <option value="Estudiante">Estudiante</option>
                     <option value="Docente">Docente</option>
                     <option value="Administrativo">Administrativo</option>
                 </select>
@@ -28,6 +29,7 @@
             <div class="campo">
                 <label for="carrera">Carrera</label>
                 <select id="carrera" name="carrera" required>
+                    <option value="">Seleccionar carrera</option>
                     <option value="1">Ingeniería en computación</option>
                     <option value="2">Ingeniería Química</option>
                     <option value="3">Ingeniería Mecánica</option>
@@ -40,26 +42,66 @@
             <div class="campo">
                 <label for="turno">Turno</label>
                 <select id="turno" name="turno" required>
+                    <option value="">Seleccionar turno</option>
                     <option value="Matutino">Matutino</option>
-                    <option value="Vespertino" selected>Vespertino</option>
+                    <option value="Vespertino">Vespertino</option>
                 </select>
             </div>
             <div class="campo">
-                <label for="fechaNacimiento">Fecha de inicio</label>
-                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                <label for="fechaInicio">Fecha de inicio</label>
+                <input type="date" id="fechaInicio" name="fechaInicio">
             </div>
 
             <div class="campo">
-                <label for="fechaNacimiento">Fecha fin</label>
-                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                <label for="fechaFin">Fecha fin</label>
+                <input type="date" id="fechaFin" name="fechaFin">
+            </div>
+            <button id="btn-buscar" class="btn-generar">
+                <i class="fas fa-search"></i> Buscar Grupo
+            </button>
+        </div>
+
+        <!-- Área para mostrar resultados -->
+        <div class="resultados-container" id="resultados-container" style="display: none; margin-top: 20px;">
+            <div class="results-header">
+                <h3 id="resultados-titulo"></h3>
+                <button id="btn-generar-pdf" class="btn-generar-pdf">
+                    <i class="fas fa-file-pdf"></i> Generar PDF
+                </button>
+            </div>
+            <div class="tabla-resultados">
+                <table id="tabla-resultados">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido Paterno</th>
+                            <th>Apellido Materno</th>
+                            <th>Matrícula</th>
+                            <th>Teléfono</th>
+                            <th>Estatus</th>
+                            <th>Fecha Registro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-tabla">
+                    </tbody>
+                </table>
             </div>
         </div>
-        <button class="btn btn-regresar" id="btn-regresar">Regresar</button>
-        <button id="btn-volver-accs" class="btn-generar">
-            Generar reporte
-        </button>
+
+        <!-- Mensaje de error -->
+        <div id="mensaje-error" style="display: none;" class="mensaje-error"></div>
+
+        <!-- Mensaje de carga -->
+        <div id="mensaje-carga" style="display: none;" class="mensaje-carga">
+            <i class="fas fa-spinner fa-spin"></i> Buscando usuarios...
+        </div>
     </div>
 
+    <div class="botones-inferiores">
+        <button class="btn btn-regresar" id="btn-regresar">
+            Regresar
+        </button>
+    </div>
 
     <script src="../js/generarreportedegrupodeusuarios.js"></script>
 </body>

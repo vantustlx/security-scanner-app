@@ -9,9 +9,7 @@ body {
 }
 
 .container {
-    max-width: 1100px;
-    height: 375px;
-    margin: 100px auto;
+    margin: 30px auto;
     background: white;
     border-radius: 10px;
     padding: 20px;
@@ -19,6 +17,14 @@ body {
     position: relative;
     /* Para contener el botón regresar */
     box-sizing: border-box;
+}
+
+.resultados-container {
+    max-height: 350px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
 }
 
 .header {
@@ -37,13 +43,22 @@ body {
 }
 
 .header h1 {
-    color: #4a90e2;
-    font-size: 24px;
+    color: #2c6ecb;
+    font-size: 28px;
     margin: 0;
+    flex: 1;
     text-align: center;
-    font-family: Ubuntu;
     position: sticky;
     right: 35%;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .btn,
@@ -66,18 +81,26 @@ body {
 
 .btn-regresar {
     background-color: #7f4c4c;
-    position: static;
-    bottom: 300px;
-    left: 270px;
+    position: absolute; 
+    bottom: 50px;
+    left: 40px;
     margin: 0; 
 }
 
-
+.btn-generar-pdf {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 .formulario-filtros {
     display: flex;
     align-items: flex-end;
-    gap: 11%;
-    background: #f8f9fa;
+    gap: 12px;
+    background: #ffffff;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -104,13 +127,20 @@ body {
 .campo label {
     margin-bottom: 5px;
     font-weight: normal;
-    color: black;
+    color: #000000;
     font-size: 14px;
     opacity: 0.8;
 }
 
 .campo input,
 .campo select {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.6);
+    padding: 5px 0;
+    font-size: 16px;
+    color: #000000;
+    outline: none;
     width: 100%;
     padding: 10px 0;
     border: none;
@@ -136,14 +166,14 @@ body {
 }
 
 .formulario-filtros .campo select {
-    background-color: #333;
-    border: 1px solid #585858;
+    background-color: #ffffff;
+    border: 1px solid #d4d4d4;
     border-radius: 4px;
     padding: 10px 35px 10px 12px;
     appearance: none;
-    color: white;
+    color: rgb(0, 0, 0);
     font-size: 14px;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon fill='%23ffffff' points='70,105 25,40 115,40'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon fill='%231a1a1a' points='70,105 25,40 115,40'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 12px;
@@ -161,8 +191,8 @@ body {
 }
 
 .formulario-filtros .campo select option {
-    background: #333;
-    color: white;
+    background: #eeeeee;
+    color: rgb(0, 0, 0);
     padding: 8px;
 }
 
@@ -171,8 +201,8 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px;
-    /* Ancho mínimo para la tabla */
+    min-width: 600px; /* Ancho mínimo para la tabla */
+    max-height: 400px;
 }
 
 table th,
@@ -233,9 +263,6 @@ table th {
 }
 
 .btn-generar {
-    position: sticky;
-    left: 1200px;
-    bottom: 300px;
     background-color: #537549;
     color: #ffffff;
     padding: 15px 25px;

@@ -36,11 +36,11 @@ body {
 }
 
 .header h1 {
-    color: #4a90e2;
-    font-size: 24px;
+    color: #2c6ecb;
+    font-size: 28px;
     margin: 0;
+    flex: 1;
     text-align: center;
-    font-family: Ubuntu;
     position: sticky;
     right: 35%;
 }
@@ -88,7 +88,7 @@ body {
 }
 
 ::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(26, 26, 26, 0.5);
 }
 
 .form-section {
@@ -131,7 +131,6 @@ table th {
     font-weight: 500;
     padding: 12px 15px;
     text-align: left;
-    position: sticky;
     top: 0;
 }
 
