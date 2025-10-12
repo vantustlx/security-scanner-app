@@ -3,40 +3,51 @@ body {
     background: url('../assets/updateinfoadmin.png') no-repeat center center fixed;
     background-size: cover;
     margin: 0;
-    padding: 20px; /* Añadido padding para evitar que el contenido toque los bordes */
+    padding: 20px;
+    /* Añadido padding para evitar que el contenido toque los bordes */
     box-sizing: border-box;
 }
 
 .container {
     max-width: 1100px;
-    margin: 30px auto;
+    height: 375px;
+    margin: 100px auto;
     background: white;
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    position: relative; /* Para contener el botón regresar */
+    position: relative;
+    /* Para contener el botón regresar */
     box-sizing: border-box;
 }
 
 .header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    justify-content: center;
+    padding: 20px;
+    border-bottom: 2px solid #eee;
 }
 
-.header .logo {
-    width: 60px;
-    height: 60px;
+.logo {
+    width: 55px;
+    height: 55px;
+    position: absolute;
+    right: 90%;
 }
 
 .header h1 {
-    color: #6aaefc;
-    font-size: 28px;
-    margin: 0; /* Eliminar margen por defecto */
+    color: #4a90e2;
+    font-size: 24px;
+    margin: 0;
+    text-align: center;
+    font-family: Ubuntu;
+    position: sticky;
+    right: 35%;
 }
 
-.btn, .btn-buscar {
+.btn,
+.btn-buscar {
     padding: 10px 20px;
     font-size: 16px;
     color: white;
@@ -55,24 +66,25 @@ body {
 
 .btn-regresar {
     background-color: #7f4c4c;
-    position: absolute; /* Posicionamiento absoluto dentro del container */
-    bottom: 150px; /* Distancia desde el fondo */
-    left: 225px; /* Distancia desde la derecha */
-    margin: 0; /* Eliminar cualquier margen */
+    position: static;
+    bottom: 300px;
+    left: 270px;
+    margin: 0; 
 }
 
 
 .formulario-filtros {
     display: flex;
     align-items: flex-end;
-    gap: 12px;
-    background: #292929;
+    gap: 11%;
+    background: #f8f9fa;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
     width: 100%;
     flex-wrap: wrap;
-    box-sizing: border-box; /* Incluir padding en el cálculo del ancho */
+    box-sizing: border-box;
+    /* Incluir padding en el cálculo del ancho */
 }
 
 .campo {
@@ -81,6 +93,7 @@ body {
     flex: 1;
     min-width: 160px;
     position: relative;
+    padding: 1%;
 }
 
 .formulario-filtros .campo:nth-child(2) {
@@ -91,22 +104,18 @@ body {
 .campo label {
     margin-bottom: 5px;
     font-weight: normal;
-    color: #fff;
+    color: black;
     font-size: 14px;
     opacity: 0.8;
 }
 
 .campo input,
 .campo select {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-    padding: 5px 0;
-    font-size: 16px;
-    color: #fff;
-    outline: none;
     width: 100%;
-    box-sizing: border-box;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    background: transparent;
     transition: border-color 0.3s;
 }
 
@@ -162,7 +171,8 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Ancho mínimo para la tabla */
+    min-width: 600px;
+    /* Ancho mínimo para la tabla */
 }
 
 table th,
@@ -189,26 +199,26 @@ table th {
         margin: 10px;
         padding: 15px;
     }
-    
+
     .formulario-filtros {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .campo {
         min-width: auto;
         margin-bottom: 10px;
     }
-    
+
     .boton-buscar {
         align-self: center;
         margin-top: 10px;
     }
-    
+
     .header h1 {
         font-size: 20px;
     }
-    
+
     .btn-regresar {
         position: static;
         margin: 20px auto 0;
@@ -223,9 +233,9 @@ table th {
 }
 
 .btn-generar {
-    position: absolute;
-    left: 1100px;
-    bottom: 155px;
+    position: sticky;
+    left: 1200px;
+    bottom: 300px;
     background-color: #537549;
     color: #ffffff;
     padding: 15px 25px;

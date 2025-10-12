@@ -21,19 +21,26 @@ body {
 .header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    justify-content: center;
+    padding: 20px;
+    border-bottom: 2px solid #eee;
 }
 
-.header .logo {
-    width: 60px;
-    height: 60px;
+
+.logo {
+    width: 55px;
+    height: 55px;
+    position: absolute;
+    right: 90%;
 }
 
 .header h1 {
-    color: #6aaefc;
-    font-size: 28px;
-    margin: 0; /* Eliminar margen por defecto */
+    color: #4a90e2;
+    font-size: 24px;
+    margin: 0;
+    text-align: center;
+    font-family: Ubuntu;
+    position: sticky;
 }
 
 .btn, .btn-buscar {
@@ -62,7 +69,7 @@ body {
 }
 
 .btn-buscar {
-    background: #5f7359;
+    background: #537549;
     height: 40px;
     min-width: 100px;
     flex-shrink: 0; /* Evitar que se encoja */
@@ -72,7 +79,7 @@ body {
     display: flex;
     align-items: flex-end;
     gap: 12px;
-    background: #292929;
+    background: #ffffff;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -104,7 +111,7 @@ body {
 .campo label {
     margin-bottom: 5px;
     font-weight: normal;
-    color: #fff;
+    color: #000000;
     font-size: 14px;
     opacity: 0.8;
 }
@@ -186,8 +193,7 @@ table {
 }
 
 table th {
-    background-color: #2c6ecb;
-    color: white;
+    color: rgb(0, 0, 0);
     font-weight: 500;
     padding: 12px 20px;
     text-align: left;
