@@ -31,9 +31,13 @@ body {
 }
 
 .header h1 {
-    color: #6aaefc;
+    color: #2c6ecb;
     font-size: 28px;
     margin: 0; /* Eliminar margen por defecto */
+    flex: 1;
+    text-align: center;
+    position: sticky;
+    right: 35%;
 }
 
 .btn, .btn-buscar {
@@ -55,10 +59,10 @@ body {
 
 .btn-regresar {
     background-color: #7f4c4c;
-    position: absolute; /* Posicionamiento absoluto dentro del container */
-    bottom: 50px; /* Distancia desde el fondo */
-    left: 40px; /* Distancia desde la derecha */
-    margin: 0; /* Eliminar cualquier margen */
+    position: absolute; 
+    bottom: 50px;
+    left: 40px;
+    margin: 0; 
 }
 
 .btn-buscar {
@@ -72,7 +76,7 @@ body {
     display: flex;
     align-items: flex-end;
     gap: 12px;
-    background: #292929;
+    background: #ffffff;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -104,7 +108,7 @@ body {
 .campo label {
     margin-bottom: 5px;
     font-weight: normal;
-    color: #fff;
+    color: #000000;
     font-size: 14px;
     opacity: 0.8;
 }
@@ -140,14 +144,14 @@ body {
 }
 
 .formulario-filtros .campo select {
-    background-color: #333;
-    border: 1px solid #585858;
+    background-color: #ffffff;
+    border: 1px solid #d7d7d7;
     border-radius: 4px;
     padding: 10px 35px 10px 12px;
     appearance: none;
-    color: white;
+    color: rgb(0, 0, 0);
     font-size: 14px;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon fill='%23ffffff' points='70,105 25,40 115,40'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon fill='%231a1a1a' points='70,105 25,40 115,40'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 12px;
@@ -165,8 +169,8 @@ body {
 }
 
 .formulario-filtros .campo select option {
-    background: #333;
-    color: white;
+    background: #e4e4e4;
+    color: rgb(0, 0, 0);
     padding: 8px;
 }
 

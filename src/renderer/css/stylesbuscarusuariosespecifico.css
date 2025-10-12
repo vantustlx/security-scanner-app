@@ -31,9 +31,13 @@ body {
 }
 
 .header h1 {
-    color: #6aaefc;
+    color: #2c6ecb;
     font-size: 28px;
-    margin: 0; /* Eliminar margen por defecto */
+    margin: 0;
+    flex: 1;
+    text-align: center;
+    position: sticky;
+    right: 35%;
 }
 
 .btn, .btn-buscar {
@@ -76,7 +80,7 @@ body {
 }
 
 ::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(26, 26, 26, 0.5);
 }
 .form-section {
     display: flex;
@@ -116,7 +120,6 @@ table th {
     font-weight: 500;
     padding: 12px 15px;
     text-align: left;
-    position: sticky;
     top: 0;
 }
 

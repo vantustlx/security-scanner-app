@@ -9,7 +9,7 @@ let ultimoUsuarioVerificado = null; // Para almacenar el usuario verificado
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'root',
+    password: '1111',
     database: 'sistemaaccesofacultad',
     port: 3306
 });
@@ -391,3 +391,46 @@ function setupDBListeners() {
 }
 
 module.exports = { setupDBListeners };
+
+// BD con fechas
+ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
+    const { rol, carrera, turno, fechaInicio, fechaFin } = filtros;
+    console.log('Buscando grupo de usuarios con filtros:', filtros);
+    
+    let query = `
+        SELECT
+            nombre,
+            apellido_paterno,
+            apellido_materno,
+            matricula,
+            numero_telefono,
+            estatus,
+            fecha_registro
+        FROM usuario
+        WHERE
+            estatus = 'Activo'
+            AND rol_facultad = ?
+            AND id_carrera = ?
+            AND turno = ?
+    `;
+    
+    let params = [rol, carrera, turno];
+    
+    // Agregar filtro de fechas si están presentes
+    if (fechaInicio && fechaFin) {
+        query += ` AND DATE(fecha_registro) BETWEEN ? AND ?`;
+        params.push(fechaInicio, fechaFin);
+    }
+    
+    query += ` ORDER BY apellido_paterno, apellido_materno, nombre`;
+    
+    connection.query(query, params, (err, results) => {
+        if (err) {
+            console.error('Error al buscar grupo de usuarios:', err);
+            event.reply('busqueda-grupo-error', err.message);
+        } else {
+            console.log(`Búsqueda de grupo completada. Encontrados: ${results.length} usuarios`);
+            event.reply('resultados-grupo-usuarios', results);
+        }
+    });
+});
