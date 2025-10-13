@@ -19,10 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Escuchar resultados de búsqueda
-    ipcRenderer.on('resultados-usuario-especifico', (event, resultados) => {
-        mostrarResultados(resultados);
-    });
+    
     
     // Escuchar errores
     ipcRenderer.on('busqueda-especifica-error', (event, error) => {
@@ -46,11 +43,16 @@ function buscarUsuarioEspecifico() {
     ipcRenderer.send('buscar-usuario-especifico', { nombre, apellidoP, apellidoM });
 }
 
+// Escuchar resultados de búsqueda
+    ipcRenderer.on('resultados-usuario-especifico', (event, resultados) => {
+        mostrarResultados(resultados);
+    });
+
 function mostrarResultados(usuarios) {
     const tbody = document.querySelector('table tbody');
     tbody.innerHTML = '';
     
-    if (usuarios.length === 0) {
+    if (!Array.isArray(usuarios) || usuarios.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="8" style="text-align: center;">No se encontraron usuarios con los criterios especificados</td>

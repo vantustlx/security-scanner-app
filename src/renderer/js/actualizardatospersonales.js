@@ -1,8 +1,5 @@
 
 const { ipcRenderer } = require('electron');
-document.getElementById('btn-regresar').addEventListener('click', () => {
-    ipcRenderer.send('navigate', 'administradoropciones');
-});
 
 // Variables globales
 let usuariosEncontrados = [];
@@ -169,12 +166,14 @@ function abrirModalEdicion(matricula) {
         mostrarMensaje('No se encontró el usuario seleccionado', 'error');
         return;
     }
-
+    const fecha = usuarioSeleccionado.fecha_nacimiento
+  ? new Date(usuarioSeleccionado.fecha_nacimiento).toISOString().split('T')[0]
+  : '';
     // Llenar formulario con datos del usuario
     document.getElementById('edit-nombre').value = usuarioSeleccionado.nombre || '';
     document.getElementById('edit-apellidoP').value = usuarioSeleccionado.apellido_paterno || '';
     document.getElementById('edit-apellidoM').value = usuarioSeleccionado.apellido_materno || '';
-    document.getElementById('edit-fechaNacimiento').value = usuarioSeleccionado.fecha_nacimiento || '';
+    document.getElementById('edit-fechaNacimiento').value = fecha;
     document.getElementById('edit-correo').value = usuarioSeleccionado.correo || '';
     document.getElementById('edit-matricula').value = usuarioSeleccionado.matricula || '';
     document.getElementById('edit-telefono').value = usuarioSeleccionado.numero_telefono || '';

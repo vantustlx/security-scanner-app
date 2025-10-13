@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pNombre = document.querySelector('.user-name');
 
     if (usuario) {
-      // Construimos “Nombre ApellidoP A pellidoM”
-      const nombreCompleto = `${usuario.nombre} ${usuario.apellido_paterno} ${usuario.apellido_materno}`;
+      // Construimos “Nombre ApellidoP ApellidoM”
+      const nombreCompleto = `${usuario.nombre} ${usuario.apellido_paterno} ${usuario.apellido_materno}\n${usuario.entrada_salida}`;
       pNombre.textContent = nombreCompleto;
     } else {
       // Si no viene nada (por ejemplo, si alguien abrió qrsuccess sin pasar por el QR)

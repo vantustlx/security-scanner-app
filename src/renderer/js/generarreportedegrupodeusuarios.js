@@ -70,7 +70,7 @@ function buscarGrupoUsuarios() {
     console.log('Enviando parámetros de búsqueda:', parametrosBusqueda);
     
     // Enviar solicitud de búsqueda
-    ipcRenderer.send('buscar-grupo-usuarios', parametrosBusqueda);
+    ipcRenderer.send('buscar-grupo-usuarios-con-fechas', parametrosBusqueda);
 }
 
 function mostrarResultados(usuarios) {
@@ -80,7 +80,7 @@ function mostrarResultados(usuarios) {
     const cuerpoTabla = document.getElementById('cuerpo-tabla');
 
     // Actualizar título
-    tituloResultados.textContent = `Resultados de la búsqueda: ${usuarios.length} usuario(s) encontrado(s)`;
+    tituloResultados.textContent = `Resultados: ${usuarios.length} registro(s) encontrado(s)`;
 
     // Limpiar tabla
     cuerpoTabla.innerHTML = '';
@@ -88,40 +88,45 @@ function mostrarResultados(usuarios) {
     if (usuarios.length === 0) {
         cuerpoTabla.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
-                    No se encontraron usuarios con los criterios especificados
+                <td colspan="7" style="text-align:center; padding:20px; color:#666;">
+                    No se encontraron registros con los criterios especificados
                 </td>
             </tr>
         `;
-    } else {
-        // Llenar tabla con resultados
-        usuarios.forEach(usuario => {
-            const fechaRegistro = new Date(usuario.fecha_registro);
-            const fechaFormateada = fechaRegistro.toLocaleDateString('es-MX');
-            const horaFormateada = fechaRegistro.toLocaleTimeString('es-MX', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            const fila = document.createElement('tr');
-            fila.innerHTML = `
-                <td>${usuario.nombre || 'N/A'}</td>
-                <td>${usuario.apellido_paterno || 'N/A'}</td>
-                <td>${usuario.apellido_materno || 'N/A'}</td>
-                <td>${usuario.matricula || 'N/A'}</td>
-                <td>${usuario.numero_telefono || 'N/A'}</td>
-                <td>
-                    <span class="estatus ${(usuario.estatus || '').toLowerCase()}">
-                        ${usuario.estatus || 'N/A'}
-                    </span>
-                </td>
-                <td>${fechaFormateada}<br><small>${horaFormateada}</small></td>
-            `;
-            cuerpoTabla.appendChild(fila);
-        });
+        resultadosContainer.style.display = 'block';
+        return;
     }
 
-    // Mostrar contenedor de resultados
+    usuarios.forEach(usuario => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td>${usuario.nombre || 'N/A'}</td>
+            <td>${usuario.apellido_paterno || 'N/A'}</td>
+            <td>${usuario.apellido_materno || 'N/A'}</td>
+            <td>${usuario.matricula || 'N/A'}</td>
+            <td>${usuario.numero_telefono || 'N/A'}</td>
+            <td>${usuario.fecha_entrada 
+                ? new Date(usuario.fecha_entrada).toLocaleString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }) 
+                : 'N/A'}</td>
+            <td>${usuario.fecha_salida 
+                ? new Date(usuario.fecha_salida).toLocaleString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }) 
+                : 'N/A'}</td>
+        `;
+        cuerpoTabla.appendChild(fila);
+    });
+
     resultadosContainer.style.display = 'block';
 }
 
@@ -131,20 +136,29 @@ function generarPDF() {
         return;
     }
 
-    // Obtener parámetros de búsqueda actuales
-    const parametrosBusqueda = {
-        rol: document.getElementById('rol').value,
-        carrera: document.getElementById('carrera').value,
-        turno: document.getElementById('turno').value,
-        fechaInicio: document.getElementById('fechaInicio').value,
-        fechaFin: document.getElementById('fechaFin').value
-    };
+    // Obtener los parámetros de búsqueda actuales
+    const rol = document.getElementById('rol').value;
+    const carrera = document.getElementById('carrera').value;
+    const turno = document.getElementById('turno').value;
+    const fechaInicio = document.getElementById('fechaInicio').value;
+    const fechaFin = document.getElementById('fechaFin').value;
+
+    const parametros = { rol, carrera, turno };
+    if (fechaInicio) parametros.fechaInicio = fechaInicio;
+    if (fechaFin) parametros.fechaFin = fechaFin;
+
+    console.log('Enviando datos para PDF:', {
+        usuariosCount: usuariosEncontrados.length,
+        parametros: parametros
+    });
 
     // Enviar solicitud para generar PDF
     ipcRenderer.send('generar-pdf-grupo-usuarios', {
         usuarios: usuariosEncontrados,
-        parametros: parametrosBusqueda
+        parametros: parametros
     });
+
+    
 }
 
 function mostrarCarga() {
@@ -186,3 +200,12 @@ function obtenerNombreCarrera(idCarrera) {
     };
     return carreras[idCarrera] || idCarrera;
 }
+
+// Agregar listeners para respuestas del PDF
+ipcRenderer.on('pdf-generado-exito', (event, mensaje) => {
+    alert(`✅ ${mensaje}`);
+});
+
+ipcRenderer.on('pdf-generado-error', (event, error) => {
+    mostrarError(`Error al generar PDF: ${error}`);
+});

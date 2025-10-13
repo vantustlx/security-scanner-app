@@ -9,7 +9,7 @@ let ultimoUsuarioVerificado = null; // Para almacenar el usuario verificado
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '1111',
+    password: 'root',
     database: 'sistemaaccesofacultad',
     port: 3306
 });
@@ -141,9 +141,72 @@ function setupDBListeners() {
                 return event.reply('resultado-verificacion', { success: false });
             }
             if (results.length > 0) {
-                ultimoUsuarioVerificado = results[0];
-                console.log('Matrícula válida:', matricula);
-                event.reply('resultado-verificacion', { success: true });
+                // Registrar entrada o salida dependiendo de el registro en la tabla registroacceso
+                const query = 'SELECT * FROM registroacceso WHERE matricula = ? ORDER BY fecha_entrada DESC LIMIT 1';
+                connection.query(query, [matricula], (err, registros) => {
+                    if (err) {
+                        console.error('Error al consultar registro de acceso:', err);
+                        return event.reply('resultado-verificacion', { success: false });
+                    }
+                    if (registros.length > 0) {
+                        const ultimoRegistro = registros[0];
+                        if (ultimoRegistro.fecha_entrada != null && ultimoRegistro.fecha_salida != null) {
+                            console.log('Creando nuevo registro de acceso', matricula);
+                            const insertQuery = 'INSERT INTO registroacceso (matricula, fecha_entrada) VALUES (?, NOW())';
+                            const updateQuery = 'UPDATE usuario SET estatus = "Activo" WHERE matricula = ?';
+                            connection.query(insertQuery, [matricula], (err) => {
+                                if (err) {
+                                    console.error('Error al insertar registro de acceso:', err);
+                                    return event.reply('resultado-verificacion', { success: false });
+                                }
+                                connection.query(updateQuery, [matricula], (err) => {
+                                    if (err) {
+                                        console.error('Error al actualizar estatus del usuario:', err);
+                                        return event.reply('resultado-verificacion', { success: false });
+                                    }
+                                    event.reply('resultado-verificacion', { success: true });
+                                });
+                        });
+                        } else if(ultimoRegistro.fecha_entrada != null && ultimoRegistro.fecha_salida == null) {
+                            console.log('Actualizando a salida:', matricula);
+                            const updateQuery = 'UPDATE registroacceso  SET fecha_salida = NOW()WHERE id_registro = (SELECT id_registro FROM (SELECT id_registro FROM registroacceso  WHERE matricula = ?  ORDER BY fecha_entrada DESC  LIMIT 1 ) AS sub );';
+                            const updateestatusQuery = 'UPDATE usuario SET estatus = "Inactivo" WHERE matricula = ?';
+                            connection.query(updateQuery, [matricula], (err) => {
+                                if (err) {
+                                    console.error('Error al actualizar registro de acceso:', err);
+                                    return event.reply('resultado-verificacion', { success: false });
+                                }
+                                connection.query(updateestatusQuery, [matricula], (err) => {
+                                if (err) {
+                                    console.error('Error al actualizar estatus del usuario:', err);
+                                    return event.reply('resultado-verificacion', { success: false });
+                                }
+                                event.reply('resultado-verificacion', { success: true });
+                            });
+                            });
+                        } 
+                    } else {
+                        console.log('No se encontró registro de acceso existente, creando uno nuevo para la nueva matricula:', matricula);
+                        const insertQuery = 'INSERT INTO registroacceso (matricula, fecha_entrada) VALUES (?, NOW())';
+                        const updateQuery = 'UPDATE usuario SET estatus = "Activo" WHERE matricula = ?';
+                        connection.query(insertQuery, [matricula], (err) => {
+                            if (err) {
+                                console.error('Error al insertar registro de acceso:', err);
+                                return event.reply('resultado-verificacion', { success: false });
+                            }
+                            
+                            connection.query(updateQuery, [matricula], (err) => {
+                                if (err) {
+                                    console.error('Error al actualizar estatus del usuario:', err);
+                                    return event.reply('resultado-verificacion', { success: false });
+                                }
+                                event.reply('resultado-verificacion', { success: true });
+                            });
+                        });
+                        ultimoUsuarioVerificado = results[0];
+                    }
+                    ultimoUsuarioVerificado = results[0];
+                });
             } else {
                 console.warn('Matrícula no encontrada:', matricula);
                 event.reply('resultado-verificacion', { success: false });
@@ -153,16 +216,35 @@ function setupDBListeners() {
 
     // 6) OBTENER ÚLTIMO USUARIO VERIFICADO
     ipcMain.on('obtener-ultimo-usuario', (event) => {
-        if (ultimoUsuarioVerificado) {
+        //verificar si es la entrada o salida del usuario
+        let entrada_salida = null;
+        matricula = ultimoUsuarioVerificado.matricula
+        const query = 'SELECT * FROM registroacceso WHERE matricula = ? ORDER BY fecha_entrada DESC LIMIT 1';
+        connection.query(query, [matricula], (err, registros) => {
+            if (err) {
+                console.error('Error al consultar registro de acceso:', err);
+                return event.reply('resultado-verificacion', { success: false });
+            }
+            if (registros.length > 0) {
+                if(registros[0].fecha_salida == null){
+                    entrada_salida = "Entrada registrada"
+                }
+                else if(registros[0].fecha_salida != null){
+                    entrada_salida = "Salida registrada"
+                }
+            }
+            if (ultimoUsuarioVerificado) {
             event.reply('enviar-ultimo-usuario', {
                 nombre: ultimoUsuarioVerificado.nombre,
                 apellido_paterno: ultimoUsuarioVerificado.apellido_paterno,
                 apellido_materno: ultimoUsuarioVerificado.apellido_materno,
-                matricula: ultimoUsuarioVerificado.matricula
+                matricula: ultimoUsuarioVerificado.matricula,
+                entrada_salida: entrada_salida
             });
         } else {
             event.reply('enviar-ultimo-usuario', null);
         }
+        });
     });
 
     // 7) ASOCIAR PLACA → INSERTAR EN vehiculo
@@ -296,7 +378,11 @@ function setupDBListeners() {
                 apellido_paterno,
                 apellido_materno,
                 numero_telefono,
+                fecha_nacimiento,
+                id_carrera,
                 correo,
+                turno,
+                rol_facultad,
                 CONCAT(nombre, ' ', apellido_paterno, ' ', apellido_materno, ' ', matricula) as nombre_completo
             FROM usuario
             WHERE
@@ -395,42 +481,100 @@ module.exports = { setupDBListeners };
 // BD con fechas
 ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
     const { rol, carrera, turno, fechaInicio, fechaFin } = filtros;
-    console.log('Buscando grupo de usuarios con filtros:', filtros);
-    
+    console.log('📘 Buscando grupo de usuarios con filtros:', filtros);
+
     let query = `
-        SELECT
-            nombre,
-            apellido_paterno,
-            apellido_materno,
-            matricula,
-            numero_telefono,
-            estatus,
-            fecha_registro
-        FROM usuario
-        WHERE
-            estatus = 'Activo'
-            AND rol_facultad = ?
-            AND id_carrera = ?
-            AND turno = ?
+        SELECT 
+            u.nombre,
+            u.apellido_paterno,
+            u.apellido_materno,
+            u.matricula,
+            u.numero_telefono,
+            r.fecha_entrada,
+            r.fecha_salida
+        FROM usuario u
+        INNER JOIN registroacceso r ON u.matricula = r.matricula
+        WHERE 
+            u.estatus = 'Activo'
+            AND u.rol_facultad = ?
+            AND u.id_carrera = ?
+            AND u.turno = ?
     `;
-    
-    let params = [rol, carrera, turno];
-    
-    // Agregar filtro de fechas si están presentes
+
+    const params = [rol, carrera, turno];
+
+    // Filtro de fechas si aplica
     if (fechaInicio && fechaFin) {
-        query += ` AND DATE(fecha_registro) BETWEEN ? AND ?`;
-        params.push(fechaInicio, fechaFin);
+        query += `
+            AND (
+                (r.fecha_entrada BETWEEN ? AND ?)
+                OR (r.fecha_salida BETWEEN ? AND ?)
+            )
+        `;
+        params.push(fechaInicio, fechaFin, fechaInicio, fechaFin);
     }
-    
-    query += ` ORDER BY apellido_paterno, apellido_materno, nombre`;
-    
+
+    query += `
+        ORDER BY u.apellido_paterno, u.apellido_materno, r.fecha_entrada;
+    `;
+
     connection.query(query, params, (err, results) => {
         if (err) {
-            console.error('Error al buscar grupo de usuarios:', err);
+            console.error('❌ Error al buscar grupo de usuarios:', err);
             event.reply('busqueda-grupo-error', err.message);
         } else {
-            console.log(`Búsqueda de grupo completada. Encontrados: ${results.length} usuarios`);
+            console.log(`✅ Búsqueda completada: ${results.length} registros encontrados`);
             event.reply('resultados-grupo-usuarios', results);
+        }
+    });
+});
+
+
+// Buscar registros de un usuario específico con rango de fechas
+ipcMain.on('buscar-usuario-especifico-reporte', (event, filtros) => {
+    const { nombre, apellidoPaterno, apellidoMaterno, fechaInicio, fechaFin } = filtros;
+    console.log('🔍 Buscando registros de usuario específico:', filtros);
+
+    let query = `
+        SELECT 
+            u.matricula,
+            u.nombre,
+            u.apellido_paterno,
+            u.apellido_materno,
+            u.numero_telefono,
+            u.correo,
+            u.rol_facultad,
+            u.id_carrera,
+            u.turno,
+            r.fecha_entrada,
+            r.fecha_salida
+        FROM usuario u
+        INNER JOIN registroacceso r ON u.matricula = r.matricula
+        WHERE 
+            u.nombre = ? 
+            AND u.apellido_paterno = ? 
+            AND u.apellido_materno = ?
+    `;
+
+    const params = [nombre, apellidoPaterno, apellidoMaterno];
+
+    // Filtro de fechas
+    if (fechaInicio && fechaFin) {
+        query += ` 
+            AND DATE(r.fecha_entrada) BETWEEN ? AND ?
+        `;
+        params.push(fechaInicio, fechaFin);
+    }
+
+    query += ` ORDER BY r.fecha_entrada ASC;`;
+
+    connection.query(query, params, (err, results) => {
+        if (err) {
+            console.error('❌ Error al buscar usuario específico:', err);
+            event.reply('busqueda-usuario-especifico-error', err.message);
+        } else {
+            console.log(`✅ ${results.length} registros encontrados para el usuario`);
+            event.reply('resultados-usuario-especifico', results);
         }
     });
 });
