@@ -1,0 +1,406 @@
+# 🧪 Guía de Pruebas Automatizadas
+
+## 📋 Tabla de Contenidos
+- [Requisitos Previos](#requisitos-previos)
+- [Instalación](#instalación)
+- [Configuración de Base de Datos](#configuración-de-base-de-datos)
+- [Ejecución de Pruebas](#ejecución-de-pruebas)
+- [Casos de Prueba](#casos-de-prueba)
+- [Estructura de Archivos](#estructura-de-archivos)
+- [Troubleshooting](#troubleshooting)
+
+## ✅ Requisitos Previos
+
+- Node.js >= 16.x
+- MySQL >= 5.7
+- Electron instalado
+- Permisos para crear bases de datos en MySQL
+
+## 📦 Instalación
+
+```bash
+# Instalar dependencias
+npm install
+
+# Instalar navegadores de Playwright
+npx playwright install
+```
+
+## 🗄️ Configuración de Base de Datos
+
+Las pruebas usan una base de datos separada llamada `sistemaaccesofacultad_test`.
+
+### Configuración Manual (Opcional)
+
+```bash
+# Crear base de datos de pruebas
+npm run db:setup
+
+# Limpiar datos de prueba
+npm run db:clean
+
+# Eliminar base de datos de pruebas
+npm run db:drop
+```
+
+### Configuración Automática
+
+Las pruebas configuran automáticamente la base de datos al ejecutarse por primera vez.
+
+## 🚀 Ejecución de Pruebas
+
+### Todas las pruebas
+
+```bash
+npm test
+```
+
+### Pruebas específicas de registro
+
+```bash
+npm run test:registro
+```
+
+### Modo UI Interactivo
+
+```bash
+npm run test:ui
+```
+
+### Modo Headed (Ver ventana)
+
+```bash
+npm run test:headed
+# O específicamente registro
+npm run test:registro:headed
+```
+
+### Modo Debug (Paso a paso)
+
+```bash
+npm run test:debug
+# O específicamente registro
+npm run test:registro:debug
+```
+
+### Ver reporte HTML
+
+```bash
+npm run test:report
+```
+
+## 📊 Casos de Prueba Implementados
+
+### Suite: Registro de Usuario
+
+#### Casos de Éxito
+- **CP001**: Registro exitoso con todos los datos válidos
+- **CP002**: Registro con turno Vespertino
+- **CP003**: Registro con rol Docente
+
+#### Casos de Error - Matrícula Duplicada
+- **CP004**: Mostrar modal de error con matrícula duplicada
+- **CP005**: Limpiar formulario al cerrar modal de error
+
+#### Validaciones - Nombre
+- **CP006**: Rechazar nombre con números
+- **CP007**: Aceptar nombre con acentos
+- **CP008**: Aceptar nombre con ñ
+
+#### Validaciones - Fecha de Nacimiento
+- **CP009**: Rechazar edad menor a 5 años
+- **CP010**: Rechazar edad mayor a 100 años
+
+#### Validaciones - Correo Electrónico
+- **CP011**: Rechazar correo sin @
+- **CP012**: Rechazar correo sin dominio
+
+#### Validaciones - Matrícula
+- **CP013**: Rechazar matrícula con menos de 8 dígitos
+- **CP014**: Rechazar matrícula con más de 8 dígitos
+- **CP015**: Rechazar matrícula con letras
+
+#### Validaciones - Teléfono
+- **CP016**: Rechazar teléfono con menos de 10 dígitos
+- **CP017**: Rechazar teléfono con letras
+
+#### Funcionalidad de Botones
+- **CP018**: Navegar de regreso con botón rojo
+
+## 📁 Estructura de Archivos
+
+```
+tests/
+├── e2e/
+│   └── registro-usuario.spec.js    # Tests principales
+├── fixtures/
+│   └── electron-test.js            # Configuración de Electron
+├── setup/
+│   ├── db-test-setup.js           # Setup de base de datos
+│   └── test-data.js               # Datos de prueba
+├── global-setup.js                # Setup global
+├── global-teardown.js             # Limpieza global
+└── README.md                      # Esta guía
+```
+
+## 🔧 Troubleshooting
+
+### La aplicación no inicia
+
+```bash
+# Verificar que Electron esté instalado
+npm install electron --save-dev
+
+# Verificar la ruta del main.js
+# En tests/fixtures/electron-test.js
+```
+
+### Error de conexión a base de datos
+
+```bash
+# Verificar MySQL está corriendo
+mysql -u root -p
+
+# Verificar credenciales en tests/setup/db-test-setup.js
+# host: 'localhost'
+# user: 'root'
+# password: 'root'
+```
+
+### Pruebas fallan por timeout
+
+```bash
+# Aumentar timeout en playwright.config.js
+timeout: 60000  // 60 segundos
+```
+
+### Base de datos no se limpia
+
+```bash
+# Limpiar manualmente
+npm run db:clean
+
+# O recrear desde cero
+npm run db:drop
+npm run db:setup
+```
+
+### Ver logs detallados
+
+```bash
+# Ejecutar con variable DEBUG
+DEBUG=pw:api npm test
+```
+
+### Problemas con matrículas duplicadas
+
+Las pruebas generan matrículas únicas usando timestamp. Si encuentras duplicados:
+
+```bash
+# Limpiar base de datos y reintentar
+npm run db:clean
+npm test
+```
+
+## 📸 Screenshots y Videos
+
+Los screenshots y videos se guardan automáticamente en `test-results/` cuando una prueba falla.
+
+```bash
+# Ver resultados
+ls test-results/
+```
+
+## 🎯 Mejores Prácticas
+
+1. **Siempre ejecuta pruebas antes de hacer commit**
+   ```bash
+   npm test
+   ```
+
+2. **Usa modo UI para debugging**
+   ```bash
+   npm run test:ui
+   ```
+
+3. **Revisa el reporte HTML después de las pruebas**
+   ```bash
+   npm run test:report
+   ```
+
+4. **Mantén la base de datos de pruebas limpia**
+   ```bash
+   npm run db:clean
+   ```
+
+## 📚 Recursos Adicionales
+
+- [Documentación de Playwright](https://playwright.dev)
+- [Electron Testing](https://www.electronjs.org/docs/latest/tutorial/automated-testing)
+- [MySQL Testing Best Practices](https://dev.mysql.com/doc/)
+
+## 🤝 Contribuir
+
+Para agregar nuevos tests:
+
+1. Crear archivo en `tests/e2e/`
+2. Importar fixture: `const { test, expect } = require('../fixtures/electron-test');`
+3. Agregar datos de prueba en `tests/setup/test-data.js` si es necesario
+4. Documentar casos de prueba en este README
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+🚀 Guía de Instalación Rápida - Playwright + Electron
+Paso 1: Instalar Dependencias
+bashnpm install --save-dev @playwright/test playwright
+Paso 2: Crear Estructura de Carpetas
+bashmkdir -p tests/{e2e,fixtures,setup}
+Paso 3: Crear Archivos
+Crea los siguientes archivos con el contenido proporcionado en los artefactos anteriores:
+Archivos de Configuración
+
+✅ playwright.config.js (raíz del proyecto)
+✅ tests/global-setup.js
+✅ tests/global-teardown.js
+
+Archivos de Setup
+
+✅ tests/setup/db-test-setup.js
+✅ tests/setup/test-data.js
+
+Archivos de Fixtures
+
+✅ tests/fixtures/electron-test.js
+
+Archivos de Tests
+
+✅ tests/e2e/registro-usuario.spec.js
+
+Modificación de Archivos Existentes
+
+✅ Modificar src/main/database.js (solo la parte de configuración)
+
+Archivos Opcionales
+
+✅ tests/README.md
+✅ Actualizar .gitignore
+
+Paso 4: Actualizar package.json
+Agrega los scripts proporcionados en el artefacto de scripts.
+Paso 5: Verificar MySQL
+bash# Asegúrate de que MySQL esté corriendo
+mysql -u root -p
+
+# Verificar credenciales:
+# Usuario: root
+# Password: root
+# Puerto: 3306
+Paso 6: Instalar Navegadores de Playwright
+bashnpx playwright install
+Paso 7: Configurar Base de Datos de Pruebas (Primera Vez)
+bashnpm run db:setup
+Paso 8: Ejecutar Primera Prueba
+bash# Modo normal
+npm run test:registro
+
+# O con ventana visible para ver qué sucede
+npm run test:registro:headed
+Paso 9: Ver Resultados
+bashnpm run test:report
+✅ Checklist de Verificación
+
+ Node.js instalado (>=16.x)
+ MySQL corriendo en puerto 3306
+ Credenciales de MySQL correctas (root/root)
+ Playwright instalado (npm install)
+ Navegadores de Playwright instalados (npx playwright install)
+ Estructura de carpetas creada
+ Todos los archivos creados
+ database.js modificado
+ Scripts agregados a package.json
+ Base de datos de pruebas configurada
+ Primera prueba ejecutada exitosamente
+
+🎯 Comandos Más Usados
+bash# Ejecutar todas las pruebas
+npm test
+
+# Ejecutar solo registro de usuario
+npm run test:registro
+
+# Modo interactivo (UI)
+npm run test:ui
+
+# Ver ventana durante pruebas
+npm run test:headed
+
+# Modo debug (paso a paso)
+npm run test:debug
+
+# Ver reporte de resultados
+npm run test:report
+
+# Limpiar base de datos de pruebas
+npm run db:clean
+
+# Recrear base de datos de pruebas
+npm run db:drop && npm run db:setup
+⚠️ Problemas Comunes
+Error: Cannot find module '@playwright/test'
+bashnpm install --save-dev @playwright/test playwright
+Error: MySQL connection refused
+bash# Verificar que MySQL esté corriendo
+sudo systemctl start mysql
+# O en Windows: iniciar servicio MySQL
+Error: Database access denied
+bash# Verificar credenciales en tests/setup/db-test-setup.js
+# Líneas 6-9
+Tests muy lentos
+bash# Asegúrate de tener solo 1 worker en playwright.config.js
+workers: 1
+🎉 ¡Listo!
+Si todos los pasos fueron exitosos, deberías ver algo como esto:
+╔══════════════════════════════════════════════════════╗
+║     INICIANDO CONFIGURACIÓN GLOBAL DE PRUEBAS        ║
+╚══════════════════════════════════════════════════════╝
+
+🔧 Configurando base de datos de pruebas...
+   ✓ Base de datos anterior eliminada
+   ✓ Base de datos "sistemaaccesofacultad_test" creada
+   ✓ Tabla "carrera" creada
+   ✓ Carreras insertadas
+   ✓ Tabla "usuario" creada
+   ✓ Tabla "vehiculo" creada
+   ✓ Tabla "visitante" creada
+   ✓ Usuarios de prueba insertados
+✅ Base de datos de pruebas configurada exitosamente
+
+Running 18 tests using 1 worker
+
+✓ CP001: Debe registrar un usuario con todos los datos válidos (5s)
+✓ CP002: Debe registrar usuario con turno Vespertino (4s)

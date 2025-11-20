@@ -4,17 +4,33 @@
   "main": "index.js",
   "scripts": {
     "start": "electron src/main/main.js",
+    "dev": "electron src/main/main.js --dev",
     "build": "electron-builder",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cross-env NODE_ENV=test playwright test",
+    "test:ui": "cross-env NODE_ENV=test playwright test --ui",
+    "test:headed": "cross-env NODE_ENV=test playwright test --headed",
+    "test:debug": "cross-env NODE_ENV=test playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:registro": "cross-env NODE_ENV=test playwright test registro-usuario.spec.js",
+    "test:registro:headed": "cross-env NODE_ENV=test playwright test registro-usuario.spec.js --headed",
+    "test:registro:debug": "cross-env NODE_ENV=test playwright test registro-usuario.spec.js --debug",
+    "db:setup": "node -e \"require('./tests/setup/db-test-setup').setupTestDatabase()\"",
+    "db:clean": "node -e \"require('./tests/setup/db-test-setup').cleanTestDatabase()\"",
+    "db:drop": "node -e \"require('./tests/setup/db-test-setup').dropTestDatabase()\"",
+    "postinstall": "playwright install"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "electron": "^35.1.2"
+    "@playwright/test": "^1.56.1",
+    "cross-env": "^10.1.0",
+    "electron": "^35.1.2",
+    "playwright": "^1.56.1"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.70.1",
     "html5-qrcode": "^2.3.8",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
