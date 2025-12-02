@@ -1,6 +1,7 @@
 // tests/e2e/actualizacion-datos.spec.js
 const { test, expect } = require('../fixtures/electron-test');
 const { matriculasExistentes } = require('../setup/test-data');
+const { TestLogger } = require('../helpers/test-logger');
 
 /**
  * CU-03: Actualización de Datos Personales
@@ -12,10 +13,14 @@ const { matriculasExistentes } = require('../setup/test-data');
  * - Validaciones de campos
  * - Confirmación de cambios
  */
-test.describe('CU-03: Actualización de Datos Personales', () => {
+
+const SUITE_NAME = 'CU-03: Actualización de Datos Personales';
+
+test.describe(SUITE_NAME, () => {
 
   test.beforeEach(async ({ electronApp, page }) => {
-    console.log('  ℹ️  Preparando prueba de actualización...');
+    const logger = new TestLogger('Actualización de Datos');
+    logger.setup('Preparando prueba de actualización de datos personales');
 
     // Navegar a la página de actualización de datos
     await page.evaluate(() => {
@@ -25,36 +30,58 @@ test.describe('CU-03: Actualización de Datos Personales', () => {
 
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
-    console.log('  ✓ Navegado a actualización de datos');
+    logger.navigate('actualizardatospersonales.html - Carga completada');
   });
 
-  test.afterEach(async ({ page }) => {
-    console.log('  ✓ Prueba de actualización completada\n');
+  test.afterEach(async ({ page }, testInfo) => {
+    const logger = new TestLogger('Actualización de Datos');
+
+    // Actualizar estadísticas globales
+    TestLogger.updateSuiteStats(SUITE_NAME, testInfo.status);
+
+    logger.teardown(`Prueba completada - Estado: ${testInfo.status}`);
+  });
+
+  test.afterAll(() => {
+    TestLogger.suiteSummary(SUITE_NAME);
   });
 
   test.describe('Búsqueda de usuarios', () => {
 
     test('CP101: Debe encontrar usuario por nombre completo', async ({ page }) => {
-      console.log('  📝 Ejecutando: Búsqueda de usuario por nombre');
+      const logger = new TestLogger('CP101');
+      logger.testStart('CP101', 'Búsqueda de usuario por nombre completo');
 
-      // Llenar campos de búsqueda
-      await page.fill('#nombre', 'Usuario');
-      await page.fill('#apellidoP', 'Prueba');
-      await page.fill('#apellidoM', 'Existente');
+      try {
+        // Llenar campos de búsqueda
+        logger.action('Llenando campos de búsqueda');
+        await page.fill('#nombre', 'Usuario');
+        await page.fill('#apellidoP', 'Prueba');
+        await page.fill('#apellidoM', 'Existente');
+        logger.step('Campos llenados: Usuario Prueba Existente');
 
-      // Hacer click en buscar
-      await page.click('#buscarBtn');
-      await page.waitForTimeout(2000);
+        // Hacer click en buscar
+        logger.action('Ejecutando búsqueda');
+        await page.click('#buscarBtn');
+        await page.waitForTimeout(2000);
 
-      // Verificar que se encontró el usuario
-      const listSection = page.locator('.list-section');
-      const userInfo = listSection.locator('.user-info');
+        // Verificar que se encontró el usuario
+        logger.verify('Verificando resultados de búsqueda');
+        const listSection = page.locator('.list-section');
+        const userInfo = listSection.locator('.user-info');
 
-      await expect(userInfo.first()).toBeVisible();
-      await expect(userInfo.first()).toContainText('Usuario');
-      await expect(userInfo.first()).toContainText('12345678');
+        await expect(userInfo.first()).toBeVisible();
+        logger.step('Usuario encontrado en la lista');
 
-      console.log('     ✅ Usuario encontrado correctamente');
+        await expect(userInfo.first()).toContainText('Usuario');
+        await expect(userInfo.first()).toContainText('12345678');
+        logger.verify('Datos del usuario correctos (Nombre: Usuario, Matrícula: 12345678)');
+
+        logger.pass('CP101', 'Usuario encontrado correctamente');
+      } catch (error) {
+        logger.fail('CP101', error.message);
+        throw error;
+      }
     });
 
     test('CP102: Debe validar que se ingrese al menos un campo de búsqueda', async ({ page }) => {
@@ -93,21 +120,30 @@ test.describe('CU-03: Actualización de Datos Personales', () => {
     });
 
     test('CP104: Debe mostrar mensaje cuando no se encuentra usuario', async ({ page }) => {
-      console.log('  📝 Ejecutando: Búsqueda sin resultados');
+      const logger = new TestLogger('CP104');
+      logger.testStart('CP104', 'Mensaje cuando no se encuentra usuario');
 
-      await page.fill('#nombre', 'NoExiste');
-      await page.fill('#apellidoP', 'Usuario');
-      await page.fill('#apellidoM', 'Inexistente');
+      try {
+        logger.action('Buscando usuario inexistente');
+        await page.fill('#nombre', 'NoExiste');
+        await page.fill('#apellidoP', 'Usuario');
+        await page.fill('#apellidoM', 'Inexistente');
+        logger.step('Búsqueda con datos: NoExiste Usuario Inexistente');
 
-      await page.click('#buscarBtn');
-      await page.waitForTimeout(2000);
+        await page.click('#buscarBtn');
+        await page.waitForTimeout(2000);
 
-      // Verificar mensaje de no resultados
-      const noResults = page.locator('.no-results');
-      await expect(noResults).toBeVisible();
-      await expect(noResults).toContainText('No se encontraron usuarios');
+        logger.verify('Verificando mensaje de "sin resultados"');
+        const noResults = page.locator('.no-results');
+        await expect(noResults).toBeVisible();
+        await expect(noResults).toContainText('No se encontraron usuarios');
+        logger.step('Mensaje mostrado correctamente');
 
-      console.log('     ✅ Mensaje de sin resultados mostrado');
+        logger.pass('CP104', 'Mensaje de sin resultados mostrado');
+      } catch (error) {
+        logger.fail('CP104', error.message);
+        throw error;
+      }
     });
   });
 

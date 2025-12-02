@@ -20,9 +20,9 @@ const dbConfig = {
 };
 
 // Log para confirmar qué BD se está usando
-console.log(`📊 Conectando a base de datos: ${databaseName}`);
+console.log(`[DB] Conectando a base de datos: ${databaseName}`);
 if (isTestEnvironment) {
-  console.log('🧪 Modo de pruebas activado');
+  console.log('[TEST] Modo de pruebas activado');
 }
 
 // Crear conexión
