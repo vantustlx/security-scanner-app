@@ -8,6 +8,9 @@ const fs = require('fs');
 const os = require('os');
 
 let mainWindow;
+let listenersConfigured = false; // Bandera para evitar registro múltiple
+let confirmationServer = null; // Referencia al servidor HTTP
+
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
@@ -16,15 +19,20 @@ function validarEmail(email) {
 function setupEmailListeners(window) {
   mainWindow = window;
 
-  ipcMain.on('navigate', (event, routeName) => {
-    const viewPath = path.join(__dirname, '..', 'renderer', 'views', `${routeName}.html`);
-    window.loadFile(viewPath).catch(console.error);
-  });
+  // Evitar registrar listeners múltiples veces
+  if (!listenersConfigured) {
+    ipcMain.on('navigate', (event, routeName) => {
+      const viewPath = path.join(__dirname, '..', 'renderer', 'views', `${routeName}.html`);
+      console.log(`[NAVIGATE] Navegando a: ${routeName} (${viewPath})`);
+      mainWindow.loadFile(viewPath).catch(err => {
+        console.error(`[ERROR] Error al cargar vista ${routeName}:`, err);
+      });
+    });
 
-  // Inicia el servidor de confirmación solo una vez al configurar los listeners
-  iniciarServidorConfirmacion();
+    // Inicia el servidor de confirmación solo una vez
+    iniciarServidorConfirmacion();
 
-  ipcMain.on('enviar-correo', async (event, datos) => {
+    ipcMain.on('enviar-correo', async (event, datos) => {
     const { email, nombre, matricula } = datos;
 
     // Generar el código QR como dataURL
@@ -94,22 +102,31 @@ function setupEmailListeners(window) {
     }
   });
 
-  ipcMain.on('recuperar-qr', async (event, { matricula, email, nombre }) => {
-    try {
-        const resultado = await enviarCorreoRecuperacion(email, nombre, matricula);
-        if (resultado.success) {
-            event.reply('recuperar-qr-respuesta', { success: true, matricula });
-        } else {
-            event.reply('recuperar-qr-respuesta', { success: false, matricula, error: resultado.error });
-        }
-    } catch (error) {
-        console.error('Error en recuperar-qr:', error);
-        event.reply('recuperar-qr-respuesta', { success: false, matricula, error });
-    }
-});
+    ipcMain.on('recuperar-qr', async (event, { matricula, email, nombre }) => {
+      try {
+          const resultado = await enviarCorreoRecuperacion(email, nombre, matricula);
+          if (resultado.success) {
+              event.reply('recuperar-qr-respuesta', { success: true, matricula });
+          } else {
+              event.reply('recuperar-qr-respuesta', { success: false, matricula, error: resultado.error });
+          }
+      } catch (error) {
+          console.error('Error en recuperar-qr:', error);
+          event.reply('recuperar-qr-respuesta', { success: false, matricula, error });
+      }
+    });
+
+    listenersConfigured = true;
+  }
 }
 
 function iniciarServidorConfirmacion() {
+  // Si ya hay un servidor ejecutándose, no crear otro
+  if (confirmationServer) {
+    console.log('[SERVER] Servidor de confirmación ya está ejecutándose');
+    return;
+  }
+
   const server = http.createServer((req, res) => {
     if (req.url.startsWith('/confirmar')) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -158,8 +175,19 @@ function iniciarServidorConfirmacion() {
     }
   });
 
+  // Manejar errores del servidor
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.log('[SERVER] Puerto 3000 ya en uso, servidor no iniciado');
+      confirmationServer = null;
+    } else {
+      console.error('[SERVER] Error en servidor de confirmación:', error);
+    }
+  });
+
   server.listen(3000, () => {
-    console.log('Servidor de confirmación escuchando en http://localhost:3000');
+    console.log('[SERVER] Servidor de confirmación escuchando en http://localhost:3000');
+    confirmationServer = server;
   });
 }
 

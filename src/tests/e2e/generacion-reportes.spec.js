@@ -2,6 +2,7 @@
 const { test, expect } = require('../fixtures/electron-test');
 const fs = require('fs');
 const path = require('path');
+const { TestLogger } = require('../helpers/test-logger');
 
 /**
  * CU-10 / CU-12: Generación de Reportes
@@ -15,12 +16,29 @@ const path = require('path');
  * - Descarga correcta de archivos
  * - Manejo de errores
  */
-test.describe('CU-10/CU-12: Generación de Reportes', () => {
+
+const SUITE_NAME = 'CU-10/CU-12: Generación de Reportes';
+
+test.describe(SUITE_NAME, () => {
+
+  test.afterEach(async ({ page }, testInfo) => {
+    const logger = new TestLogger('Generación de Reportes');
+
+    // Actualizar estadísticas globales
+    TestLogger.updateSuiteStats(SUITE_NAME, testInfo.status);
+
+    logger.teardown(`Prueba completada - Estado: ${testInfo.status}`);
+  });
+
+  test.afterAll(() => {
+    TestLogger.suiteSummary(SUITE_NAME);
+  });
 
   test.describe('Reporte de Usuario Específico', () => {
 
     test.beforeEach(async ({ page }) => {
-      console.log('  ℹ️  Preparando prueba de reportes...');
+      const logger = new TestLogger('Generación de Reportes');
+      logger.setup('Preparando prueba de generación de reportes');
 
       // Navegar a la página de reporte de usuario específico
       await page.evaluate(() => {
@@ -30,11 +48,7 @@ test.describe('CU-10/CU-12: Generación de Reportes', () => {
 
       await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(1000);
-      console.log('  ✓ Navegado a generación de reportes');
-    });
-
-    test.afterEach(async ({ page }) => {
-      console.log('  ✓ Prueba de reporte completada\n');
+      logger.navigate('generarreporteusuarioespecifico.html - Carga completada');
     });
 
     test.describe('Búsqueda de usuario para reporte', () => {

@@ -1,6 +1,7 @@
 // tests/e2e/autenticacion-qr.spec.js
 const { test, expect } = require('../fixtures/electron-test');
 const { matriculasExistentes } = require('../setup/test-data');
+const { TestLogger } = require('../helpers/test-logger');
 
 /**
  * CU-04: Autenticación con QR
@@ -12,10 +13,14 @@ const { matriculasExistentes } = require('../setup/test-data');
  * - Rechazo de usuarios inactivos
  * - Navegación post-autenticación
  */
-test.describe('CU-04: Autenticación con QR', () => {
+
+const SUITE_NAME = 'CU-04: Autenticación con QR';
+
+test.describe(SUITE_NAME, () => {
 
   test.beforeEach(async ({ page }) => {
-    console.log('  ℹ️  Preparando prueba de autenticación QR...');
+    const logger = new TestLogger('Autenticación QR');
+    logger.setup('Preparando prueba de autenticación con código QR');
 
     // Navegar a la página de QR lector
     await page.evaluate(() => {
@@ -25,11 +30,20 @@ test.describe('CU-04: Autenticación con QR', () => {
 
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1500);
-    console.log('  ✓ Navegado a lector QR');
+    logger.navigate('qrlector.html - Carga completada');
   });
 
-  test.afterEach(async ({ page }) => {
-    console.log('  ✓ Prueba de QR completada\n');
+  test.afterEach(async ({ page }, testInfo) => {
+    const logger = new TestLogger('Autenticación QR');
+
+    // Actualizar estadísticas globales
+    TestLogger.updateSuiteStats(SUITE_NAME, testInfo.status);
+
+    logger.teardown(`Prueba completada - Estado: ${testInfo.status}`);
+  });
+
+  test.afterAll(() => {
+    TestLogger.suiteSummary(SUITE_NAME);
   });
 
   test.describe('Autenticación exitosa', () => {

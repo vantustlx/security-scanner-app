@@ -1,6 +1,7 @@
 // tests/e2e/asociacion-huella.spec.js
 const { test, expect } = require('../fixtures/electron-test');
 const { matriculasExistentes } = require('../setup/test-data');
+const { TestLogger } = require('../helpers/test-logger');
 
 /**
  * CU-18: Asociación de Huella Biométrica
@@ -13,10 +14,14 @@ const { matriculasExistentes } = require('../setup/test-data');
  * - Manejo de errores en la lectura
  * - Cancelación del proceso
  */
-test.describe('CU-18: Asociación de Huella Biométrica', () => {
+
+const SUITE_NAME = 'CU-18: Asociación de Huella Biométrica';
+
+test.describe(SUITE_NAME, () => {
 
   test.beforeEach(async ({ page }) => {
-    console.log('  ℹ️  Preparando prueba de asociación de huella...');
+    const logger = new TestLogger('Asociación de Huella');
+    logger.setup('Preparando prueba de asociación de huella biométrica');
 
     // Navegar a la página de asociación de huella
     await page.evaluate(() => {
@@ -26,11 +31,20 @@ test.describe('CU-18: Asociación de Huella Biométrica', () => {
 
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
-    console.log('  ✓ Navegado a asociación de huella');
+    logger.navigate('asociarhuellalector.html - Carga completada');
   });
 
-  test.afterEach(async ({ page }) => {
-    console.log('  ✓ Prueba de asociación completada\n');
+  test.afterEach(async ({ page }, testInfo) => {
+    const logger = new TestLogger('Asociación de Huella');
+
+    // Actualizar estadísticas globales
+    TestLogger.updateSuiteStats(SUITE_NAME, testInfo.status);
+
+    logger.teardown(`Prueba completada - Estado: ${testInfo.status}`);
+  });
+
+  test.afterAll(() => {
+    TestLogger.suiteSummary(SUITE_NAME);
   });
 
   test.describe('Interfaz de usuario', () => {

@@ -10,34 +10,45 @@ exports.test = base.extend({
    * Inicia la aplicación Electron en modo test
    */
   electronApp: async ({}, use) => {
-    console.log('🚀 Iniciando aplicación Electron para pruebas...');
-    
-    // Iniciar Electron con variables de entorno de prueba
-    const electronApp = await electron.launch({
-      args: [path.join(__dirname, '../../main/main.js')], // Ruta corregida: sin src/ duplicado
-      env: {
-        ...process.env,
-        NODE_ENV: 'test', // Asegurar que use BD de pruebas
-      },
-      // Opciones útiles para debugging
-      // timeout: 30000,
-      // executablePath: '/ruta/a/electron', // Si necesitas versión específica
-    });
+    console.log('[FIXTURE] Iniciando aplicación Electron para pruebas...');
 
-    console.log('✅ Aplicación Electron iniciada');
+    let electronApp;
+    try {
+      // Iniciar Electron con variables de entorno de prueba
+      electronApp = await electron.launch({
+        args: [path.join(__dirname, '../../main/main.js')],
+        env: {
+          ...process.env,
+          NODE_ENV: 'test',
+        },
+        timeout: 30000,
+      });
 
-    // Esperar a que la ventana principal esté lista
-    const window = await electronApp.firstWindow();
-    await window.waitForLoadState('domcontentloaded');
-    console.log('✅ Ventana principal cargada');
+      console.log('[FIXTURE] Aplicación Electron iniciada');
 
-    // Exponer la aplicación a las pruebas
-    await use(electronApp);
+      // Esperar a que la ventana principal esté lista
+      const window = await electronApp.firstWindow();
+      await window.waitForLoadState('domcontentloaded');
+      console.log('[FIXTURE] Ventana principal cargada');
 
-    // Limpieza: cerrar la aplicación después de las pruebas
-    console.log('🔄 Cerrando aplicación Electron...');
-    await electronApp.close();
-    console.log('✅ Aplicación cerrada\n');
+      // Exponer la aplicación a las pruebas
+      await use(electronApp);
+
+    } catch (error) {
+      console.error('[FIXTURE] Error al iniciar Electron:', error);
+      throw error;
+    } finally {
+      // Limpieza: cerrar la aplicación después de las pruebas
+      if (electronApp) {
+        try {
+          console.log('[FIXTURE] Cerrando aplicación Electron...');
+          await electronApp.close();
+          console.log('[FIXTURE] Aplicación cerrada\n');
+        } catch (closeError) {
+          console.error('[FIXTURE] Error al cerrar aplicación:', closeError);
+        }
+      }
+    }
   },
 
   /**

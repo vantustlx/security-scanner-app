@@ -45,23 +45,17 @@ function createWindow() {
     callback(false);
   });
 
-  // Configuración del router
-  ipcMain.on('navigate', (event, destino) => {
-    if (destino === 'qrsuccess') {
-      win.loadFile(path.join(__dirname, '..', 'renderer', 'views', 'qrsuccess.html'));
-    } else if (destino === 'qrdontsucces') {
-      win.loadFile(path.join(__dirname, '..', 'renderer', 'views', 'qrdontsucces.html'));
-    } else if (destino === 'acceder') {
-      win.loadFile(path.join(__dirname, '..', 'renderer', 'views', 'acceder.html'));
-    }
-  });
-
-  setupDBListeners();
-  setupEmailListeners(win);
 }
+
+// Configurar listeners de IPC una sola vez al inicio
+// Esto evita registrar múltiples listeners cuando se recrea la ventana
+setupDBListeners();
 
 app.whenReady().then(() => {
   createWindow();
+  // Configurar listeners de email después de crear la ventana
+  // porque necesita la referencia a win
+  setupEmailListeners(win);
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
