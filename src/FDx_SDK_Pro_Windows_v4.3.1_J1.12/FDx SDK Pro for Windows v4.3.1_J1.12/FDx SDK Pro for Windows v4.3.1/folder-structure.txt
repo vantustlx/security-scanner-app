@@ -1,0 +1,151 @@
+FDx-SDK-Pro-for-Windows-v4.3.1
+├── Documents
+│   ├── FDx SDK Pro .NET Programming Manual (Windows) (SG1-0030B-019).pdf
+│   ├── FDx SDK Pro Programming Manual (SG1-0030A-026).pdf
+│   └── How to Develop Applications Compatible with All SecuGen USB Readers (SG1-0030D-001).pdf
+├── DotNET
+│   ├── Bin
+│   │   ├── i386
+│   │   │   ├── README.txt
+│   │   │   └── SecuGen.FDxSDKPro.DotNet.Windows.dll
+│   │   └── x64
+│   │       ├── README.txt
+│   │       └── SecuGen.FDxSDKPro.DotNet.Windows.dll
+│   └── Samples
+│       └── C#
+│           ├── Matching
+│           └── MatchingUAIR
+├── DotNETFramework
+│   ├── Bin
+│   │   ├── i386
+│   │   │   ├── README.txt
+│   │   │   └── SecuGen.FDxSDKPro.Windows.dll
+│   │   └── x64
+│   │       ├── README.txt
+│   │       └── SecuGen.FDxSDKPro.Windows.dll
+│   └── Samples
+│       ├── C#
+│       │   ├── Matching
+│       │   ├── MatchingAnsi
+│       │   └── MatchingUAIR
+│       └── VB.NET
+│           └── Matching
+├── Inc
+│   └── sgfplib.h
+├── Lib
+│   ├── i386
+│   │   ├── sgfplib.exp
+│   │   └── sgfplib.lib
+│   └── x64
+│       ├── sgfplib.exp
+│       └── sgfplib.lib
+├── Samples
+│   └── VisualC++
+│       ├── DeviceTest
+│       │   ├── DeviceTest.sln
+│       │   ├── DeviceTest.vcxproj
+│       │   ├── DeviceTest.vcxproj.filters
+│       │   ├── DibClass.cpp
+│       │   ├── DibClass.h
+│       │   ├── ReadMe.txt
+│       │   ├── StdAfx.cpp
+│       │   ├── StdAfx.h
+│       │   ├── i386
+│       │   ├── res
+│       │   ├── resource.h
+│       │   ├── sgdvc.cpp
+│       │   ├── sgdvc.h
+│       │   ├── sgdvc.rc
+│       │   ├── sgdvcDlg.cpp
+│       │   ├── sgdvcDlg.h
+│       │   └── x64
+│       ├── Matching
+│       │   ├── DibClass.cpp
+│       │   ├── DibClass.h
+│       │   ├── ReadMe.txt
+│       │   ├── StdAfx.cpp
+│       │   ├── StdAfx.h
+│       │   ├── i386
+│       │   ├── matching.cpp
+│       │   ├── matching.h
+│       │   ├── matching.rc
+│       │   ├── matching.sln
+│       │   ├── matching.vcproj
+│       │   ├── matching.vcxproj
+│       │   ├── matching.vcxproj.filters
+│       │   ├── matching.vcxproj.user
+│       │   ├── matchingDlg.cpp
+│       │   ├── matchingDlg.h
+│       │   ├── res
+│       │   ├── resource.h
+│       │   └── x64
+│       ├── MatchingAnsi
+│       │   ├── DibClass.cpp
+│       │   ├── DibClass.h
+│       │   ├── MatchingANSI.rc
+│       │   ├── MatchingAnsi.sln
+│       │   ├── MatchingAnsi.vcxproj
+│       │   ├── MatchingAnsi.vcxproj.filters
+│       │   ├── ReadMe.txt
+│       │   ├── StdAfx.cpp
+│       │   ├── StdAfx.h
+│       │   ├── i386
+│       │   ├── matchingANSI.cpp
+│       │   ├── matchingANSI.h
+│       │   ├── matchingANSIDlg.cpp
+│       │   ├── matchingansidlg.h
+│       │   ├── res
+│       │   ├── resource.h
+│       │   └── x64
+│       ├── MatchingISO
+│       │   ├── DibClass.cpp
+│       │   ├── DibClass.h
+│       │   ├── MatchingISO.cpp
+│       │   ├── MatchingISO.h
+│       │   ├── MatchingISO.rc
+│       │   ├── MatchingISODlg.cpp
+│       │   ├── MatchingISODlg.h
+│       │   ├── ReadMe.txt
+│       │   ├── StdAfx.cpp
+│       │   ├── StdAfx.h
+│       │   ├── i386
+│       │   ├── matchingISO.sln
+│       │   ├── matchingISO.vcproj
+│       │   ├── matchingISO.vcxproj
+│       │   ├── matchingISO.vcxproj.filters
+│       │   ├── res
+│       │   ├── resource.h
+│       │   └── x64
+│       └── MatchingUAIR
+│           ├── DibClass.cpp
+│           ├── DibClass.h
+│           ├── StdAfx.cpp
+│           ├── StdAfx.h
+│           ├── i386
+│           ├── matching.vcxproj.filters
+│           ├── matchingUAIR.cpp
+│           ├── matchingUAIR.h
+│           ├── matchingUAIR.rc
+│           ├── matchingUAIR.sln
+│           ├── matchingUAIR.vcxproj
+│           ├── matchingUAIRDlg.cpp
+│           ├── matchingUAIRDlg.h
+│           ├── res
+│           ├── resource.h
+│           └── x64
+├── bin
+│   ├── i386
+│   │   ├── sgbledev.dll
+│   │   ├── sgfdusda.dll
+│   │   ├── sgfpamx.dll
+│   │   ├── sgfplib.dll
+│   │   └── sgwsqlib.dll
+│   └── x64
+│       ├── sgbledev.dll
+│       ├── sgfdusdax64.dll
+│       ├── sgfpamx.dll
+│       ├── sgfplib.dll
+│       └── sgwsqlib.dll
+└── folder-structure.txt
+
+49 directories, 99 files
