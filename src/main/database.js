@@ -509,11 +509,11 @@ ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
         FROM usuario u
         INNER JOIN registroacceso r ON u.matricula = r.matricula
         WHERE 
-            u.estatus = 'Activo'
-            AND u.rol_facultad = ?
+            u.rol_facultad = ?
             AND u.id_carrera = ?
             AND u.turno = ?
     `;
+    
 
     const params = [rol, carrera, turno];
 
@@ -534,10 +534,10 @@ ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
 
     connection.query(query, params, (err, results) => {
         if (err) {
-            console.error('❌ Error al buscar grupo de usuarios:', err);
+            console.error('Error al buscar grupo de usuarios:', err);
             event.reply('busqueda-grupo-error', err.message);
         } else {
-            console.log(`✅ Búsqueda completada: ${results.length} registros encontrados`);
+            console.log(`Búsqueda completada: ${results.length} registros encontrados`);
             event.reply('resultados-grupo-usuarios', results);
         }
     });
@@ -584,10 +584,10 @@ ipcMain.on('buscar-usuario-especifico-reporte', (event, filtros) => {
 
     connection.query(query, params, (err, results) => {
         if (err) {
-            console.error('❌ Error al buscar usuario específico:', err);
+            console.error('Error al buscar usuario específico:', err);
             event.reply('busqueda-usuario-especifico-error', err.message);
         } else {
-            console.log(`✅ ${results.length} registros encontrados para el usuario`);
+            console.log(`${results.length} registros encontrados para el usuario`);
             event.reply('resultados-usuario-especifico', results);
         }
     });
