@@ -26,6 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4) Botón “Aceptar” para volver a la pantalla de acceso
   document.getElementById('btn-volver-qr-sccs').addEventListener('click', () => {
-    ipcRenderer.send('navigate', 'acceder');
+    ipcRenderer.send('navigate', 'qrlector');
   });
 });

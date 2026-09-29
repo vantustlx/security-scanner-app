@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Volver al menú de registro
   btnVolver.addEventListener('click', () => {
-    ipcRenderer.send('navigate', 'registrovisitantes');
+    ipcRenderer.send('navigate', 'registroguest');
   });
 
   // Verificar el folio ingresado
