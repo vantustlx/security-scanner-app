@@ -134,16 +134,3 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-
-# Resultados de pruebas
-test-results/
-playwright-report/
-playwright/.cache/
-
-# Screenshots y videos de pruebas
-tests/screenshots/
-tests/videos/
-
-# Archivos de trazado de Playwright
-trace.zip
-*.trace.zip
