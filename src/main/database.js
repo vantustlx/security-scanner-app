@@ -5,25 +5,17 @@ const path = require('path');
 
 let ultimoUsuarioVerificado = null; // Para almacenar el usuario verificado
 
-const isTestEnvironment = process.env.NODE_ENV === 'test';
-const databaseName = isTestEnvironment 
-  ? 'sistemaaccesofacultad_test' 
-  : 'sistemaaccesofacultad';
-
 // Configuración de la conexión
 const dbConfig = {
   host: 'localhost',
   user: 'root',
   password: 'root',
-  database: databaseName,
+  database: 'sistemaaccesofacultad',
   port: 3306
 };
 
 // Log para confirmar qué BD se está usando
-console.log(`[DB] Conectando a base de datos: ${databaseName}`);
-if (isTestEnvironment) {
-  console.log('[TEST] Modo de pruebas activado');
-}
+console.log(`[DB] Conectando a base de datos: ${dbConfig.database}`);
 
 // Crear conexión
 const connection = mysql.createConnection(dbConfig);

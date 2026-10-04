@@ -21,10 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ipcRenderer.send('navigate', 'qrlector');
     });
 
-    document.getElementById('fingerprint-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate', 'accederhuella');
-    });
-
     document.getElementById('vehicle-access').addEventListener('click', () => {
         ipcRenderer.send('navigate', 'opcionvehiculo');
     });
