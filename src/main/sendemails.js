@@ -1,49 +1,23 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
-const { ipcMain, nativeImage } = require('electron');
+const { ipcMain, BrowserWindow } = require('electron');
 const QRCode = require('qrcode');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const os = require('os');
 const config = require('./config');
 const plantillas = require('./plantillasCorreo');
+const { COLORES, ASSETS_DIR, obtenerLogos: obtenerLogosGafete } = require('./utils/identidad');
 
 let mainWindow;
 let listenersConfigured = false; // Bandera para evitar registro múltiple
 let transporter = null;
 
-// Paleta tomada de los logos de la UATx y la FCBIyT
-const COLORES = {
-  guinda: '#6B1719',
-  guindaOscuro: '#2B0A0D',
-  dorado: '#C49A40',
-  gris: '#9B9B9B',
-  texto: '#333333',
-  rosaClaro: '#EADEDE'
-};
-
-const ASSETS_DIR = path.join(__dirname, '..', 'renderer', 'assets');
 const TERMINOS_PDF = path.join(ASSETS_DIR, 'TérminosyCondiciones.pdf');
-let logosGafete = null;
 
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
-}
-
-// Los logos originales pesan varios MB: se reducen una sola vez para no inflar cada PDF
-function obtenerLogosGafete() {
-  if (!logosGafete) {
-    const reducir = (archivo, ancho) => nativeImage
-      .createFromPath(path.join(ASSETS_DIR, archivo))
-      .resize({ width: ancho, quality: 'best' })
-      .toPNG();
-    logosGafete = {
-      uatx: reducir('logo_uatx.png', 360),
-      fcbiyt: reducir('logo_FCBIyT.png', 960)
-    };
-  }
-  return logosGafete;
 }
 
 // Genera el gafete de acceso (QR grande centrado) y devuelve la ruta del PDF
@@ -221,7 +195,9 @@ function setupEmailListeners(window) {
     ipcMain.on('navigate', (event, routeName) => {
       const viewPath = path.join(__dirname, '..', 'renderer', 'views', `${routeName}.html`);
       console.log(`[NAVIGATE] Navegando a: ${routeName} (${viewPath})`);
-      mainWindow.loadFile(viewPath).catch(err => {
+      // Se navega en la ventana que lo pidió (principal o lector de accesos)
+      const ventana = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+      ventana.loadFile(viewPath).catch(err => {
         console.error(`[ERROR] Error al cargar vista ${routeName}:`, err);
       });
     });

@@ -1,0 +1,196 @@
+/* Ventana del lector de accesos: tres lectores + cámara de respaldo */
+:root {
+    --guinda: #6B1719;
+    --guinda-oscuro: #4A0E12;
+    --dorado: #C49A40;
+    --gris: #6B6B6B;
+    --fondo: #F4EFEA;
+    --ok: #2e7d32;
+    --salida: #1565c0;
+    --error: #c62828;
+    --aviso: #ef6c00;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--fondo);
+    font-family: Arial, Helvetica, sans-serif;
+    color: #333;
+}
+
+.encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 24px;
+    background: #fff;
+    border-bottom: 4px solid var(--dorado);
+}
+.logo-uatx { width: 56px; height: 56px; object-fit: contain; }
+.logo-fcbiyt { width: 150px; height: 56px; object-fit: contain; }
+.titulo { text-align: center; }
+.titulo h1 { margin: 0; color: var(--guinda); font-size: 24px; }
+.titulo p { margin: 2px 0 0; color: var(--gris); font-size: 14px; }
+
+.aviso-sin-asignar {
+    margin: 10px 24px 0;
+    padding: 10px 14px;
+    background: #fff3e0;
+    border-left: 4px solid var(--aviso);
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.paneles {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding: 14px 24px;
+    min-height: 0;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(74, 14, 18, .10);
+    overflow: hidden;
+}
+.panel > header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--guinda);
+    color: #fff;
+}
+.panel h2 { margin: 0; font-size: 17px; flex: 1; }
+.numero {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--dorado);
+    color: var(--guinda-oscuro);
+    font-weight: bold;
+}
+.estado-lector { font-size: 12px; padding: 3px 8px; border-radius: 10px; background: rgba(255,255,255,.18); white-space: nowrap; }
+.estado-lector.conectado::before { content: '● '; color: #7CFC9A; }
+.estado-lector.desconectado::before { content: '● '; color: #ff8a80; }
+
+.resultado {
+    min-height: 190px;
+    margin: 12px;
+    padding: 14px;
+    border-radius: 10px;
+    border: 2px dashed #e0d6c6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    transition: background .2s;
+}
+.resultado .espera { color: var(--gris); margin: 0; }
+.resultado.activo { border-style: solid; }
+.resultado.ENTRADA { background: #e8f5e9; border-color: var(--ok); }
+.resultado.SALIDA { background: #e3f2fd; border-color: var(--salida); }
+.resultado.RECHAZADO { background: #ffebee; border-color: var(--error); }
+.resultado .tipo {
+    align-self: center;
+    padding: 4px 14px;
+    border-radius: 14px;
+    color: #fff;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+.resultado.ENTRADA .tipo { background: var(--ok); }
+.resultado.SALIDA .tipo { background: var(--salida); }
+.resultado.RECHAZADO .tipo { background: var(--error); }
+.resultado .nombre { margin: 10px 0 2px; font-size: 22px; font-weight: bold; color: #222; }
+.resultado .detalle { margin: 0; color: var(--gris); font-size: 14px; }
+.resultado .placas { margin: 10px 0 0; font-size: 18px; font-weight: bold; color: var(--guinda); letter-spacing: 1px; }
+.resultado .avisos { margin: 10px 0 0; padding: 0; list-style: none; color: var(--aviso); font-size: 14px; font-weight: bold; }
+
+.historial {
+    flex: 1;
+    margin: 0 12px 12px;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+    font-size: 13px;
+}
+.historial li { padding: 6px 4px; border-bottom: 1px solid #eee; display: flex; gap: 8px; }
+.historial .hora { color: var(--gris); }
+.historial .etiqueta { font-weight: bold; min-width: 70px; }
+.historial .ENTRADA { color: var(--ok); }
+.historial .SALIDA { color: var(--salida); }
+.historial .RECHAZADO { color: var(--error); }
+.historial .con-aviso::after { content: ' ⚠'; color: var(--aviso); }
+
+.respaldo {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 24px 14px;
+}
+#img-qr {
+    width: 180px;
+    height: 135px;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.respaldo-controles { flex: 1; font-size: 14px; }
+.respaldo-controles h3 { margin: 0 0 2px; color: var(--guinda); font-size: 16px; }
+.respaldo-controles p { margin: 0 0 6px; color: var(--gris); }
+.respaldo-controles select { margin-left: 6px; padding: 5px 8px; border-radius: 6px; border: 1px solid #ccc; }
+.estado-camara { margin-top: 6px !important; }
+.acciones { display: flex; flex-direction: column; gap: 8px; }
+
+.boton-principal, .boton-secundario {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.boton-principal { background: var(--guinda); color: #fff; border: none; }
+.boton-principal:hover { background: var(--guinda-oscuro); }
+.boton-secundario { background: #fff; color: var(--guinda); border: 1px solid var(--guinda); }
+
+/* Modal de calibración (UI.abrirModal alterna la clase .active) */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, .55);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .2s;
+    z-index: 1000;
+}
+.modal-overlay.active { visibility: visible; opacity: 1; }
+.modal-content { width: min(520px, 92vw); background: #fff; border-radius: 12px; padding: 24px; }
+.modal-content h2 { margin: 0 0 10px; color: var(--guinda); }
+.calibracion-instruccion { font-size: 17px; }
+.calibracion-resumen { padding-left: 18px; color: var(--gris); }
+.calibracion-resumen .listo { color: var(--ok); font-weight: bold; }
+.modal-botones { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+@media (max-width: 860px) {
+    .paneles { grid-template-columns: 1fr; }
+    .respaldo { flex-wrap: wrap; }
+}
