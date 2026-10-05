@@ -1,15 +1,16 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
 const { ipcMain, nativeImage } = require('electron');
-const http = require('http');
 const QRCode = require('qrcode');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const os = require('os');
+const config = require('./config');
+const plantillas = require('./plantillasCorreo');
 
 let mainWindow;
 let listenersConfigured = false; // Bandera para evitar registro múltiple
-let confirmationServer = null; // Referencia al servidor HTTP
+let transporter = null;
 
 // Paleta tomada de los logos de la UATx y la FCBIyT
 const COLORES = {
@@ -22,6 +23,7 @@ const COLORES = {
 };
 
 const ASSETS_DIR = path.join(__dirname, '..', 'renderer', 'assets');
+const TERMINOS_PDF = path.join(ASSETS_DIR, 'TérminosyCondiciones.pdf');
 let logosGafete = null;
 
 function validarEmail(email) {
@@ -123,6 +125,94 @@ async function generarGafetePDF(nombre, matricula) {
   return pdfPath;
 }
 
+function obtenerTransporter() {
+  if (!transporter) {
+    if (!config.correo.usuario || !config.correo.password) {
+      throw new Error('Falta configurar GMAIL_USER y GMAIL_APP_PASSWORD en .env');
+    }
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: config.correo.usuario, pass: config.correo.password }
+    });
+  }
+  return transporter;
+}
+
+// Modo de pruebas: guarda el correo como HTML (con los logos visibles) y sus adjuntos
+function guardarVistaPrevia(mensaje) {
+  const dir = config.correo.vistaPreviaDir;
+  fs.mkdirSync(dir, { recursive: true });
+  const base = `${Date.now()}_${mensaje.subject.replace(/[^\w]+/g, '_').slice(0, 40)}`;
+  let html = mensaje.html;
+  for (const adjunto of mensaje.attachments) {
+    if (adjunto.cid) {
+      html = html.split(`cid:${adjunto.cid}`).join(`data:image/png;base64,${adjunto.content.toString('base64')}`);
+    } else {
+      fs.copyFileSync(adjunto.path, path.join(dir, `${base}__${adjunto.filename}`));
+    }
+  }
+  fs.writeFileSync(path.join(dir, `${base}.html`), html);
+  fs.writeFileSync(path.join(dir, `${base}.json`), JSON.stringify({
+    para: mensaje.to, asunto: mensaje.subject, adjuntos: mensaje.attachments.filter((a) => !a.cid).map((a) => a.filename)
+  }, null, 2));
+  console.log(`[CORREO] Vista previa guardada (no enviado): ${base}.html`);
+}
+
+async function enviarCorreo({ para, plantilla, adjuntos = [] }) {
+  const logos = obtenerLogosGafete();
+  const mensaje = {
+    from: `"Sistema de Acceso FCBIyT" <${config.correo.usuario}>`,
+    to: para,
+    subject: plantilla.asunto,
+    html: plantilla.html,
+    text: plantilla.texto,
+    attachments: [
+      { filename: 'logo-uatx.png', content: logos.uatx, cid: plantillas.CID_LOGO_UATX },
+      { filename: 'logo-fcbiyt.png', content: logos.fcbiyt, cid: plantillas.CID_LOGO_FCBIYT },
+      ...adjuntos
+    ]
+  };
+  if (config.correo.vistaPreviaDir) return guardarVistaPrevia(mensaje);
+  await obtenerTransporter().sendMail(mensaje);
+}
+
+// Primer correo del registro: Términos y Condiciones + enlace para aceptarlos o rechazarlos
+async function enviarCorreoTerminos({ correo, nombre, enlace, expiraEn }) {
+  await enviarCorreo({
+    para: correo,
+    plantilla: plantillas.correoTerminos({ nombre, enlace, expiraEn }),
+    adjuntos: [{ filename: 'Terminos_y_Condiciones_Sistema_de_Acceso.pdf', path: TERMINOS_PDF }]
+  });
+}
+
+async function enviarConGafete({ correo, nombre, matricula, plantilla }) {
+  const pdfPath = await generarGafetePDF(nombre, matricula);
+  try {
+    await enviarCorreo({
+      para: correo,
+      plantilla,
+      adjuntos: [{ filename: `Credencial_${matricula}.pdf`, path: pdfPath }]
+    });
+  } finally {
+    fs.unlink(pdfPath, () => {});
+  }
+}
+
+// Segundo correo del registro: el usuario ya aceptó y recibe su credencial con QR
+async function enviarCredencial({ correo, nombre, matricula }) {
+  await enviarConGafete({ correo, nombre, matricula, plantilla: plantillas.correoCredencial({ nombre, matricula }) });
+}
+
+async function enviarCorreoRecuperacion(email, nombre, matricula) {
+  try {
+    await enviarConGafete({ correo: email, nombre, matricula, plantilla: plantillas.correoRecuperacion({ nombre, matricula }) });
+    return { success: true };
+  } catch (error) {
+    console.error('Error enviando correo de recuperación:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 function setupEmailListeners(window) {
   mainWindow = window;
 
@@ -136,68 +226,12 @@ function setupEmailListeners(window) {
       });
     });
 
-    // Inicia el servidor de confirmación solo una vez
-    iniciarServidorConfirmacion();
-
-    ipcMain.on('enviar-correo', async (event, datos) => {
-    const { email, nombre, matricula } = datos;
-
-    const pdfPath = await generarGafetePDF(nombre, matricula);
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'dangonzares@gmail.com',
-        pass: 'itkhozuwhujqvmqu'
-      }
-    });
-
-    const confirmationLink = `http://localhost:3000/confirmar?email=${encodeURIComponent(email)}`;
-
-    const htmlContent = `
-      <h2>Hola ${nombre}</h2>
-      <p>Haz clic en el botón para confirmar tu registro:</p>
-      <a href="${confirmationLink}" style="
-        display:inline-block;
-        padding:10px 20px;
-        background-color:#28a745;
-        color:#fff;
-        text-decoration:none;
-        border-radius:5px;">Confirmar registro</a>
-      <p>Adjunto encontrarás tu código QR personal.</p>
-    `;
-
-    const mailOptions = {
-      from: 'dangonzares@gmail.com',
-      to: email,
-      subject: 'Confirma tu registro',
-      html: htmlContent,
-      attachments: [{
-        filename: `${matricula}_qr.pdf`,
-        path: pdfPath
-      }]
-    };
-
-    try {
-      await transporter.sendMail(mailOptions);
-      event.reply('correo-enviado', { success: true });
-    } catch (error) {
-      console.error('Error enviando correo:', error);
-      event.reply('correo-enviado', { success: false, error });
-    }
-  });
-
     ipcMain.on('recuperar-qr', async (event, { matricula, email, nombre }) => {
-      try {
-          const resultado = await enviarCorreoRecuperacion(email, nombre, matricula);
-          if (resultado.success) {
-              event.reply('recuperar-qr-respuesta', { success: true, matricula });
-          } else {
-              event.reply('recuperar-qr-respuesta', { success: false, matricula, error: resultado.error });
-          }
-      } catch (error) {
-          console.error('Error en recuperar-qr:', error);
-          event.reply('recuperar-qr-respuesta', { success: false, matricula, error });
+      const resultado = await enviarCorreoRecuperacion(email, nombre, matricula);
+      if (resultado.success) {
+        event.reply('recuperar-qr-respuesta', { success: true, matricula });
+      } else {
+        event.reply('recuperar-qr-respuesta', { success: false, matricula, error: resultado.error });
       }
     });
 
@@ -205,112 +239,11 @@ function setupEmailListeners(window) {
   }
 }
 
-function iniciarServidorConfirmacion() {
-  // Si ya hay un servidor ejecutándose, no crear otro
-  if (confirmationServer) {
-    console.log('[SERVER] Servidor de confirmación ya está ejecutándose');
-    return;
-  }
-
-  const server = http.createServer((req, res) => {
-    if (req.url.startsWith('/confirmar')) {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-
-      const htmlContent = `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Confirmación de Registro</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #0a2e52, #006064);
-      font-family: Arial, sans-serif;
-    }
-    h1 {
-      color: #000000;
-      text-align: center;
-      padding: 30px;
-      background-color: rgba(255, 255, 255, 0.8);
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-  </style>
-</head>
-<body>
-  <h1>Registro confirmado. Puedes cerrar esta ventana.</h1>
-</body>
-</html>`;
-
-      res.end(htmlContent);
-
-      if (mainWindow) {
-        const viewPath = path.join(__dirname, '..', 'renderer', 'views', `termsandconditions.html`);
-        mainWindow.loadFile(viewPath).catch(console.error);
-      }
-    } else {
-      res.writeHead(404);
-      res.end();
-    }
-  });
-
-  // Manejar errores del servidor
-  server.on('error', (error) => {
-    if (error.code === 'EADDRINUSE') {
-      console.log('[SERVER] Puerto 3000 ya en uso, servidor no iniciado');
-      confirmationServer = null;
-    } else {
-      console.error('[SERVER] Error en servidor de confirmación:', error);
-    }
-  });
-
-  server.listen(3000, () => {
-    console.log('[SERVER] Servidor de confirmación escuchando en http://localhost:3000');
-    confirmationServer = server;
-  });
-}
-
-async function enviarCorreoRecuperacion(email, nombre, matricula) {
-    const pdfPath = await generarGafetePDF(nombre, matricula);
-
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'dangonzares@gmail.com',
-            pass: 'itkhozuwhujqvmqu'
-        }
-    });
-
-    const htmlContent = `
-        <h2>Hola ${nombre}</h2>
-        <p>Adjunto encontrarás tu código QR personal para el sistema de acceso.</p>
-        <p>Si no solicitaste este correo, por favor ignóralo.</p>
-    `;
-
-    const mailOptions = {
-        from: 'dangonzares@gmail.com',
-        to: email,
-        subject: 'Recuperación de código QR',
-        html: htmlContent,
-        attachments: [{
-            filename: `${matricula}_qr.pdf`,
-            path: pdfPath
-        }]
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-        return { success: true };
-    } catch (error) {
-        console.error('Error enviando correo de recuperación:', error);
-        return { success: false, error };
-    }
-}
-
-module.exports = { setupEmailListeners,validarEmail,enviarCorreoRecuperacion, iniciarServidorConfirmacion, generarGafetePDF};
+module.exports = {
+  setupEmailListeners,
+  validarEmail,
+  generarGafetePDF,
+  enviarCorreoTerminos,
+  enviarCredencial,
+  enviarCorreoRecuperacion
+};
