@@ -4,11 +4,68 @@ const { setupDBListeners, pool } = require('./database');
 const { setupEmailListeners } = require('./sendemails');
 const { setupNotificaciones } = require('./notificaciones');
 const { setupRegistro } = require('./registro');
+const { setupAuth } = require('./auth');
+const { setupAcceso } = require('./acceso');
+const { setupLectores } = require('./lectores');
+const { setupCierreDiario } = require('./cierreDiario');
 const { generateGroupReportPDF } = require('./utils/pdfGenerator'); 
 const { generateUserReportPDF } = require('./utils/pdfGeneratorspecific'); 
 
 
 let win;
+let lectorWin;      // Ventana del lector de accesos, siempre abierta
+let saliendo = false;
+
+const VISTA_LECTOR = path.join(__dirname, '..', 'renderer', 'views', 'qrlector.html');
+
+// El lector vive en su propia ventana para seguir registrando entradas y salidas
+// mientras el administrador usa la ventana principal
+function crearVentanaLector() {
+  const principal = screen.getPrimaryDisplay();
+  const secundaria = screen.getAllDisplays().find(d => d.id !== principal.id);
+  const area = (secundaria || principal).workArea;
+
+  lectorWin = new BrowserWindow({
+    title: 'Lector de accesos',
+    x: area.x + Math.max(0, Math.round((area.width - 900) / 2)),
+    y: area.y + Math.max(0, Math.round((area.height - 800) / 2)),
+    width: 900,
+    height: 800,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      mediaPermissions: true,
+      backgroundThrottling: false // la cámara y los temporizadores siguen activos sin foco
+    }
+  });
+  // En un segundo monitor (caseta de vigilancia) ocupa toda la pantalla
+  if (secundaria) lectorWin.maximize();
+  lectorWin.loadFile(VISTA_LECTOR);
+
+  // Cerrarlo solo lo minimiza: se cierra junto con la ventana principal
+  lectorWin.on('close', (e) => {
+    if (!saliendo) {
+      e.preventDefault();
+      lectorWin.minimize();
+    }
+  });
+  lectorWin.on('closed', () => { lectorWin = null; });
+}
+
+function mostrarVentana(ventana) {
+  if (ventana.isMinimized()) ventana.restore();
+  ventana.show();
+  ventana.focus();
+}
+
+ipcMain.on('mostrar-lector', () => {
+  if (!lectorWin) crearVentanaLector();
+  mostrarVentana(lectorWin);
+});
+
+ipcMain.on('mostrar-ventana-principal', () => {
+  if (win && !win.isDestroyed()) mostrarVentana(win);
+});
 
 function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -32,6 +89,13 @@ function createWindow() {
     win.show();
   });
 
+  // Cerrar la ventana principal cierra la aplicación, incluido el lector
+  win.on('close', () => { saliendo = true; });
+  win.on('closed', () => {
+    win = null;
+    app.quit();
+  });
+
   // Configuración de permisos de cámara explícitos (MUY IMPORTANTE)
   win.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
     if (permission === 'media') {
@@ -53,20 +117,28 @@ function createWindow() {
 // Esto evita registrar múltiples listeners cuando se recrea la ventana
 setupDBListeners();
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  setupAuth();
+  setupAcceso(pool);
   createWindow();
+  crearVentanaLector();
   // Configurar listeners de email después de crear la ventana
   // porque necesita la referencia a win
   setupEmailListeners(win);
   setupNotificaciones(pool);
   // Recoge las confirmaciones de registro recibidas mientras la app estaba cerrada
   setupRegistro(pool);
+  // Primero se cierran las entradas de días anteriores; después se abren los escáneres
+  await setupCierreDiario(pool);
+  setupLectores();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
+
+app.on('before-quit', () => { saliendo = true; });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

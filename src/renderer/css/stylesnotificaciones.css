@@ -37,6 +37,25 @@
     border-left-color: #6B1719;
 }
 
+.history-item.info {
+    border-left-color: #C49A40;
+}
+
+.history-pdf {
+    margin-top: 12px;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 6px;
+    background: #6B1719;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.history-pdf:hover {
+    background: #4A0E12;
+}
+
 .history-empty {
     text-align: center;
     color: #6B6B6B;

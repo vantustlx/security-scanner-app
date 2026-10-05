@@ -17,11 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Eventos para las tarjetas de acceso
+    // El lector tiene su propia ventana siempre abierta: solo se trae al frente
     document.getElementById('qr-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate', 'qrlector');
+        ipcRenderer.send('mostrar-lector');
     });
 
+    // Los accesos en vehículo los registran los lectores 2 y 3; aquí solo se asocian las placas
     document.getElementById('vehicle-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate', 'opcionvehiculo');
+        ipcRenderer.send('navigate', 'asociarplacasvehiculo');
     });
 });

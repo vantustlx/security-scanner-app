@@ -4,39 +4,74 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Leer código QR</title>
-    <link rel="stylesheet" href="../css/styleleerqr.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <title>Lector de accesos</title>
+    <link rel="stylesheet" href="../css/stylelector.css" />
 </head>
 
 <body>
-    <div class="layout">
-        <div class="backgroundwhite">
-            <img src="../assets/backgroundwhite.png" alt="Decoración superior" />
+    <header class="encabezado">
+        <img src="../assets/logo_uatx.png" alt="UATx" class="logo-uatx">
+        <div class="titulo">
+            <h1>Lector de accesos</h1>
+            <p id="reloj"></p>
         </div>
+        <img src="../assets/logo_FCBIyT.png" alt="FCBIyT" class="logo-fcbiyt">
+    </header>
 
-        <main class="container">
-            <div class="qr-scanner-container">
-                <div class="qr-scanner-frame">
-                    <!-- Cambié la imagen por un div para mostrar el video del QR -->
-                    <div id="img-qr"></div>
-                </div>
-                <div class="qr-instructions">
-                    <p>Presente su
-                        código frente
-                        al lector</p>
-                </div>
+    <p class="aviso-sin-asignar" id="aviso-sin-asignar" hidden></p>
+
+    <main class="paneles">
+        <section class="panel" data-rol="PEATONAL">
+            <header><span class="numero">1</span><h2>Peatonal</h2><span class="estado-lector"></span></header>
+            <div class="resultado"></div>
+            <ol class="historial"></ol>
+        </section>
+        <section class="panel" data-rol="ENTRADA_VEHICULAR">
+            <header><span class="numero">2</span><h2>Entrada vehicular</h2><span class="estado-lector"></span></header>
+            <div class="resultado"></div>
+            <ol class="historial"></ol>
+        </section>
+        <section class="panel" data-rol="SALIDA_VEHICULAR">
+            <header><span class="numero">3</span><h2>Salida vehicular</h2><span class="estado-lector"></span></header>
+            <div class="resultado"></div>
+            <ol class="historial"></ol>
+        </section>
+    </main>
+
+    <section class="respaldo">
+        <div id="img-qr"></div>
+        <div class="respaldo-controles">
+            <h3>Cámara de respaldo</h3>
+            <p>Si un escáner falla, presenta el código a la cámara.</p>
+            <label for="rol-camara">Registrar como</label>
+            <select id="rol-camara">
+                <option value="PEATONAL">1 · Peatonal</option>
+                <option value="ENTRADA_VEHICULAR">2 · Entrada vehicular</option>
+                <option value="SALIDA_VEHICULAR">3 · Salida vehicular</option>
+            </select>
+            <p class="estado-camara" id="estado-camara">Iniciando cámara...</p>
+        </div>
+        <div class="acciones">
+            <button id="btn-configurar" class="boton-secundario">Configurar lectores</button>
+            <button id="btn-volver-qr" class="boton-principal">Menú principal</button>
+        </div>
+    </section>
+
+    <!-- Identificación de cada escáner físico con su puerto COM -->
+    <div class="modal-overlay" id="modal-calibracion">
+        <div class="modal-content">
+            <h2>Configurar lectores</h2>
+            <p class="calibracion-instruccion" id="calibracion-instruccion"></p>
+            <ul class="calibracion-resumen" id="calibracion-resumen"></ul>
+            <div class="modal-botones">
+                <button id="btn-calibracion-omitir" class="boton-secundario">Dejar sin asignar</button>
+                <button id="btn-calibracion-cancelar" class="boton-secundario">Cancelar</button>
+                <button id="btn-calibracion-guardar" class="boton-principal" hidden>Guardar</button>
             </div>
-            <button id="btn-volver-qr" class="back-button">
-                Regresar
-            </button>
-        </main>
-
-        <div class="backgroundwhite-bottom">
-            <img src="../assets/backgroundwhite-bottom.png" alt="Decoración inferior" />
         </div>
     </div>
 
+    <script src="../js/ui.js"></script>
     <script src="../js/qrlector.js"></script>
 </body>
 

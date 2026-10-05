@@ -5,14 +5,7 @@ let currentUser = null;  // Guarda aquí el usuario encontrado
 document.addEventListener('DOMContentLoaded', () => {
   // Botón “Regresar”
   document.getElementById('boton-rojo').addEventListener('click', () => {
-    ipcRenderer.send('navigate', 'opcionvehiculo');
-  });
-
-  // 1) Buscar usuario por matrícula
-  document.getElementById('boton-verde').addEventListener('click', () => {
-    const matricula = document.getElementById('matricula').value.trim();
-    if (!matricula) return;
-    ipcRenderer.send('verificar-matricula', matricula);
+    ipcRenderer.send('navigate', 'acceder');
   });
 
   const modalFallida = document.getElementById('modal-asociacion-fallida');
@@ -20,17 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAsociar = document.getElementById('btn-asociar');
   const mostrarFallida = () => UI.abrirModal(modalFallida);
 
-  // 2) Recibe el resultado de la verificación
-  ipcRenderer.on('resultado-verificacion', (event, { success }) => {
-    if (!success) {
-      mostrarFallida();
-    } else {
-      ipcRenderer.send('obtener-ultimo-usuario');
-    }
-  });
-
-  // 3) Recibe los datos completos del usuario
-  ipcRenderer.on('enviar-ultimo-usuario', (event, user) => {
+  // 1) Buscar usuario por matrícula (solo consulta: no registra entrada ni salida)
+  document.getElementById('boton-verde').addEventListener('click', async () => {
+    const matricula = document.getElementById('matricula').value.trim();
+    if (!matricula) return;
+    const user = await ipcRenderer.invoke('buscar-usuario-por-matricula', matricula);
     if (!user) {
       mostrarFallida();
       return;
@@ -114,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 7) Regresar tras “Aceptar” del éxito final
   function regresarAlMenu() {
-    ipcRenderer.send('navigate', 'opcionvehiculo');
+    ipcRenderer.send('navigate', 'acceder');
   }
   document.getElementById('btn-aceptar-final').addEventListener('click', regresarAlMenu);
 });

@@ -6,6 +6,8 @@ const TIPOS = {
     REGISTRO_RECHAZADO: ['Registro rechazado', 'warning'],
     REGISTRO_EXPIRADO: ['Solicitud vencida', 'warning'],
     REGISTRO_ERROR: ['Error en el registro', 'error'],
+    ACCESO_INCONSISTENTE: ['Acceso inconsistente', 'warning'],
+    CIERRE_DIARIO: ['Cierre del día', 'info'],
     ACCESO_MATRICULA_NO_ENCONTRADA: ['Matrícula no encontrada', 'error'],
     ACCESO_QR_INVALIDO: ['QR inválido', 'error'],
     ACCESO_USUARIO_SIN_SALIDA_HORARIO: ['Registro incompleto', 'warning']
@@ -45,6 +47,18 @@ function crearItem(notificacion, indice) {
     );
 
     item.append(titulo, mensaje, detalles);
+
+    // El cierre diario adjunta un PDF con quienes no registraron su salida
+    if (notificacion.tieneArchivo) {
+        const boton = document.createElement('button');
+        boton.className = 'history-pdf';
+        boton.textContent = 'Ver PDF';
+        boton.addEventListener('click', async () => {
+            const resultado = await ipcRenderer.invoke('abrir-archivo-notificacion', notificacion.id);
+            if (!resultado.ok) UI.notificar(`No se pudo abrir el PDF: ${resultado.error}`, 'error');
+        });
+        item.appendChild(boton);
+    }
     return item;
 }
 
