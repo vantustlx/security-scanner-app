@@ -187,26 +187,35 @@ function setupDBListeners() {
         });
     });
 
-    // 13) BUSCAR USUARIO ESPECÍFICO (name match)
+    // 13) BUSCAR USUARIO ESPECÍFICO (name match), con su último acceso de hoy
     ipcMain.on('buscar-usuario-especifico', (event, filtros) => {
         const { nombre, apellidoP, apellidoM } = filtros;
         console.log('Buscando usuario específico con filtros:', filtros);
         const query = `
             SELECT
-                nombre,
-                apellido_paterno,
-                apellido_materno,
-                matricula,
-                numero_telefono,
-                estatus,
-                fecha_registro
-            FROM usuario
+                u.nombre,
+                u.apellido_paterno,
+                u.apellido_materno,
+                u.matricula,
+                u.numero_telefono,
+                u.estatus,
+                u.fecha_registro,
+                ra.fecha_entrada AS entrada_hoy,
+                ra.fecha_salida AS salida_hoy,
+                ra.cierre_automatico AS cierre_hoy,
+                (SELECT COUNT(*) FROM registroacceso r
+                  WHERE r.matricula = u.matricula AND r.fecha_entrada >= CURDATE()) AS accesos_hoy
+            FROM usuario u
+            LEFT JOIN registroacceso ra ON ra.id_registro = (
+                SELECT r.id_registro FROM registroacceso r
+                 WHERE r.matricula = u.matricula AND r.fecha_entrada >= CURDATE()
+                 ORDER BY r.fecha_entrada DESC LIMIT 1)
             WHERE
-                estatus = 'Activo'
-                AND nombre LIKE CONCAT('%', ?, '%')
-                AND apellido_paterno LIKE CONCAT('%', ?, '%')
-                AND apellido_materno LIKE CONCAT('%', ?, '%')
-            ORDER BY apellido_paterno, apellido_materno, nombre
+                u.estatus = 'Activo'
+                AND u.nombre LIKE CONCAT('%', ?, '%')
+                AND u.apellido_paterno LIKE CONCAT('%', ?, '%')
+                AND u.apellido_materno LIKE CONCAT('%', ?, '%')
+            ORDER BY u.apellido_paterno, u.apellido_materno, u.nombre
             LIMIT 1
         `;
         connection.query(query, [nombre, apellidoP, apellidoM], (err, results) => {
@@ -221,6 +230,18 @@ function setupDBListeners() {
                 event.reply('resultados-usuario-especifico', []);
             }
         });
+    });
+
+    // 14) ENTRADAS Y SALIDAS DE HOY de un usuario (detalle de la búsqueda de usuario activo)
+    ipcMain.handle('accesos-de-hoy', async (event, matricula) => {
+        const [filas] = await pool.query(
+            `SELECT fecha_entrada, medio_entrada, fecha_salida, medio_salida, cierre_automatico
+               FROM registroacceso
+              WHERE matricula = ? AND fecha_entrada >= CURDATE()
+              ORDER BY fecha_entrada`,
+            [matricula]
+        );
+        return filas;
     });
 }
 
