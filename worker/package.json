@@ -1,0 +1,12 @@
+{
+  "name": "registro-fcbiyt-worker",
+  "private": true,
+  "description": "Buzón de confirmaciones de registro del Sistema de Acceso FCBIyT (Cloudflare Worker)",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.86.0"
+  }
+}
