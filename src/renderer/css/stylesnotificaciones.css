@@ -16,16 +16,39 @@
 .history-item {
     padding: 15px;
     margin-bottom: 15px;
-    background: #e5f0fb;
+    background: #f6f8fa;
     border-radius: 15px;
+    border-left: 8px solid #9B9B9B;
+}
+
+.history-item.unread {
+    background: #e5f0fb;
+}
+
+.history-item.success {
+    border-left-color: #2e8b57;
 }
 
 .history-item.warning {
     border-left-color: #f66a0a;
 }
 
+.history-item.error {
+    border-left-color: #6B1719;
+}
+
+.history-empty {
+    text-align: center;
+    color: #6B6B6B;
+}
+
+.delete-button.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .history-title {
-    font-size: 30px;
+    font-size: 24px;
     font-family: Ubuntu;
     font-weight: 700;
     letter-spacing: 3px;

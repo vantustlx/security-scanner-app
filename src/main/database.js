@@ -20,6 +20,9 @@ console.log(`[DB] Conectando a base de datos: ${dbConfig.database}`);
 // Crear conexión
 const connection = mysql.createConnection(dbConfig);
 
+// Pool con promesas para los módulos que usan async/await y transacciones (registro, notificaciones)
+const pool = mysql.createPool({ ...dbConfig, connectionLimit: 4 }).promise();
+
 function setupDBListeners() {
     // Verificar la conexión
     connection.connect((err) => {
@@ -30,43 +33,7 @@ function setupDBListeners() {
         console.log('Conexión exitosa a la base de datos MySQL');
     });
 
-    // 1) INSERTAR USUARIO
-    ipcMain.on('registrar-usuario-completo', (event, data) => {
-        const checkQuery = 'SELECT * FROM usuario WHERE matricula = ?';
-        connection.query(checkQuery, [data.matricula], (err, results) => {
-            if (err) {
-                console.error('Error al verificar existencia:', err);
-                event.reply('registro-error', err.message);
-                return;
-            }
-            if (results.length > 0) {
-                console.warn('Matrícula ya registrada:', data.matricula);
-                event.reply('usuario-ya-existe');
-                return;
-            }
-            const insertQuery = `
-                INSERT INTO usuario (
-                    matricula, nombre, apellido_paterno, apellido_materno,
-                    fecha_nacimiento, fecha_registro, numero_telefono, correo,
-                    turno, rol_facultad, estatus, id_carrera
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
-            const valores = [
-                data.matricula, data.nombre, data.apellido_paterno, data.apellido_materno,
-                data.fecha_nacimiento, data.fecha_registro, data.numero_telefono, data.correo,
-                data.turno, data.rol_facultad, data.estatus, data.id_carrera
-            ];
-            connection.query(insertQuery, valores, (err2, results2) => {
-                if (err2) {
-                    console.error('Error al insertar:', err2);
-                    event.reply('registro-error', err2.message);
-                } else {
-                    console.log('Usuario registrado con ID:', results2.insertId);
-                    event.reply('registro-exitoso', results2.insertId);
-                }
-            });
-        });
-    });
+    // 1) El alta de usuarios está en registro.js (requiere confirmación por correo)
 
     // 2) OBTENER TODOS LOS USUARIOS
     ipcMain.on('obtener-usuarios', (event) => {
@@ -482,7 +449,7 @@ function setupDBListeners() {
     });
 }
 
-module.exports = { setupDBListeners };
+module.exports = { setupDBListeners, pool };
 
 // BD con fechas
 ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
