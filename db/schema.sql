@@ -42,11 +42,13 @@ CREATE TABLE IF NOT EXISTS `visitante` (
   `apellido_materno` varchar(50) DEFAULT NULL,
   `fecha_registro` date DEFAULT NULL,
   `numero_telefono` varchar(15) DEFAULT NULL,
-  `correo` varchar(50) DEFAULT NULL,
-  `codigo_acceso` varchar(6) DEFAULT NULL,
+  `correo` varchar(100) DEFAULT NULL,
+  `codigo_acceso` varchar(10) DEFAULT NULL COMMENT 'Folio; el código de barras contiene "V-" + folio',
   `motivo` varchar(255) DEFAULT NULL,
   `tipo` enum('Ocasional','Frecuente') DEFAULT NULL,
-  PRIMARY KEY (`id_visitante`)
+  `vigente_hasta` datetime DEFAULT NULL COMMENT 'Fin de la vigencia del folio y del pase',
+  PRIMARY KEY (`id_visitante`),
+  UNIQUE KEY `uq_visitante_codigo` (`codigo_acceso`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 CREATE TABLE IF NOT EXISTS `vehiculo` (
   `matricula` int DEFAULT NULL,
