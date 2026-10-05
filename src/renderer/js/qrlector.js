@@ -143,7 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
         aviso.textContent = `Hay escáneres conectados sin asignar (${sinAsignar.join(', ')}). Usa "Configurar lectores" para indicar cuál es cada uno.`;
     }
 
-    ipcRenderer.invoke('estado-lectores').then(pintarEstado);
+    // Al arrancar, los escáneres se abren después del cierre diario: se reintenta hasta que estén listos
+    const pedirEstado = () => ipcRenderer.invoke('estado-lectores').then(pintarEstado).catch(() => setTimeout(pedirEstado, 1000));
+    pedirEstado();
     ipcRenderer.on('estado-lectores', (event, estado) => pintarEstado(estado));
     ipcRenderer.on('lectura-sin-asignar', (event, { puerto }) => {
         UI.notificar(`Se leyó un código en ${puerto}, que no está asignado a ningún lector`, 'warning');

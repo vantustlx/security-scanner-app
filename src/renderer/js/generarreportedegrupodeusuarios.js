@@ -113,11 +113,11 @@ function mostrarResultados(usuarios) {
     usuarios.forEach(usuario => {
         const fila = document.createElement('tr');
         fila.innerHTML = `
-            <td>${usuario.nombre || 'N/A'}</td>
-            <td>${usuario.apellido_paterno || 'N/A'}</td>
-            <td>${usuario.apellido_materno || 'N/A'}</td>
-            <td>${usuario.matricula || 'N/A'}</td>
-            <td>${usuario.numero_telefono || 'N/A'}</td>
+            <td>${UI.escapar(usuario.nombre || 'N/A')}</td>
+            <td>${UI.escapar(usuario.apellido_paterno || 'N/A')}</td>
+            <td>${UI.escapar(usuario.apellido_materno || 'N/A')}</td>
+            <td>${UI.escapar(usuario.matricula || 'N/A')}</td>
+            <td>${UI.escapar(usuario.numero_telefono || 'N/A')}</td>
             <td>${usuario.fecha_entrada 
                 ? new Date(usuario.fecha_entrada).toLocaleString('es-MX', { 
                     day: '2-digit', 

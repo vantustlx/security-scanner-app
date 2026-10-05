@@ -9,6 +9,7 @@ const { ipcMain, BrowserWindow } = require('electron');
 const config = require('./config');
 const { crearNotificacion, registrarAccesoFallido } = require('./notificaciones');
 const { obtenerAreasDeUsuarios, areaPrincipal } = require('./areas');
+const { leerQR } = require('./qrFirmado');
 
 const LECTORES = {
   PEATONAL: { numero: 1, nombre: 'Peatonal', medio: 'PEATONAL' },
@@ -81,13 +82,18 @@ async function registrarAcceso(textoLeido, lector, origen) {
   }
 
   const visitante = CODIGO_VISITANTE.exec(texto.toUpperCase());
-  if (!visitante && !MATRICULA_VALIDA.test(texto)) {
+  const credencial = visitante ? null : leerQR(texto);
+  if (!visitante && !credencial) {
     resultado = await rechazar(base, texto, 'QR_INVALIDO', 'Código no válido');
+  } else if (credencial && credencial.error === 'SIN_FIRMA') {
+    resultado = await rechazar(base, texto, 'QR_SIN_FIRMA', 'Credencial anterior: pide al administrador que te la reenvíe');
+  } else if (credencial && credencial.error) {
+    resultado = await rechazar(base, texto, 'QR_FALSIFICADO', 'Código no válido');
   } else {
     try {
       resultado = visitante
         ? await registrarVisitanteEnBD(base, visitante[1])
-        : await registrarEnBD(base, Number(texto), info);
+        : await registrarEnBD(base, credencial.matricula, info);
     } catch (error) {
       console.error('[ACCESO] Error al registrar el acceso:', error);
       resultado = { ...base, estado: 'RECHAZADO', mensaje: 'Error del sistema, intenta de nuevo' };

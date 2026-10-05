@@ -180,5 +180,10 @@
     });
   }
 
-  window.UI = { notificar, abrirModal, cerrarModal, enterAvanza };
+  // Para insertar datos de la BD dentro de plantillas HTML (innerHTML)
+  function escapar(valor) {
+    return String(valor ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  window.UI = { notificar, abrirModal, cerrarModal, enterAvanza, escapar };
 })();

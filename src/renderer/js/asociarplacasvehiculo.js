@@ -85,9 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.cerrarModal(modalPlaca);
     const texto = document.getElementById('texto-exito');
     texto.innerHTML = `
-      Nombre: ${currentUser.nombre} ${currentUser.apellido_paterno} ${currentUser.apellido_materno}<br>
-      Matrícula: ${currentUser.matricula}<br>
-      Placas: ${inputPlaca.value.trim().toUpperCase()}
+      Nombre: ${UI.escapar(currentUser.nombre)} ${UI.escapar(currentUser.apellido_paterno)} ${UI.escapar(currentUser.apellido_materno)}<br>
+      Matrícula: ${UI.escapar(currentUser.matricula)}<br>
+      Placas: ${UI.escapar(inputPlaca.value.trim().toUpperCase())}
     `;
     UI.abrirModal(document.getElementById('modal-exito-final'), { alEscape: regresarAlMenu });
   });

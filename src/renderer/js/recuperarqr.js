@@ -182,7 +182,7 @@ function mostrarResultados(usuarios) {
                 <input type="checkbox" id="usuario_${usuario.matricula}" class="result-checkbox" 
                     onchange="toggleSeleccion(${usuario.matricula})">
                 <span class="result-id">${String(index + 1).padStart(3, '0')} |</span>
-                <span class="result-name">${usuario.nombre_completo}</span>
+                <span class="result-name">${UI.escapar(usuario.nombre_completo)}</span>
                 <img src="../assets/qr-code.png" alt="QR Code" class="result-qr" />
             </div>`
     ).join('');

@@ -12,6 +12,10 @@ const { setupLectores } = require('./lectores');
 const { setupCierreDiario } = require('./cierreDiario');
 const { generateGroupReportPDF } = require('./utils/pdfGenerator'); 
 const { generateUserReportPDF } = require('./utils/pdfGeneratorspecific'); 
+const { protegerVentana, quitarMenu } = require('./seguridad');
+const { setupSesionAdmin } = require('./sesionAdmin');
+const { setupBitacora } = require('./bitacora');
+const config = require('./config');
 
 
 let win;
@@ -42,6 +46,8 @@ function crearVentanaLector() {
   });
   // En un segundo monitor (caseta de vigilancia) ocupa toda la pantalla
   if (secundaria) lectorWin.maximize();
+  protegerVentana(lectorWin);
+  recuperarSiFalla(lectorWin, VISTA_LECTOR);
   lectorWin.loadFile(VISTA_LECTOR);
 
   // Cerrarlo solo lo minimiza: se cierra junto con la ventana principal
@@ -52,6 +58,14 @@ function crearVentanaLector() {
     }
   });
   lectorWin.on('closed', () => { lectorWin = null; });
+}
+
+// Si el proceso de una vista se cae, se vuelve a cargar en lugar de dejar la ventana en blanco
+function recuperarSiFalla(ventana, vista) {
+  ventana.webContents.on('render-process-gone', (evento, detalles) => {
+    console.error(`[APP] La vista dejó de responder (${detalles.reason}); se recarga`);
+    if (!ventana.isDestroyed()) setTimeout(() => ventana.loadFile(vista).catch(() => {}), 1000);
+  });
 }
 
 function mostrarVentana(ventana) {
@@ -85,7 +99,10 @@ function createWindow() {
   });
 
   win.maximize();
-  win.loadFile(path.join(__dirname, '..', 'renderer', 'views', 'index.html'));
+  protegerVentana(win);
+  const inicio = path.join(__dirname, '..', 'renderer', 'views', 'index.html');
+  recuperarSiFalla(win, inicio);
+  win.loadFile(inicio);
 
   win.once('ready-to-show', () => {
     win.show();
@@ -120,7 +137,18 @@ function createWindow() {
 setupDBListeners();
 
 app.whenReady().then(async () => {
+  setupBitacora();
+  quitarMenu();
+  // En la PC de producción la app abre sola al iniciar sesión en Windows (INICIAR_CON_WINDOWS=si)
+  if (process.platform === 'win32') {
+    app.setLoginItemSettings({
+      openAtLogin: config.iniciarConWindows,
+      path: process.execPath,
+      args: [path.resolve(__dirname, '..', '..')]
+    });
+  }
   setupAuth();
+  setupSesionAdmin();
   setupAcceso(pool);
   setupVisitantes(pool);
   setupAreas(pool);
@@ -180,8 +208,8 @@ ipcMain.on('generar-pdf-grupo-usuarios', async (event, data) => {
 
 // En tu manejador IPC:
 ipcMain.on('generar-pdf-usuario-especifico', async (event, data) => {
-    console.log('Generando PDF con datos:', {
-        usuario: data.usuario,
+    console.log('Generando PDF de usuario:', {
+        matricula: data.usuario && data.usuario.matricula,
         registrosCount: data.registros ? data.registros.length : 0,
         rangoFechas: data.rangoFechas
     });

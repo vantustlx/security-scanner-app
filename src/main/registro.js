@@ -11,6 +11,7 @@ const config = require('./config');
 const { enviarCorreoTerminos, enviarCredencial } = require('./sendemails');
 const { crearNotificacion } = require('./notificaciones');
 const { obtenerCatalogos, validarAreas, guardarAreas } = require('./areas');
+const { validarDatosPersonales } = require('./validacion');
 
 // Margen para no vencer una solicitud cuya respuesta aún no se replica en el buzón
 const MINUTOS_GRACIA = 10;
@@ -36,6 +37,9 @@ async function llamarBuzon(ruta, { method = 'GET', body } = {}) {
 }
 
 async function registrarSolicitud(datos) {
+  const erroresDatos = validarDatosPersonales(datos, { nuevo: true });
+  if (erroresDatos.length) return { estado: 'invalido', mensaje: erroresDatos.join('. ') };
+
   const [usuarios] = await pool.query('SELECT 1 FROM usuario WHERE matricula = ?', [datos.matricula]);
   if (usuarios.length) return { estado: 'usuario-ya-existe' };
   const [pendientes] = await pool.query('SELECT 1 FROM registro_pendiente WHERE matricula = ?', [datos.matricula]);

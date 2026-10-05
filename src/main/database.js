@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const path = require('path');
 const config = require('./config');
 const { obtenerCatalogos, validarAreas, guardarAreas, adjuntarAreas, filtroPorAreas } = require('./areas');
+const { validarDatosPersonales } = require('./validacion');
 
 // Configuración de la conexión (credenciales en .env)
 const dbConfig = {
@@ -42,36 +43,13 @@ function setupDBListeners() {
 
     // 1) El alta de usuarios está en registro.js (requiere confirmación por correo)
 
-    // 2) OBTENER TODOS LOS USUARIOS
-    ipcMain.on('obtener-usuarios', (event) => {
-        connection.query('SELECT * FROM usuario', (err, results) => {
-            if (err) {
-                console.error('Error al obtener usuarios:', err);
-                event.reply('consulta-error', err.message);
-            } else {
-                event.reply('lista-usuarios', results);
-            }
-        });
-    });
-
-    // 3) ELIMINAR USUARIO
-    ipcMain.on('eliminar-usuario', (event, id) => {
-        connection.query('DELETE FROM usuario WHERE id = ?', [id], (err, results) => {
-            if (err) {
-                console.error('Error al eliminar usuario:', err);
-                event.reply('eliminacion-error', err.message);
-            } else {
-                event.reply('usuario-eliminado', results.affectedRows);
-            }
-        });
-    });
-
     // 4) ACTUALIZAR USUARIO (datos personales y sus áreas, en una transacción)
     ipcMain.on('actualizar-usuario', async (event, data) => {
         console.log('Recibida solicitud para actualizar usuario:', data.matricula);
         let conexion;
         try {
-            const { errores, areas } = validarAreas(data.areas, await obtenerCatalogos(pool));
+            const { errores: erroresAreas, areas } = validarAreas(data.areas, await obtenerCatalogos(pool));
+            const errores = [...validarDatosPersonales(data), ...erroresAreas];
             if (errores.length) {
                 event.reply('actualizacion-error', { success: false, error: errores.join('. ') });
                 return;
@@ -191,7 +169,7 @@ function setupDBListeners() {
         });
     });
 
-    // 13) BUSCAR USUARIO ESPECÍFICO (name match), con su último acceso de hoy
+    // 13) BUSCAR USUARIOS ACTIVOS por nombre (todas las coincidencias), con su último acceso de hoy
     ipcMain.on('buscar-usuario-especifico', (event, filtros) => {
         const { nombre, apellidoP, apellidoM } = filtros;
         console.log('Buscando usuario específico con filtros:', filtros);
@@ -220,7 +198,7 @@ function setupDBListeners() {
                 AND u.apellido_paterno LIKE CONCAT('%', ?, '%')
                 AND u.apellido_materno LIKE CONCAT('%', ?, '%')
             ORDER BY u.apellido_paterno, u.apellido_materno, u.nombre
-            LIMIT 1
+            LIMIT 50
         `;
         connection.query(query, [nombre, apellidoP, apellidoM], (err, results) => {
             if (err) {
