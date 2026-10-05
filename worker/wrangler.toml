@@ -1,0 +1,8 @@
+name = "registro-fcbiyt"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# Se crea una sola vez con: npx wrangler kv namespace create CONFIRMACIONES
+[[kv_namespaces]]
+binding = "CONFIRMACIONES"
+id = "REEMPLAZAR_CON_EL_ID_DEL_NAMESPACE"
