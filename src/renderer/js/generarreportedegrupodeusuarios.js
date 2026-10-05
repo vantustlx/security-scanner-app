@@ -2,8 +2,9 @@ const { ipcRenderer } = require('electron');
 
 // Variables globales
 let usuariosEncontrados = [];
+let filtros = null; // Área, carrera y turno (se llenan con los catálogos de la BD)
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Configurar event listeners
     document.getElementById('btn-regresar').addEventListener('click', () => {
         ipcRenderer.send('navigate', 'generarreportes');
@@ -29,6 +30,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Configurar fecha mínima/máxima para los date inputs
     configurarFechas();
+
+    try {
+        const catalogos = await ipcRenderer.invoke('obtener-catalogos');
+        filtros = AreasUsuario.llenarFiltros({
+            area: document.getElementById('area'),
+            carrera: document.getElementById('carrera'),
+            turno: document.getElementById('turno')
+        }, catalogos);
+    } catch (error) {
+        mostrarError(`No se pudieron cargar las áreas: ${error.message}`);
+    }
 });
 
 function configurarFechas() {
@@ -38,15 +50,12 @@ function configurarFechas() {
 }
 
 function buscarGrupoUsuarios() {
-    const rol = document.getElementById('rol').value;
-    const carrera = document.getElementById('carrera').value;
-    const turno = document.getElementById('turno').value;
     const fechaInicio = document.getElementById('fechaInicio').value;
     const fechaFin = document.getElementById('fechaFin').value;
 
-    // Validaciones básicas
-    if (!rol || !carrera || !turno) {
-        mostrarError('Por favor, complete todos los campos obligatorios (Rol, Carrera, Turno)');
+    // Los filtros de área, carrera y turno son opcionales ('' = todos)
+    if (!filtros) {
+        mostrarError('No se pudieron cargar las áreas');
         return;
     }
 
@@ -65,7 +74,7 @@ function buscarGrupoUsuarios() {
     ocultarResultados();
 
     // Preparar parámetros de búsqueda
-    const parametrosBusqueda = { rol, carrera, turno };
+    const parametrosBusqueda = filtros.valores();
     
     // Agregar fechas si están presentes
     if (fechaInicio) parametrosBusqueda.fechaInicio = fechaInicio;
@@ -140,14 +149,11 @@ function generarPDF() {
         return;
     }
 
-    // Obtener los parámetros de búsqueda actuales
-    const rol = document.getElementById('rol').value;
-    const carrera = document.getElementById('carrera').value;
-    const turno = document.getElementById('turno').value;
+    // Obtener los parámetros de búsqueda actuales (con sus nombres para el encabezado del PDF)
     const fechaInicio = document.getElementById('fechaInicio').value;
     const fechaFin = document.getElementById('fechaFin').value;
 
-    const parametros = { rol, carrera, turno };
+    const parametros = { ...filtros.valores(), nombres: filtros.nombres() };
     if (fechaInicio) parametros.fechaInicio = fechaInicio;
     if (fechaFin) parametros.fechaFin = fechaFin;
 
@@ -192,18 +198,6 @@ function ocultarResultados() {
     document.getElementById('resultados-container').style.display = 'none';
 }
 
-// Función para formatear nombres de carrera (opcional)
-function obtenerNombreCarrera(idCarrera) {
-    const carreras = {
-        '1': 'Ingeniería en computación',
-        '2': 'Ingeniería Química',
-        '3': 'Ingeniería Mecánica',
-        '4': 'Ingeniería en Sistemas Electrónicos',
-        '5': 'Química Industrial',
-        '6': 'Matemáticas Aplicadas'
-    };
-    return carreras[idCarrera] || idCarrera;
-}
 
 // Agregar listeners para respuestas del PDF
 ipcRenderer.on('pdf-generado-exito', (event, mensaje) => {

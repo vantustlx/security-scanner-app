@@ -7,6 +7,7 @@ const { setupRegistro } = require('./registro');
 const { setupAuth } = require('./auth');
 const { setupAcceso } = require('./acceso');
 const { setupVisitantes } = require('./visitantes');
+const { setupAreas } = require('./areas');
 const { setupLectores } = require('./lectores');
 const { setupCierreDiario } = require('./cierreDiario');
 const { generateGroupReportPDF } = require('./utils/pdfGenerator'); 
@@ -122,6 +123,7 @@ app.whenReady().then(async () => {
   setupAuth();
   setupAcceso(pool);
   setupVisitantes(pool);
+  setupAreas(pool);
   createWindow();
   crearVentanaLector();
   // Configurar listeners de email después de crear la ventana

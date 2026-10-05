@@ -8,6 +8,7 @@
 const { ipcMain, BrowserWindow } = require('electron');
 const config = require('./config');
 const { crearNotificacion, registrarAccesoFallido } = require('./notificaciones');
+const { obtenerAreasDeUsuarios, areaPrincipal } = require('./areas');
 
 const LECTORES = {
   PEATONAL: { numero: 1, nombre: 'Peatonal', medio: 'PEATONAL' },
@@ -106,7 +107,7 @@ async function registrarEnBD(base, matricula, info) {
 
     // Bloquea al usuario: dos lectores con la misma persona se procesan uno tras otro
     const [[usuario]] = await conexion.query(
-      'SELECT matricula, nombre, apellido_paterno, apellido_materno, rol_facultad FROM usuario WHERE matricula = ? FOR UPDATE',
+      'SELECT matricula, nombre, apellido_paterno, apellido_materno FROM usuario WHERE matricula = ? FOR UPDATE',
       [matricula]
     );
     if (!usuario) {
@@ -174,7 +175,7 @@ async function registrarEnBD(base, matricula, info) {
       estado: tipo,
       matricula,
       nombre: nombreCompleto(usuario),
-      rol: usuario.rol_facultad,
+      rol: areaPrincipal((await obtenerAreasDeUsuarios([matricula], conexion)).get(matricula)),
       placas,
       avisos,
       mensaje: tipo === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada'

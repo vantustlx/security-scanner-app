@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Actualizar Datos Personales</title>
     <link rel="stylesheet" href="../css/stylesactualizardatospersonales.css">
+    <link rel="stylesheet" href="../css/areasUsuario.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -82,37 +83,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="edit-turno">Turno</label>
-                    <select id="edit-turno" required>
-                        <option value="Matutino">Matutino</option>
-                        <option value="Vespertino" selected>Vespertino</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="edit-carrera">Carrera</label>
-                    <select id="edit-carrera" required>
-                        <option value="1">Ingeniería en computación</option>
-                        <option value="2">Ingeniería Química</option>
-                        <option value="3">Ingeniería Mecánica</option>
-                        <option value="4">Ingeniería en Sistemas Electrónicos</option>
-                        <option value="5">Quimica Industrial</option>
-                        <option value="6">Matematicas aplicadas</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
                     <label for="edit-telefono">Número de teléfono</label>
                     <input type="tel" id="edit-telefono" required pattern="[0-9+\s-]{10,15}">
-                </div>
-
-                <div class="form-group">
-                    <label for="edit-rol">Rol en la facultad</label>
-                    <select id="edit-rol" required>
-                        <option value="Estudiante" selected>Estudiante</option>
-                        <option value="Docente">Docente</option>
-                        <option value="Administrativo">Administrativo</option>
-                    </select>
                 </div>
 
                 <div class="form-group">
@@ -121,6 +93,11 @@
                         <option value="Activo">Activo</option>
                         <option value="Inactivo">Inactivo</option>
                     </select>
+                </div>
+
+                <!-- Una persona puede tener varias áreas (con su carrera si aplica y sus turnos) -->
+                <div class="form-group areas-usuario" id="edit-areas">
+                    <label>Áreas en la facultad</label>
                 </div>
             </div>
 
@@ -131,6 +108,7 @@
         </div>
     </div>
     <script src="../js/ui.js"></script>
+    <script src="../js/areasUsuario.js"></script>
     <script src="../js/actualizardatospersonales.js"></script>
 </body>
 

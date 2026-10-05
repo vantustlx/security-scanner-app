@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
     <link rel="stylesheet" href="../css/stylesregistrarusuario.css">
+    <link rel="stylesheet" href="../css/areasUsuario.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500&display=swap" rel="stylesheet">
@@ -53,37 +54,13 @@
                     </div>
 
                     <div class="campo">
-                        <label for="turno">Turno</label>
-                        <select id="turno" name="turno" required>
-                            <option value="Matutino">Matutino</option>
-                            <option value="Vespertino" selected>Vespertino</option>
-                        </select>
-                    </div>
-
-                    <div class="campo">
-                        <label for="carrera">Carrera</label>
-                        <select id="carrera" name="carrera" required>
-                            <option value="1">Ingeniería en computación</option>
-                            <option value="2">Ingeniería Química</option>
-                            <option value="3">Ingeniería Mecánica</option>
-                            <option value="4">Ingeniería en Sistemas Electrónicos</option>
-                            <option value="5">Quimica Industrial</option>
-                            <option value="6">Matematicas aplicadas</option>
-                        </select>
-                    </div>
-
-                    <div class="campo">
                         <label for="telefono">Número de teléfono</label>
                         <input type="tel" id="telefono" name="telefono" required pattern="[0-9+\s-]{10,15}">
                     </div>
 
-                    <div class="campo" id="rol-container">
-                        <label for="rol">Rol en la facultad</label>
-                        <select id="rol" name="rol" required>
-                            <option value="Estudiante" selected>Estudiante</option>
-                            <option value="Docente">Docente</option>
-                            <option value="Administrativo">Administrativo</option>
-                        </select>
+                    <!-- Una persona puede tener varias áreas (con su carrera si aplica y sus turnos) -->
+                    <div class="campo areas-usuario" id="areas">
+                        <label>Áreas en la facultad</label>
                     </div>
 
                     <div class="botones">
@@ -122,6 +99,7 @@
         </script>
     </div>
     <script src="../js/ui.js"></script>
+    <script src="../js/areasUsuario.js"></script>
     <script src="../js/registrarusuario.js"></script>
 </body>
 

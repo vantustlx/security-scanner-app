@@ -10,6 +10,7 @@ const { app } = require('electron');
 const config = require('./config');
 const { crearNotificacion } = require('./notificaciones');
 const { generarPdfCierre } = require('./utils/pdfCierreDiario');
+const { obtenerAreasDeUsuarios, areaPrincipal } = require('./areas');
 
 const INTERVALO_REVISION_MS = 60 * 1000;
 
@@ -59,7 +60,7 @@ async function ejecutarCierre(tipo, limite) {
               COALESCE(u.nombre, v.nombre) AS nombre,
               COALESCE(u.apellido_paterno, v.apellido_paterno) AS apellido_paterno,
               COALESCE(u.apellido_materno, v.apellido_materno) AS apellido_materno,
-              CASE WHEN ra.id_visitante IS NOT NULL THEN 'Visitante' ELSE u.rol_facultad END AS rol,
+              ra.id_visitante,
               COALESCE(u.numero_telefono, v.numero_telefono) AS telefono
          FROM registroacceso ra
          LEFT JOIN usuario u ON u.matricula = ra.matricula
@@ -69,6 +70,11 @@ async function ejecutarCierre(tipo, limite) {
           FOR UPDATE OF ra`,
       [limite]
     );
+
+    const areas = await obtenerAreasDeUsuarios(pendientes.map((p) => p.matricula), conexion);
+    pendientes.forEach((p) => {
+      p.rol = p.id_visitante ? 'Visitante' : areaPrincipal(areas.get(p.matricula));
+    });
 
     await generarPdfCierre({ archivo, pendientes, fechaCierre: ahora, tipo });
 

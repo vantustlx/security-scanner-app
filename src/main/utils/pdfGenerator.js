@@ -58,7 +58,9 @@ async function generateGroupReportPDF(usuarios, searchParams, mainWindow) {
     doc.y = 120;
 
     // FILTROS APLICADOS - Mejor estructura
-    const hasSearchParams = searchParams.rol || searchParams.carrera || searchParams.turno || 
+    // La pantalla envía los nombres de los filtros elegidos (los catálogos viven en la BD)
+    const nombres = searchParams.nombres || {};
+    const hasSearchParams = nombres.area || nombres.carrera || nombres.turno || 
                            (searchParams.fechaInicio && searchParams.fechaFin);
     
     if (hasSearchParams) {
@@ -78,9 +80,9 @@ async function generateGroupReportPDF(usuarios, searchParams, mainWindow) {
            .fillColor('#2d3748');
 
         const filters = [];
-        if (searchParams.rol) filters.push(`Rol: ${searchParams.rol}`);
-        if (searchParams.carrera) filters.push(`Carrera: ${obtenerNombreCarrera(searchParams.carrera)}`);
-        if (searchParams.turno) filters.push(`Turno: ${searchParams.turno}`);
+        if (nombres.area) filters.push(`Área: ${nombres.area}`);
+        if (nombres.carrera) filters.push(`Carrera: ${nombres.carrera}`);
+        if (nombres.turno) filters.push(`Turno: ${nombres.turno}`);
         if (searchParams.fechaInicio && searchParams.fechaFin) filters.push(`Período: ${searchParams.fechaInicio} a ${searchParams.fechaFin}`);
         
         doc.text(filters.join(' • '), 50, doc.y, { width: 512 });
@@ -244,18 +246,6 @@ async function generateGroupReportPDF(usuarios, searchParams, mainWindow) {
             reject(error);
         });
     });
-}
-
-function obtenerNombreCarrera(idCarrera) {
-    const carreras = {
-        '1': 'Ingeniería en computación',
-        '2': 'Ingeniería Química',
-        '3': 'Ingeniería Mecánica',
-        '4': 'Ingeniería en Sistemas Electrónicos',
-        '5': 'Química Industrial',
-        '6': 'Matemáticas Aplicadas'
-    };
-    return carreras[idCarrera] || idCarrera;
 }
 
 module.exports = { generateGroupReportPDF };

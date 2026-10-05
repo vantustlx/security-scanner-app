@@ -4,8 +4,9 @@ const { ipcRenderer } = require('electron');
 // Variables globales
 let usuariosEncontrados = [];
 let usuarioSeleccionado = null;
+let selectorAreas = null; // Selector de áreas del modal (se crea al cargar los catálogos de la BD)
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     // Configurar búsqueda
     const buscarBtn = document.getElementById('buscarBtn');
     if (buscarBtn) {
@@ -43,6 +44,14 @@ document.addEventListener('DOMContentLoaded', function () {
     ipcRenderer.on('actualizacion-exitosa', () => terminarActualizacion(true));
     ipcRenderer.on('actualizacion-no-encontrada', () => terminarActualizacion(false, 'No se encontró el usuario a actualizar'));
     ipcRenderer.on('actualizacion-error', (event, { error }) => terminarActualizacion(false, `No se pudo actualizar: ${error}`));
+
+    try {
+        const catalogos = await ipcRenderer.invoke('obtener-catalogos');
+        selectorAreas = AreasUsuario.crear(document.getElementById('edit-areas'), catalogos);
+    } catch (error) {
+        console.error('No se pudieron cargar las áreas:', error);
+        mostrarMensaje('No se pudieron cargar las áreas. Verifique la conexión con la base de datos.', 'error');
+    }
 });
 
 // Función para validar entrada de texto
@@ -169,10 +178,8 @@ function abrirModalEdicion(matricula) {
     document.getElementById('edit-correo').value = usuarioSeleccionado.correo || '';
     document.getElementById('edit-matricula').value = usuarioSeleccionado.matricula || '';
     document.getElementById('edit-telefono').value = usuarioSeleccionado.numero_telefono || '';
-    document.getElementById('edit-turno').value = usuarioSeleccionado.turno || 'Vespertino';
-    document.getElementById('edit-carrera').value = usuarioSeleccionado.id_carrera || '1';
-    document.getElementById('edit-rol').value = usuarioSeleccionado.rol_facultad || 'Estudiante';
     document.getElementById('edit-estatus').value = usuarioSeleccionado.estatus || 'Activo';
+    if (selectorAreas) selectorAreas.establecer(usuarioSeleccionado.areas || []);
 
     // Mostrar modal (enfoca el primer campo; Escape lo cierra)
     UI.abrirModal(document.getElementById('modal-edicion'));
@@ -193,6 +200,8 @@ function validarEdicion(datos) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.correo)) errores.push('Ingresa un correo válido');
     if (!/^\d{10,15}$/.test(datos.numero_telefono)) errores.push('El teléfono debe tener entre 10 y 15 dígitos');
     if (!datos.fecha_nacimiento) errores.push('Ingresa la fecha de nacimiento');
+    if (!selectorAreas) errores.push('No se pudieron cargar las áreas');
+    else errores.push(...selectorAreas.validar());
     return errores;
 }
 
@@ -207,10 +216,8 @@ function actualizarUsuario() {
         fecha_nacimiento: document.getElementById('edit-fechaNacimiento').value,
         correo: document.getElementById('edit-correo').value.trim(),
         numero_telefono: document.getElementById('edit-telefono').value.trim(),
-        turno: document.getElementById('edit-turno').value,
-        id_carrera: document.getElementById('edit-carrera').value,
-        rol_facultad: document.getElementById('edit-rol').value,
-        estatus: document.getElementById('edit-estatus').value
+        estatus: document.getElementById('edit-estatus').value,
+        areas: selectorAreas ? selectorAreas.obtener() : []
     };
 
     const errores = validarEdicion(datosActualizados);
@@ -247,10 +254,8 @@ function terminarActualizacion(exito, mensajeError) {
             fecha_nacimiento: document.getElementById('edit-fechaNacimiento').value,
             correo: document.getElementById('edit-correo').value.trim(),
             numero_telefono: document.getElementById('edit-telefono').value.trim(),
-            turno: document.getElementById('edit-turno').value,
-            id_carrera: document.getElementById('edit-carrera').value,
-            rol_facultad: document.getElementById('edit-rol').value,
-            estatus: document.getElementById('edit-estatus').value
+            estatus: document.getElementById('edit-estatus').value,
+            areas: selectorAreas.obtener()
         });
         mostrarResultados(usuariosEncontrados);
     }

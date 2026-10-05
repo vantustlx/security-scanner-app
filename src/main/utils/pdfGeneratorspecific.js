@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
 const { dialog } = require('electron');
+const { resumenAreas } = require('../areas');
 
 /**
  * Genera un PDF para un usuario específico con sus registros
@@ -99,9 +100,7 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
     doc.moveDown(0.3);
     doc.text(`Matrícula: ${usuario.matricula || 'N/A'}`, 50, doc.y);
     doc.moveDown(0.3);
-    doc.text(`Turno: ${usuario.turno || 'N/A'}`, 50, doc.y);
-    doc.moveDown(0.3);
-    doc.text(`Carrera: ${obtenerNombreCarrera(usuario.id_carrera) || 'N/A'}`, 50, doc.y);
+    doc.text(`Áreas: ${resumenAreas(usuario.areas) || 'N/A'}`, 50, doc.y, { width: 512 });
     doc.moveDown(0.3);
     doc.text(`Teléfono: ${usuario.numero_telefono || 'N/A'}`, 50, doc.y);
     doc.moveDown(0.3);
@@ -278,18 +277,6 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
             reject(error);
         });
     });
-}
-
-function obtenerNombreCarrera(idCarrera) {
-    const carreras = {
-        '1': 'Ingeniería en computación',
-        '2': 'Ingeniería Química',
-        '3': 'Ingeniería Mecánica',
-        '4': 'Ingeniería en Sistemas Electrónicos',
-        '5': 'Química Industrial',
-        '6': 'Matemáticas Aplicadas'
-    };
-    return carreras[idCarrera] || idCarrera;
 }
 
 module.exports = { generateUserReportPDF };
