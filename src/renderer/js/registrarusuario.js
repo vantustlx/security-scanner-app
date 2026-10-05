@@ -33,7 +33,14 @@ function mostrarModal(estado, detalle) {
     modal.querySelector('h2').textContent = titulo;
     modal.querySelector('p').textContent = detalle ? `${mensaje} (${detalle})` : mensaje;
     modal.dataset.limpiar = estado === 'usuario-ya-existe';
-    modal.classList.add('active');
+    UI.abrirModal(modal, { alEscape: cerrarModalRegistro });
+}
+
+function cerrarModalRegistro() {
+    const modal = document.getElementById('modal-usuario-existente');
+    UI.cerrarModal(modal);
+    // Limpiar el formulario solo si la matrícula ya estaba registrada
+    if (modal.dataset.limpiar === 'true') limpiarFormulario();
 }
 
 // Botón verde: validar y enviar
@@ -152,20 +159,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Evento para cerrar el modal con el botón Aceptar
     if (btnAceptar) {
-        btnAceptar.addEventListener('click', function () {
-            modal.classList.remove('active');
-            // Limpiar el formulario solo si la matrícula ya estaba registrada
-            if (modal.dataset.limpiar === 'true') limpiarFormulario();
-        });
+        btnAceptar.addEventListener('click', cerrarModalRegistro);
     }
 
     // También puedes cerrar el modal al hacer clic fuera de él
     modal.addEventListener('click', function (e) {
-        if (e.target === modal) {
-            modal.classList.remove('active');
-            // Limpiar el formulario solo si la matrícula ya estaba registrada
-            if (modal.dataset.limpiar === 'true') limpiarFormulario();
-        }
+        if (e.target === modal) cerrarModalRegistro();
+    });
+
+    // Enter avanza al siguiente campo; en el último envía el registro
+    UI.enterAvanza(document.querySelector('.formulario'), {
+        alFinal: () => document.getElementById('boton-verde').click()
     });
 
     // Para pruebas: Si quieres mostrar el modal automáticamente al cargar la página

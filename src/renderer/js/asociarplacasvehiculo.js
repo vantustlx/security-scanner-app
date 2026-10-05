@@ -15,10 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ipcRenderer.send('verificar-matricula', matricula);
   });
 
+  const modalFallida = document.getElementById('modal-asociacion-fallida');
+  const modalPlaca = document.getElementById('modal-user-exito');
+  const btnAsociar = document.getElementById('btn-asociar');
+  const mostrarFallida = () => UI.abrirModal(modalFallida);
+
   // 2) Recibe el resultado de la verificación
   ipcRenderer.on('resultado-verificacion', (event, { success }) => {
     if (!success) {
-      document.getElementById('modal-asociacion-fallida').classList.add('active');
+      mostrarFallida();
     } else {
       ipcRenderer.send('obtener-ultimo-usuario');
     }
@@ -27,16 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3) Recibe los datos completos del usuario
   ipcRenderer.on('enviar-ultimo-usuario', (event, user) => {
     if (!user) {
-      document.getElementById('modal-asociacion-fallida').classList.add('active');
+      mostrarFallida();
       return;
     }
     currentUser = user;  // { nombre, apellido_paterno, apellido_materno, matricula }
-    document.getElementById('modal-user-exito').classList.add('active');
+    // Cada búsqueda empieza con el campo de placa limpio y enfocado
+    inputPlaca.value = '';
+    errorPlaca.style.display = 'none';
+    UI.abrirModal(modalPlaca);
   });
 
   // Cerrar modal de “usuario no encontrado”
   document.getElementById('btn-aceptar-asociacion').addEventListener('click', () => {
-    document.getElementById('modal-asociacion-fallida').classList.remove('active');
+    UI.cerrarModal(modalFallida);
   });
 
   // Preparo validación de placa
@@ -55,17 +63,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const regexPlaca = /^[A-Z]{3}-\d{3}-[A-Z]$/;
 
+  // Enter en el campo de placa asocia
+  UI.enterAvanza(modalPlaca.querySelector('.modal-content'), { alFinal: () => btnAsociar.click() });
+
   // 4) Click en “Asociar”
-  document.getElementById('btn-asociar').addEventListener('click', () => {
+  btnAsociar.addEventListener('click', () => {
+    if (!currentUser) return;
     const placa = inputPlaca.value.trim().toUpperCase();
     if (!regexPlaca.test(placa)) {
       errorPlaca.textContent = 'Error, número de placas no válido';
       errorPlaca.style.display = 'block';
+      inputPlaca.focus();
       return;
     }
     errorPlaca.style.display = 'none';
 
     // Llamo al backend para guardar la asociación
+    btnAsociar.disabled = true; // evita asociar dos veces por doble clic
     ipcRenderer.send('asociar-placa', {
       matricula: currentUser.matricula,
       placa
@@ -74,30 +88,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 5) Manejo de la respuesta de asociación
   ipcRenderer.on('asociacion-exitosa', (event, { success }) => {
+    btnAsociar.disabled = false;
     if (!success) {
-      document.getElementById('modal-asociacion-fallida').classList.add('active');
+      mostrarFallida();
       return;
     }
 
     // Cierro modal anterior y abro el de éxito final
-    document.getElementById('modal-user-exito').classList.remove('active');
+    UI.cerrarModal(modalPlaca);
     const texto = document.getElementById('texto-exito');
     texto.innerHTML = `
       Nombre: ${currentUser.nombre} ${currentUser.apellido_paterno} ${currentUser.apellido_materno}<br>
       Matrícula: ${currentUser.matricula}<br>
       Placas: ${inputPlaca.value.trim().toUpperCase()}
     `;
-    document.getElementById('modal-exito-final').classList.add('active');
+    UI.abrirModal(document.getElementById('modal-exito-final'), { alEscape: regresarAlMenu });
   });
 
   // 6) Si hay error en la consulta de asociación
   ipcRenderer.on('asociacion-error', (event, errorMsg) => {
+    btnAsociar.disabled = false;
     console.error('Error al asociar placa:', errorMsg);
-    document.getElementById('modal-asociacion-fallida').classList.add('active');
+    mostrarFallida();
   });
 
-  // 7) Regresar tras “Aceptar” del éx ito final
-  document.getElementById('btn-aceptar-final').addEventListener('click', () => {
+  // 7) Regresar tras “Aceptar” del éxito final
+  function regresarAlMenu() {
     ipcRenderer.send('navigate', 'opcionvehiculo');
-  });
+  }
+  document.getElementById('btn-aceptar-final').addEventListener('click', regresarAlMenu);
 });

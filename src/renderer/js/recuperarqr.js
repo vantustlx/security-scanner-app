@@ -14,17 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
         buscarBtn.addEventListener('click', buscarUsuarios);
     }
 
-    // También permitir búsqueda con Enter
-    ['nombre', 'apellidoP', 'apellidoM'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    buscarUsuarios();
-                }
-            });
-        }
-    });
+    // Enter avanza entre los campos; en el último, busca
+    UI.enterAvanza(document.querySelector('.search-form'), { alFinal: () => buscarBtn.click() });
 
     // Funcionalidad original para filas estáticas (si existen)
     const resultRows = document.querySelectorAll('.result-row');

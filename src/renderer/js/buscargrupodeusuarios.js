@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Botón de buscar
     document.querySelector('.btn-buscar').addEventListener('click', buscarGrupoUsuarios);
+    // Enter avanza entre los filtros; en el último, busca
+    UI.enterAvanza(document.querySelector('.formulario-filtros'), { alFinal: buscarGrupoUsuarios });
     
     // Escuchar resultados de búsqueda
     ipcRenderer.on('resultados-grupo-usuarios', (event, resultados) => {

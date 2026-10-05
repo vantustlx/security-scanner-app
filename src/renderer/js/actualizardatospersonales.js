@@ -12,41 +12,37 @@ document.addEventListener('DOMContentLoaded', function () {
         buscarBtn.addEventListener('click', buscarUsuarios);
     }
 
-    // Permitir búsqueda con Enter
-    ['nombre', 'apellidoP', 'apellidoM'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    buscarUsuarios();
-                }
-            });
-        }
-    });
+    // Enter avanza entre los campos de búsqueda; en el último, busca
+    UI.enterAvanza(document.querySelector('.search-section .form-section'), { alFinal: buscarUsuarios });
 
     // Botón de regresar
     document.getElementById('btn-regresar').addEventListener('click', () => {
         ipcRenderer.send('navigate', 'administradoropciones');
     });
 
-    // Configurar eventos de edición
-    document.querySelectorAll('.edit-icon').forEach(icon => {
-        icon.addEventListener('click', function () {
-            const listItem = this.closest('.list-item');
-            const userId = listItem.querySelector('.user-id').textContent.replace('|', '').trim();
-            abrirModalEdicion(userId);
-        });
+    // Un solo listener para los íconos de edición, aunque la lista se vuelva a pintar
+    document.querySelector('.list-section').addEventListener('click', (e) => {
+        const icono = e.target.closest('.edit-icon');
+        if (icono) abrirModalEdicion(icono.dataset.matricula);
     });
 
     // Configurar modal de edición
     document.querySelector('.close-modal').addEventListener('click', cerrarModal);
     document.getElementById('btn-cancelar').addEventListener('click', cerrarModal);
     document.getElementById('btn-actualizar').addEventListener('click', actualizarUsuario);
+    UI.enterAvanza(document.querySelector('#modal-edicion .form-container'), {
+        alFinal: () => document.getElementById('btn-actualizar').click()
+    });
 
     // Escuchar para usuarios encontrados
     ipcRenderer.on('usuarios-encontrados', (event, data) => {
         mostrarResultados(data.usuarios);
     });
+
+    // Respuestas de la actualización (se registran una sola vez)
+    ipcRenderer.on('actualizacion-exitosa', () => terminarActualizacion(true));
+    ipcRenderer.on('actualizacion-no-encontrada', () => terminarActualizacion(false, 'No se encontró el usuario a actualizar'));
+    ipcRenderer.on('actualizacion-error', (event, { error }) => terminarActualizacion(false, `No se pudo actualizar: ${error}`));
 });
 
 // Función para validar entrada de texto
@@ -119,6 +115,10 @@ function buscarUsuarios() {
     ipcRenderer.send('buscar-usuarios', parametrosBusqueda);
 }
 
+function escaparHTML(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 // Función para mostrar resultados
 function mostrarResultados(usuarios) {
     usuariosEncontrados = usuarios;
@@ -139,22 +139,14 @@ function mostrarResultados(usuarios) {
                     <div class="list-item">
                         <div class="user-info">
                             <span class="user-id">${String(index + 1).padStart(3, '0')} |</span>
-                            <span>${usuario.nombre} ${usuario.apellido_paterno} ${usuario.apellido_materno} (${usuario.matricula})</span>
+                            <span>${escaparHTML(usuario.nombre)} ${escaparHTML(usuario.apellido_paterno)} ${escaparHTML(usuario.apellido_materno)} (${escaparHTML(usuario.matricula)})</span>
                         </div>
-                        <i class="fas fa-edit edit-icon" data-matricula="${usuario.matricula}"></i>
+                        <i class="fas fa-edit edit-icon" data-matricula="${escaparHTML(usuario.matricula)}"></i>
                     </div>
                 `;
     });
 
     listSection.innerHTML = listHTML;
-
-    // Configurar eventos de edición para los nuevos elementos
-    document.querySelectorAll('.edit-icon').forEach(icon => {
-        icon.addEventListener('click', function () {
-            const matricula = this.getAttribute('data-matricula');
-            abrirModalEdicion(matricula);
-        });
-    });
 }
 
 // Función para abrir modal de edición
@@ -182,13 +174,26 @@ function abrirModalEdicion(matricula) {
     document.getElementById('edit-rol').value = usuarioSeleccionado.rol_facultad || 'Estudiante';
     document.getElementById('edit-estatus').value = usuarioSeleccionado.estatus || 'Activo';
 
-    // Mostrar modal
-    document.getElementById('modal-edicion').classList.add('active');
+    // Mostrar modal (enfoca el primer campo; Escape lo cierra)
+    UI.abrirModal(document.getElementById('modal-edicion'));
 }
 
 // Función para cerrar modal
 function cerrarModal() {
-    document.getElementById('modal-edicion').classList.remove('active');
+    UI.cerrarModal(document.getElementById('modal-edicion'));
+}
+
+function validarEdicion(datos) {
+    const errores = [];
+    [['nombre', 'Nombre'], ['apellido_paterno', 'Apellido Paterno'], ['apellido_materno', 'Apellido Materno']]
+        .forEach(([campo, etiqueta]) => {
+            const validacion = validarTexto(datos[campo], etiqueta);
+            if (!validacion.valido) errores.push(validacion.mensaje);
+        });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.correo)) errores.push('Ingresa un correo válido');
+    if (!/^\d{10,15}$/.test(datos.numero_telefono)) errores.push('El teléfono debe tener entre 10 y 15 dígitos');
+    if (!datos.fecha_nacimiento) errores.push('Ingresa la fecha de nacimiento');
+    return errores;
 }
 
 // Función para actualizar usuario
@@ -196,33 +201,65 @@ function actualizarUsuario() {
     // Recopilar datos del formulario
     const datosActualizados = {
         matricula: document.getElementById('edit-matricula').value,
-        nombre: document.getElementById('edit-nombre').value,
-        apellido_paterno: document.getElementById('edit-apellidoP').value,
-        apellido_materno: document.getElementById('edit-apellidoM').value,
+        nombre: document.getElementById('edit-nombre').value.trim(),
+        apellido_paterno: document.getElementById('edit-apellidoP').value.trim(),
+        apellido_materno: document.getElementById('edit-apellidoM').value.trim(),
         fecha_nacimiento: document.getElementById('edit-fechaNacimiento').value,
-        correo: document.getElementById('edit-correo').value,
-        numero_telefono: document.getElementById('edit-telefono').value,
+        correo: document.getElementById('edit-correo').value.trim(),
+        numero_telefono: document.getElementById('edit-telefono').value.trim(),
         turno: document.getElementById('edit-turno').value,
         id_carrera: document.getElementById('edit-carrera').value,
         rol_facultad: document.getElementById('edit-rol').value,
         estatus: document.getElementById('edit-estatus').value
     };
 
-    // Validar datos (similar a la validación de registro)
-    // ... (implementar validación similar a tu formulario de registro)
+    const errores = validarEdicion(datosActualizados);
+    if (errores.length) {
+        mostrarMensaje(errores.join('. '), 'error');
+        return;
+    }
 
-    // Enviar datos para actualizar
+    // Se espera la respuesta de la BD antes de cerrar el modal o confirmar
+    const boton = document.getElementById('btn-actualizar');
+    boton.disabled = true;
+    boton.textContent = 'Actualizando...';
     ipcRenderer.send('actualizar-usuario', datosActualizados);
+}
 
-    // Cerrar modal
+function terminarActualizacion(exito, mensajeError) {
+    const boton = document.getElementById('btn-actualizar');
+    boton.disabled = false;
+    boton.textContent = 'Actualizar';
+
+    if (!exito) {
+        mostrarMensaje(mensajeError, 'error');
+        return;
+    }
+
+    // Refleja los cambios en la lista para que al reabrir el usuario se vean los datos nuevos
+    const matricula = document.getElementById('edit-matricula').value;
+    const usuario = usuariosEncontrados.find(u => u.matricula == matricula);
+    if (usuario) {
+        Object.assign(usuario, {
+            nombre: document.getElementById('edit-nombre').value.trim(),
+            apellido_paterno: document.getElementById('edit-apellidoP').value.trim(),
+            apellido_materno: document.getElementById('edit-apellidoM').value.trim(),
+            fecha_nacimiento: document.getElementById('edit-fechaNacimiento').value,
+            correo: document.getElementById('edit-correo').value.trim(),
+            numero_telefono: document.getElementById('edit-telefono').value.trim(),
+            turno: document.getElementById('edit-turno').value,
+            id_carrera: document.getElementById('edit-carrera').value,
+            rol_facultad: document.getElementById('edit-rol').value,
+            estatus: document.getElementById('edit-estatus').value
+        });
+        mostrarResultados(usuariosEncontrados);
+    }
+
     cerrarModal();
-
-    // Mostrar mensaje de éxito
     mostrarMensaje('Usuario actualizado correctamente', 'success');
 }
 
-// Función para mostrar mensajes
+// Avisos dentro de la página: alert() deja los inputs sin foco en Electron
 function mostrarMensaje(mensaje, tipo = 'info') {
-    // Implementación similar a la que ya tienes
-    alert(`${tipo}: ${mensaje}`); // Esto sería temporal
+    UI.notificar(mensaje, tipo);
 }
