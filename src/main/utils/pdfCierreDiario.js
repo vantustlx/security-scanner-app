@@ -10,7 +10,7 @@ const COLUMNAS = [
   { titulo: '#', ancho: 24, valor: (f, i) => String(i + 1) },
   { titulo: 'Matrícula', ancho: 64, valor: (f) => (f.matricula != null ? String(f.matricula) : '—') },
   { titulo: 'Nombre', ancho: 150, valor: (f) => [f.nombre, f.apellido_paterno, f.apellido_materno].filter(Boolean).join(' ') },
-  { titulo: 'Rol', ancho: 74, valor: (f) => f.rol || '—' },
+  { titulo: 'Área', ancho: 74, valor: (f) => f.rol || '—' },
   { titulo: 'Entrada', ancho: 86, valor: (f) => new Date(f.fecha_entrada).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) },
   { titulo: 'Medio', ancho: 60, valor: (f) => (f.medio_entrada === 'VEHICULAR' ? 'Vehículo' : f.medio_entrada === 'PEATONAL' ? 'A pie' : '—') },
   { titulo: 'Teléfono', ancho: 74, valor: (f) => f.telefono || '—' }

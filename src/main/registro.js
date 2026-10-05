@@ -10,6 +10,7 @@ const { ipcMain } = require('electron');
 const config = require('./config');
 const { enviarCorreoTerminos, enviarCredencial } = require('./sendemails');
 const { crearNotificacion } = require('./notificaciones');
+const { obtenerCatalogos, validarAreas, guardarAreas } = require('./areas');
 
 // Margen para no vencer una solicitud cuya respuesta aún no se replica en el buzón
 const MINUTOS_GRACIA = 10;
@@ -40,15 +41,18 @@ async function registrarSolicitud(datos) {
   const [pendientes] = await pool.query('SELECT 1 FROM registro_pendiente WHERE matricula = ?', [datos.matricula]);
   if (pendientes.length) return { estado: 'solicitud-pendiente' };
 
+  const { errores, areas } = validarAreas(datos.areas, await obtenerCatalogos(pool));
+  if (errores.length) return { estado: 'invalido', mensaje: errores.join('. ') };
+
   const token = crypto.randomBytes(24).toString('base64url');
   const expiraEn = new Date(Date.now() + config.confirmacion.horasVigencia * 60 * 60 * 1000);
   await pool.query(
     `INSERT INTO registro_pendiente (
        token, matricula, nombre, apellido_paterno, apellido_materno, fecha_nacimiento,
-       numero_telefono, correo, turno, rol_facultad, id_carrera, expira_en
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       numero_telefono, correo, areas, expira_en
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [token, datos.matricula, datos.nombre, datos.apellido_paterno, datos.apellido_materno, datos.fecha_nacimiento,
-      datos.numero_telefono, datos.correo, datos.turno, datos.rol_facultad, datos.id_carrera, expiraEn]
+      datos.numero_telefono, datos.correo, JSON.stringify(areas), expiraEn]
   );
 
   try {
@@ -99,12 +103,14 @@ async function procesarDecision({ token, accion, fecha }) {
     await conexion.query(
       `INSERT INTO usuario (
          matricula, nombre, apellido_paterno, apellido_materno, fecha_nacimiento, fecha_registro,
-         numero_telefono, correo, turno, rol_facultad, estatus, id_carrera, fecha_aceptacion_terminos
-       ) VALUES (?, ?, ?, ?, ?, CURDATE(), ?, ?, ?, ?, 'Inactivo', ?, ?)`,
+         numero_telefono, correo, estatus, fecha_aceptacion_terminos
+       ) VALUES (?, ?, ?, ?, ?, CURDATE(), ?, ?, 'Inactivo', ?)`,
       [pendiente.matricula, pendiente.nombre, pendiente.apellido_paterno, pendiente.apellido_materno,
-        pendiente.fecha_nacimiento, pendiente.numero_telefono, pendiente.correo, pendiente.turno,
-        pendiente.rol_facultad, pendiente.id_carrera, new Date(fecha)]
+        pendiente.fecha_nacimiento, pendiente.numero_telefono, pendiente.correo, new Date(fecha)]
     );
+    // Las áreas se validaron al crear la solicitud; mysql2 entrega la columna JSON ya convertida
+    const areas = typeof pendiente.areas === 'string' ? JSON.parse(pendiente.areas) : (pendiente.areas || []);
+    await guardarAreas(conexion, pendiente.matricula, areas);
     await conexion.query('DELETE FROM registro_pendiente WHERE token = ?', [token]);
     await conexion.commit();
   } catch (error) {

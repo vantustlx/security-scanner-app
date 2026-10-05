@@ -3,6 +3,7 @@ const { ipcMain } = require('electron');
 const mysql = require('mysql2');
 const path = require('path');
 const config = require('./config');
+const { obtenerCatalogos, validarAreas, guardarAreas, adjuntarAreas, filtroPorAreas } = require('./areas');
 
 // Configuración de la conexión (credenciales en .env)
 const dbConfig = {
@@ -61,49 +62,43 @@ function setupDBListeners() {
         });
     });
 
-    // 4) ACTUALIZAR USUARIO (completo)
-    ipcMain.on('actualizar-usuario', (event, data) => {
-        console.log('Recibida solicitud para actualizar usuario:', data);
-        const updateQuery = `
-            UPDATE usuario
-            SET
-                nombre = ?,
-                apellido_paterno = ?,
-                apellido_materno = ?,
-                fecha_nacimiento = ?,
-                numero_telefono = ?,
-                correo = ?,
-                turno = ?,
-                rol_facultad = ?,
-                estatus = ?,
-                id_carrera = ?
-            WHERE matricula = ?
-        `;
-        const valores = [
-            data.nombre,
-            data.apellido_paterno,
-            data.apellido_materno,
-            data.fecha_nacimiento,
-            data.numero_telefono,
-            data.correo,
-            data.turno,
-            data.rol_facultad,
-            data.estatus,
-            data.id_carrera,
-            data.matricula
-        ];
-        connection.query(updateQuery, valores, (err, results) => {
-            if (err) {
-                console.error('Error al actualizar usuario:', err);
-                event.reply('actualizacion-error', { success: false, error: err.message });
-            } else if (results.affectedRows > 0) {
-                console.log('Usuario actualizado con éxito');
-                event.reply('actualizacion-exitosa', { success: true, matricula: data.matricula, affectedRows: results.affectedRows });
-            } else {
+    // 4) ACTUALIZAR USUARIO (datos personales y sus áreas, en una transacción)
+    ipcMain.on('actualizar-usuario', async (event, data) => {
+        console.log('Recibida solicitud para actualizar usuario:', data.matricula);
+        let conexion;
+        try {
+            const { errores, areas } = validarAreas(data.areas, await obtenerCatalogos(pool));
+            if (errores.length) {
+                event.reply('actualizacion-error', { success: false, error: errores.join('. ') });
+                return;
+            }
+            conexion = await pool.getConnection();
+            await conexion.beginTransaction();
+            const [resultado] = await conexion.query(
+                `UPDATE usuario
+                    SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, fecha_nacimiento = ?,
+                        numero_telefono = ?, correo = ?, estatus = ?
+                  WHERE matricula = ?`,
+                [data.nombre, data.apellido_paterno, data.apellido_materno, data.fecha_nacimiento,
+                    data.numero_telefono, data.correo, data.estatus, data.matricula]
+            );
+            if (resultado.affectedRows === 0) {
+                await conexion.rollback();
                 console.log('No se encontró el usuario para actualizar');
                 event.reply('actualizacion-no-encontrada', { success: false, matricula: data.matricula, message: 'Usuario no encontrado' });
+                return;
             }
-        });
+            await guardarAreas(conexion, data.matricula, areas);
+            await conexion.commit();
+            console.log('Usuario actualizado con éxito');
+            event.reply('actualizacion-exitosa', { success: true, matricula: data.matricula, affectedRows: resultado.affectedRows });
+        } catch (err) {
+            if (conexion) await conexion.rollback().catch(() => {});
+            console.error('Error al actualizar usuario:', err);
+            event.reply('actualizacion-error', { success: false, error: err.message });
+        } finally {
+            if (conexion) conexion.release();
+        }
     });
 
     // 5) y 6) El registro de entradas/salidas y la búsqueda por matrícula están en acceso.js
@@ -135,10 +130,8 @@ function setupDBListeners() {
                 apellido_materno,
                 numero_telefono,
                 fecha_nacimiento,
-                id_carrera,
                 correo,
-                turno,
-                rol_facultad,
+                estatus,
                 CONCAT(nombre, ' ', apellido_paterno, ' ', apellido_materno, ' ', matricula) as nombre_completo
             FROM usuario
             WHERE
@@ -152,39 +145,38 @@ function setupDBListeners() {
             apellido_paterno, apellido_paterno,
             apellido_materno, apellido_materno
         ];
-        connection.query(query, parametrosQuery, (err, results) => {
-            if (err) {
+        pool.query(query, parametrosQuery)
+            .then(([results]) => adjuntarAreas(results, pool))
+            .then((usuarios) => {
+                console.log(`Búsqueda completada. Encontrados: ${usuarios.length} usuarios`);
+                event.reply('usuarios-encontrados', { usuarios, total: usuarios.length });
+            })
+            .catch((err) => {
                 console.error('Error al buscar usuarios:', err);
                 event.reply('busqueda-error', err.message);
-            } else {
-                console.log(`Búsqueda completada. Encontrados: ${results.length} usuarios`);
-                event.reply('usuarios-encontrados', { usuarios: results, total: results.length });
-            }
-        });
+            });
     });
 
-    // 12) BUSCAR GRUPO DE USUARIOS por rol, carrera y turno
+    // 12) BUSCAR GRUPO DE USUARIOS por área, carrera y turno (cada filtro es opcional)
     ipcMain.on('buscar-grupo-usuarios', (event, filtros) => {
-        const { rol, carrera, turno } = filtros;
         console.log('Buscando grupo de usuarios con filtros:', filtros);
+        const filtro = filtroPorAreas(filtros);
         const query = `
             SELECT
-                nombre,
-                apellido_paterno,
-                apellido_materno,
-                matricula,
-                numero_telefono,
-                estatus,
-                fecha_registro
-            FROM usuario
+                u.nombre,
+                u.apellido_paterno,
+                u.apellido_materno,
+                u.matricula,
+                u.numero_telefono,
+                u.estatus,
+                u.fecha_registro
+            FROM usuario u
             WHERE
-                estatus = 'Activo'
-                AND rol_facultad = ?
-                AND id_carrera = ?
-                AND turno = ?
-            ORDER BY apellido_paterno, apellido_materno, nombre
+                u.estatus = 'Activo'
+                AND ${filtro.sql}
+            ORDER BY u.apellido_paterno, u.apellido_materno, u.nombre
         `;
-        connection.query(query, [rol, carrera, turno], (err, results) => {
+        connection.query(query, filtro.params, (err, results) => {
             if (err) {
                 console.error('Error al buscar grupo de usuarios:', err);
                 event.reply('busqueda-grupo-error', err.message);
@@ -236,7 +228,8 @@ module.exports = { setupDBListeners, pool };
 
 // BD con fechas
 ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
-    const { rol, carrera, turno, fechaInicio, fechaFin } = filtros;
+    const { fechaInicio, fechaFin } = filtros;
+    const filtro = filtroPorAreas(filtros);
     console.log('📘 Buscando grupo de usuarios con filtros:', filtros);
 
     let query = `
@@ -250,14 +243,10 @@ ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
             r.fecha_salida
         FROM usuario u
         INNER JOIN registroacceso r ON u.matricula = r.matricula
-        WHERE 
-            u.rol_facultad = ?
-            AND u.id_carrera = ?
-            AND u.turno = ?
+        WHERE ${filtro.sql}
     `;
-    
 
-    const params = [rol, carrera, turno];
+    const params = [...filtro.params];
 
     // Filtro de fechas si aplica
     if (fechaInicio && fechaFin) {
@@ -299,9 +288,6 @@ ipcMain.on('buscar-usuario-especifico-reporte', (event, filtros) => {
             u.apellido_materno,
             u.numero_telefono,
             u.correo,
-            u.rol_facultad,
-            u.id_carrera,
-            u.turno,
             r.fecha_entrada,
             r.fecha_salida
         FROM usuario u
@@ -324,13 +310,14 @@ ipcMain.on('buscar-usuario-especifico-reporte', (event, filtros) => {
 
     query += ` ORDER BY r.fecha_entrada ASC;`;
 
-    connection.query(query, params, (err, results) => {
-        if (err) {
-            console.error('Error al buscar usuario específico:', err);
-            event.reply('busqueda-usuario-especifico-error', err.message);
-        } else {
+    pool.query(query, params)
+        .then(([results]) => adjuntarAreas(results, pool))
+        .then((results) => {
             console.log(`${results.length} registros encontrados para el usuario`);
             event.reply('resultados-usuario-especifico', results);
-        }
-    });
+        })
+        .catch((err) => {
+            console.error('Error al buscar usuario específico:', err);
+            event.reply('busqueda-usuario-especifico-error', err.message);
+        });
 });

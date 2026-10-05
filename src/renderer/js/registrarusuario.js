@@ -1,5 +1,8 @@
 const { ipcRenderer } = require('electron');
 
+// Selector de áreas (se crea al cargar los catálogos de la BD)
+let selectorAreas = null;
+
 // Botón rojo: regresar
 document.getElementById('boton-rojo').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'index'); // Asumiendo que el archivo se llama index.html
@@ -14,6 +17,7 @@ function limpiarFormulario() {
     document.getElementById('correo').value = '';
     document.getElementById('matricula').value = '';
     document.getElementById('telefono').value = '';
+    if (selectorAreas) selectorAreas.establecer([]);
 
     // Eliminar mensajes de error si existen
     const errores = document.querySelectorAll('.error');
@@ -24,6 +28,7 @@ function limpiarFormulario() {
 const MENSAJES_MODAL = {
     'usuario-ya-existe': ['Registro ya existente', 'Usuario ya registrado intente cambiar los datos'],
     'solicitud-pendiente': ['Solicitud pendiente', 'Esta matrícula ya tiene una solicitud de registro esperando la confirmación del usuario por correo'],
+    'invalido': ['Revise las áreas', 'Los datos de las áreas no son válidos'],
     'error': ['No se pudo enviar el registro', 'Verifique la conexión a internet e intente de nuevo']
 };
 
@@ -64,9 +69,6 @@ document.getElementById('boton-verde').addEventListener('click', async function 
     const correo = document.getElementById('correo');
     const matricula = document.getElementById('matricula');
     const telefono = document.getElementById('telefono');
-    const turno = document.getElementById('turno');
-    const rol = document.getElementById('rol');
-    const carrera = document.getElementById('carrera');
 
     const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/;
     const soloNumeros = /^\d+$/;
@@ -116,7 +118,21 @@ if (!/^(\d{4}|\d{8})$/.test(matricula.value)) {
         mostrarError(telefono, 'El teléfono debe contener entre 10 y 15 dígitos numéricos');
     }
 
-
+    // Áreas: cada una con su carrera (si la requiere) y al menos un turno
+    if (!selectorAreas) {
+        mostrarModal('error', 'No se pudieron cargar las áreas');
+        return;
+    }
+    const erroresAreas = selectorAreas.validar();
+    if (erroresAreas.length) {
+        const error = document.createElement('span');
+        error.className = 'error';
+        error.style.color = '#f77474';
+        error.style.fontSize = '12px';
+        error.textContent = erroresAreas.join('. ');
+        document.getElementById('areas').appendChild(error);
+        valido = false;
+    }
 
     if (!valido) return;
 
@@ -129,9 +145,7 @@ if (!/^(\d{4}|\d{8})$/.test(matricula.value)) {
         fecha_nacimiento: fechaNacimiento.value,
         numero_telefono: telefono.value,
         correo: correo.value.trim(),
-        turno: turno.value,
-        rol_facultad: rol.value,
-        id_carrera: parseInt(carrera.value)
+        areas: selectorAreas.obtener()
     };
 
     const textoOriginal = boton.textContent;
@@ -153,7 +167,7 @@ if (!/^(\d{4}|\d{8})$/.test(matricula.value)) {
 });
 
 // Configuración del modal cuando se carga el documento
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     const modal = document.getElementById('modal-usuario-existente');
     const btnAceptar = document.getElementById('btn-aceptar');
 
@@ -171,6 +185,14 @@ document.addEventListener('DOMContentLoaded', function () {
     UI.enterAvanza(document.querySelector('.formulario'), {
         alFinal: () => document.getElementById('boton-verde').click()
     });
+
+    try {
+        const catalogos = await ipcRenderer.invoke('obtener-catalogos');
+        selectorAreas = AreasUsuario.crear(document.getElementById('areas'), catalogos);
+    } catch (error) {
+        console.error('No se pudieron cargar las áreas:', error);
+        UI.notificar('No se pudieron cargar las áreas. Verifique la conexión con la base de datos.', 'error');
+    }
 
     // Para pruebas: Si quieres mostrar el modal automáticamente al cargar la página
     // Descomenta la siguiente línea:

@@ -1,6 +1,9 @@
 const { ipcRenderer } = require('electron');
 
-document.addEventListener('DOMContentLoaded', function() {
+// Filtros de área, carrera y turno (se llenan con los catálogos de la BD)
+let filtros = null;
+
+document.addEventListener('DOMContentLoaded', async function() {
     // Botón de regresar
     document.getElementById('btn-regresar').addEventListener('click', () => {
         ipcRenderer.send('navigate', 'buscarusuariosactivos');
@@ -21,15 +24,26 @@ document.addEventListener('DOMContentLoaded', function() {
         mostrarMensaje(`Error en la búsqueda: ${error}`, 'error');
         limpiarResultados();
     });
+
+    try {
+        const catalogos = await ipcRenderer.invoke('obtener-catalogos');
+        filtros = AreasUsuario.llenarFiltros({
+            area: document.getElementById('area'),
+            carrera: document.getElementById('carrera'),
+            turno: document.getElementById('turno')
+        }, catalogos);
+    } catch (error) {
+        mostrarMensaje(`No se pudieron cargar las áreas: ${error.message}`, 'error');
+    }
 });
 
 function buscarGrupoUsuarios() {
-    const rol = document.getElementById('rol').value;
-    const carrera = document.getElementById('carrera').value;
-    const turno = document.getElementById('turno').value;
-    
-    // Enviar parámetros de búsqueda
-    ipcRenderer.send('buscar-grupo-usuarios', { rol, carrera, turno });
+    if (!filtros) {
+        mostrarMensaje('No se pudieron cargar las áreas', 'error');
+        return;
+    }
+    // Enviar parámetros de búsqueda ('' = todos)
+    ipcRenderer.send('buscar-grupo-usuarios', filtros.valores());
 }
 
 function mostrarResultados(usuarios) {

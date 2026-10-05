@@ -1,0 +1,129 @@
+/* Selector de áreas de un usuario (registro y edición). Hereda colores y estilo de los
+   select de cada formulario; aquí solo se acomodan las filas, las casillas y los botones. */
+.areas-usuario {
+    grid-column: 1 / -1;
+    container: areas / inline-size;
+}
+
+.areas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.areas-fila {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) minmax(190px, 1.3fr) minmax(250px, 1.6fr) auto auto;
+    gap: 16px;
+    align-items: end;
+    padding: 10px 12px;
+    border: 1px solid rgba(128, 128, 128, 0.4);
+    border-radius: 8px;
+}
+
+.areas-fila.invalida {
+    border-color: #f77474;
+    box-shadow: 0 0 0 1px #f77474;
+}
+
+.areas-campo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Mantiene la columna aunque el área no lleve carrera, para que las filas queden alineadas */
+.areas-campo.oculto {
+    visibility: hidden;
+}
+
+.areas-subtitulo {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-bottom: 4px;
+}
+
+.areas-usuario .areas-turnos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    padding: 6px 0;
+}
+
+/* Las reglas de los formularios (.campo input, .form-group label) no deben deformar las casillas */
+.areas-usuario .areas-turnos label,
+.areas-usuario .areas-principal {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: normal;
+    color: inherit;
+    opacity: 1;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.areas-usuario input[type="checkbox"],
+.areas-usuario input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.areas-principal {
+    padding-bottom: 6px;
+}
+
+.areas-quitar {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 2px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    font-size: 18px;
+    line-height: 1;
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.areas-quitar:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.areas-agregar {
+    margin-top: 10px;
+    padding: 8px 14px;
+    border: 1px dashed currentColor;
+    border-radius: 6px;
+    background: none;
+    color: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Espacio angosto (modal de edición o ventana chica): área y carrera arriba, turnos y principal abajo */
+@container areas (max-width: 860px) {
+    .areas-fila {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        grid-template-areas:
+            "area carrera quitar"
+            "turnos turnos principal";
+        row-gap: 10px;
+    }
+
+    .areas-fila > :nth-child(1) { grid-area: area; }
+    .areas-fila > :nth-child(2) { grid-area: carrera; }
+    .areas-fila > :nth-child(3) { grid-area: turnos; }
+    .areas-fila > .areas-principal { grid-area: principal; }
+    .areas-fila > .areas-quitar { grid-area: quitar; }
+}
