@@ -8,6 +8,8 @@ const fs = require('fs');
 const os = require('os');
 const config = require('./config');
 const plantillas = require('./plantillasCorreo');
+const { contenidoQR } = require('./qrFirmado');
+const sesionAdmin = require('./sesionAdmin');
 const { COLORES, ASSETS_DIR, obtenerLogos: obtenerLogosGafete } = require('./utils/identidad');
 
 let mainWindow;
@@ -104,9 +106,9 @@ async function generarCredencialPDF({ titulo, nombre, etiqueta, valor, subtitulo
   return pdfPath;
 }
 
-// Gafete del usuario: QR grande con su matrícula
+// Gafete del usuario: QR grande con su matrícula firmada (qrFirmado.js)
 async function generarGafetePDF(nombre, matricula) {
-  const qrPNG = await QRCode.toBuffer(matricula.toString(), {
+  const qrPNG = await QRCode.toBuffer(contenidoQR(matricula), {
     errorCorrectionLevel: 'M',
     margin: 1,
     width: 1000,
@@ -282,8 +284,14 @@ function setupEmailListeners(window) {
   // Evitar registrar listeners múltiples veces
   if (!listenersConfigured) {
     ipcMain.on('navigate', (event, routeName) => {
+      // Solo nombres de vista (sin rutas); las del administrador requieren su sesión
+      if (!/^[a-z]+$/.test(String(routeName))) return;
+      if (!sesionAdmin.puedeAbrir(event.sender, routeName)) {
+        console.warn(`[NAVIGATE] Vista de administrador sin sesión: ${routeName}`);
+        routeName = 'index';
+      }
       const viewPath = path.join(__dirname, '..', 'renderer', 'views', `${routeName}.html`);
-      console.log(`[NAVIGATE] Navegando a: ${routeName} (${viewPath})`);
+      console.log(`[NAVIGATE] Navegando a: ${routeName}`);
       // Se navega en la ventana que lo pidió (principal o lector de accesos)
       const ventana = BrowserWindow.fromWebContents(event.sender) || mainWindow;
       ventana.loadFile(viewPath).catch(err => {

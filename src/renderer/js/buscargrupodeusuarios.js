@@ -69,12 +69,12 @@ function mostrarResultados(usuarios) {
         
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${usuario.nombre}</td>
-            <td>${usuario.apellido_paterno}</td>
-            <td>${usuario.apellido_materno}</td>
-            <td>${usuario.matricula}</td>
-            <td>${usuario.numero_telefono}</td>
-            <td>${usuario.estatus}</td>
+            <td>${UI.escapar(usuario.nombre)}</td>
+            <td>${UI.escapar(usuario.apellido_paterno)}</td>
+            <td>${UI.escapar(usuario.apellido_materno)}</td>
+            <td>${UI.escapar(usuario.matricula)}</td>
+            <td>${UI.escapar(usuario.numero_telefono)}</td>
+            <td>${UI.escapar(usuario.estatus)}</td>
             <td>${fechaFormateada}</td>
             <td>${horaFormateada}</td>
         `;

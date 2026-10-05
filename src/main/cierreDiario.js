@@ -9,6 +9,7 @@ const path = require('path');
 const { app } = require('electron');
 const config = require('./config');
 const { crearNotificacion } = require('./notificaciones');
+const { respaldoDiario } = require('./respaldos');
 const { generarPdfCierre } = require('./utils/pdfCierreDiario');
 const { obtenerAreasDeUsuarios, areaPrincipal } = require('./areas');
 
@@ -148,6 +149,8 @@ async function revisar() {
   } finally {
     revisando = false;
   }
+  // 3) Respaldo de la BD, ya con el cierre del día aplicado
+  await respaldoDiario({ despuesDelCierre: new Date() >= horaDeCierreHoy(new Date()) });
 }
 
 // Devuelve la primera revisión para esperarla antes de abrir los lectores

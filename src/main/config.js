@@ -21,7 +21,9 @@ const config = {
   },
   admin: {
     usuario: process.env.ADMIN_USUARIO,
-    password: process.env.ADMIN_PASSWORD
+    password: process.env.ADMIN_PASSWORD,
+    // Minutos sin usar la ventana tras los que se cierra la sesión del administrador
+    inactividadMinutos: Number(process.env.ADMIN_INACTIVIDAD_MIN) || 10
   },
   correo: {
     usuario: process.env.GMAIL_USER,
@@ -47,6 +49,22 @@ const config = {
   cierre: {
     hora: process.env.CIERRE_HORA || '20:00',
     carpeta: process.env.CIERRE_CARPETA || null
+  },
+  // Respaldo diario de la BD (después de la hora de cierre) y bitácora de la app
+  respaldo: {
+    carpeta: process.env.RESPALDO_CARPETA || null,
+    dias: Number(process.env.RESPALDO_DIAS) || 30,
+    mysqldump: process.env.RESPALDO_MYSQLDUMP || null
+  },
+  bitacora: {
+    carpeta: process.env.BITACORA_CARPETA || null,
+    dias: Number(process.env.BITACORA_DIAS) || 30
+  },
+  // Abre la app al iniciar sesión en Windows (solo en la PC de producción)
+  iniciarConWindows: /^(si|sí|true|1)$/i.test(process.env.INICIAR_CON_WINDOWS || ''),
+  qr: {
+    // Acepta las credenciales anteriores (QR con solo la matrícula) mientras se reenvían las nuevas
+    aceptarSinFirma: /^(si|sí|true|1)$/i.test(process.env.QR_ACEPTAR_SIN_FIRMA || '')
   }
 };
 
