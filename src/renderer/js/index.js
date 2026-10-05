@@ -46,14 +46,17 @@ document.addEventListener('DOMContentLoaded', function () {
     togglePassword.classList.toggle('fa-eye-slash');
   });
 
-  btnAceptar.addEventListener('click', function () {
-    const usuario = usuarioInput.value.trim();
-    const contraseña = passwordInput.value;
+  // Las credenciales se validan en el proceso principal contra .env
+  btnAceptar.addEventListener('click', async function () {
+    const resultado = await ipcRenderer.invoke('login-admin', {
+      usuario: usuarioInput.value.trim(),
+      password: passwordInput.value
+    });
 
-    if (usuario === 'admin' && contraseña === 'root') {
+    if (resultado.ok) {
       ipcRenderer.send('navigate', 'administradoropciones');
     } else {
-      UI.notificar('Usuario o contraseña incorrectos 🤖', 'error', 3000);
+      UI.notificar(`${resultado.error} 🤖`, 'error', 3000);
       passwordInput.focus();
       passwordInput.select();
     }

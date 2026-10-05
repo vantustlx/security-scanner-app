@@ -2,17 +2,19 @@
 const { ipcMain } = require('electron');
 const mysql = require('mysql2');
 const path = require('path');
+const config = require('./config');
 
-let ultimoUsuarioVerificado = null; // Para almacenar el usuario verificado
-
-// Configuración de la conexión
+// Configuración de la conexión (credenciales en .env)
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'sistemaaccesofacultad',
-  port: 3306
+  host: config.db.host,
+  user: config.db.usuario,
+  password: config.db.password,
+  database: config.db.nombre,
+  port: config.db.port
 };
+if (!dbConfig.user || dbConfig.password === undefined) {
+  console.error('[DB] Falta configurar DB_USER y DB_PASSWORD en .env');
+}
 
 // Log para confirmar qué BD se está usando
 console.log(`[DB] Conectando a base de datos: ${dbConfig.database}`);
@@ -104,121 +106,7 @@ function setupDBListeners() {
         });
     });
 
-    // 5) VERIFICAR MATRÍCULA (y guardar en ultimoUsuarioVerificado)
-    ipcMain.on('verificar-matricula', (event, matricula) => {
-        const query = 'SELECT * FROM usuario WHERE matricula = ?';
-        console.log('Verificando matrícula:', matricula);
-        connection.query(query, [matricula], (err, results) => {
-            if (err) {
-                console.error('Error al consultar matrícula:', err);
-                return event.reply('resultado-verificacion', { success: false });
-            }
-            if (results.length > 0) {
-                // Registrar entrada o salida dependiendo de el registro en la tabla registroacceso
-                const query = 'SELECT * FROM registroacceso WHERE matricula = ? ORDER BY fecha_entrada DESC LIMIT 1';
-                connection.query(query, [matricula], (err, registros) => {
-                    if (err) {
-                        console.error('Error al consultar registro de acceso:', err);
-                        return event.reply('resultado-verificacion', { success: false });
-                    }
-                    if (registros.length > 0) {
-                        const ultimoRegistro = registros[0];
-                        if (ultimoRegistro.fecha_entrada != null && ultimoRegistro.fecha_salida != null) {
-                            console.log('Creando nuevo registro de acceso', matricula);
-                            const insertQuery = 'INSERT INTO registroacceso (matricula, fecha_entrada) VALUES (?, NOW())';
-                            const updateQuery = 'UPDATE usuario SET estatus = "Activo" WHERE matricula = ?';
-                            connection.query(insertQuery, [matricula], (err) => {
-                                if (err) {
-                                    console.error('Error al insertar registro de acceso:', err);
-                                    return event.reply('resultado-verificacion', { success: false });
-                                }
-                                connection.query(updateQuery, [matricula], (err) => {
-                                    if (err) {
-                                        console.error('Error al actualizar estatus del usuario:', err);
-                                        return event.reply('resultado-verificacion', { success: false });
-                                    }
-                                    event.reply('resultado-verificacion', { success: true });
-                                });
-                        });
-                        } else if(ultimoRegistro.fecha_entrada != null && ultimoRegistro.fecha_salida == null) {
-                            console.log('Actualizando a salida:', matricula);
-                            const updateQuery = 'UPDATE registroacceso  SET fecha_salida = NOW()WHERE id_registro = (SELECT id_registro FROM (SELECT id_registro FROM registroacceso  WHERE matricula = ?  ORDER BY fecha_entrada DESC  LIMIT 1 ) AS sub );';
-                            const updateestatusQuery = 'UPDATE usuario SET estatus = "Inactivo" WHERE matricula = ?';
-                            connection.query(updateQuery, [matricula], (err) => {
-                                if (err) {
-                                    console.error('Error al actualizar registro de acceso:', err);
-                                    return event.reply('resultado-verificacion', { success: false });
-                                }
-                                connection.query(updateestatusQuery, [matricula], (err) => {
-                                if (err) {
-                                    console.error('Error al actualizar estatus del usuario:', err);
-                                    return event.reply('resultado-verificacion', { success: false });
-                                }
-                                event.reply('resultado-verificacion', { success: true });
-                            });
-                            });
-                        } 
-                    } else {
-                        console.log('No se encontró registro de acceso existente, creando uno nuevo para la nueva matricula:', matricula);
-                        const insertQuery = 'INSERT INTO registroacceso (matricula, fecha_entrada) VALUES (?, NOW())';
-                        const updateQuery = 'UPDATE usuario SET estatus = "Activo" WHERE matricula = ?';
-                        connection.query(insertQuery, [matricula], (err) => {
-                            if (err) {
-                                console.error('Error al insertar registro de acceso:', err);
-                                return event.reply('resultado-verificacion', { success: false });
-                            }
-                            
-                            connection.query(updateQuery, [matricula], (err) => {
-                                if (err) {
-                                    console.error('Error al actualizar estatus del usuario:', err);
-                                    return event.reply('resultado-verificacion', { success: false });
-                                }
-                                event.reply('resultado-verificacion', { success: true });
-                            });
-                        });
-                        ultimoUsuarioVerificado = results[0];
-                    }
-                    ultimoUsuarioVerificado = results[0];
-                });
-            } else {
-                console.warn('Matrícula no encontrada:', matricula);
-                event.reply('resultado-verificacion', { success: false });
-            }
-        });
-    });
-
-    // 6) OBTENER ÚLTIMO USUARIO VERIFICADO
-    ipcMain.on('obtener-ultimo-usuario', (event) => {
-        //verificar si es la entrada o salida del usuario
-        let entrada_salida = null;
-        matricula = ultimoUsuarioVerificado.matricula
-        const query = 'SELECT * FROM registroacceso WHERE matricula = ? ORDER BY fecha_entrada DESC LIMIT 1';
-        connection.query(query, [matricula], (err, registros) => {
-            if (err) {
-                console.error('Error al consultar registro de acceso:', err);
-                return event.reply('resultado-verificacion', { success: false });
-            }
-            if (registros.length > 0) {
-                if(registros[0].fecha_salida == null){
-                    entrada_salida = "Entrada registrada"
-                }
-                else if(registros[0].fecha_salida != null){
-                    entrada_salida = "Salida registrada"
-                }
-            }
-            if (ultimoUsuarioVerificado) {
-            event.reply('enviar-ultimo-usuario', {
-                nombre: ultimoUsuarioVerificado.nombre,
-                apellido_paterno: ultimoUsuarioVerificado.apellido_paterno,
-                apellido_materno: ultimoUsuarioVerificado.apellido_materno,
-                matricula: ultimoUsuarioVerificado.matricula,
-                entrada_salida: entrada_salida
-            });
-        } else {
-            event.reply('enviar-ultimo-usuario', null);
-        }
-        });
-    });
+    // 5) y 6) El registro de entradas/salidas y la búsqueda por matrícula están en acceso.js
 
     // 7) ASOCIAR PLACA → INSERTAR EN vehiculo
     ipcMain.on('asociar-placa', (event, { matricula, placa }) => {
