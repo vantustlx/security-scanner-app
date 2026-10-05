@@ -1,10 +1,10 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro</title>
+  <title>Registro de visitante</title>
   <link rel="stylesheet" href="../css/stylesregistrarusuario.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,8 +19,16 @@
 
     <main class="container">
       <div class="registro">
-        <h1>Registro de visitante temporal</h1>
+        <h1>Registro de visitante</h1>
         <form class="formulario" method="POST" action="#">
+          <div class="campo">
+            <label for="tipo">Tipo de visitante</label>
+            <!-- Valores exactos del enum visitante.tipo -->
+            <select id="tipo" name="tipo" required>
+              <option value="Ocasional" selected>Ocasional (solo hoy)</option>
+              <option value="Frecuente">Frecuente (6 meses)</option>
+            </select>
+          </div>
           <div class="campo">
             <label for="motivo">Motivo de visita</label>
             <input type="text" id="motivo" name="motivo" required>
@@ -38,12 +46,12 @@
             <input type="text" id="apellidoM" name="apellidoM" required>
           </div>
           <div class="campo">
-            <label for="correo">Correo electrónico</label>
-            <input type="email" id="correo" name="correo" required>
-          </div>
-          <div class="campo">
             <label for="telefono">Número de teléfono</label>
             <input type="tel" id="telefono" name="telefono" required pattern="[0-9+\s-]{10,15}">
+          </div>
+          <div class="campo">
+            <label for="correo">Correo electrónico (opcional)</label>
+            <input type="email" id="correo" name="correo" placeholder="Para recibir tu pase con código de barras">
           </div>
 
           <div class="botones">
@@ -58,20 +66,23 @@
       <img src="../assets/backgroundwhite-bottom.png" alt="Decoración inferior">
     </div>
 
-    <!-- Modal: usuario existente -->
-    <div class="modal-overlay" id="modal-usuario-existente">
+    <!-- Modal: error al registrar -->
+    <div class="modal-overlay" id="modal-error">
       <div class="modal-content">
-        <h2>Registro ya existente</h2>
-        <p>Usuario ya registrado, intenta cambiar los datos.</p>
-        <button class="modal-btn" id="btn-aceptar">Aceptar</button>
+        <h2>No se pudo registrar</h2>
+        <p id="texto-error"></p>
+        <button class="modal-btn" id="btn-aceptar-error">Aceptar</button>
       </div>
     </div>
 
     <!-- Modal: registro exitoso -->
     <div class="modal-overlay" id="modal-visitante-exito">
       <div class="modal-content">
-        <h2>¡Registro exitoso!</h2>
-        <p id="texto-folio">Folio: </p>
+        <h2 id="titulo-exito">¡Registro exitoso!</h2>
+        <p>Tu folio es</p>
+        <p class="folio-visitante" id="texto-folio"></p>
+        <p id="texto-vigencia"></p>
+        <p id="texto-pase"></p>
         <button class="modal-btn" id="btn-aceptar-exito">Aceptar</button>
       </div>
     </div>
@@ -87,6 +98,7 @@
   </div>
 
   <script src="../js/ui.js"></script>
-  <script src="../js/registrovisitantetemporal.js"></script>
+  <script src="../js/registrovisitante.js"></script>
 </body>
+
 </html>

@@ -6,9 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnVolver    = document.getElementById('btn-volver-gst-accs');
 
   const modalFail = document.getElementById('modal-acceso-fallido');
+  const textoFail = modalFail.querySelector('p');
   const btnFail   = document.getElementById('btn-fallido');
 
   const modalOk   = document.getElementById('modal-acceso-exito');
+  const tituloOk  = modalOk.querySelector('h2');
   const textoOk   = document.getElementById('texto-acceso');
   const btnOk     = document.getElementById('btn-exito');
 
@@ -17,25 +19,27 @@ document.addEventListener('DOMContentLoaded', () => {
     ipcRenderer.send('navigate', 'registroguest');
   });
 
-  // Verificar el folio ingresado
-  btnVerificar.addEventListener('click', () => {
+  // El folio tecleado registra la entrada o la salida, igual que el código de barras en los lectores
+  btnVerificar.addEventListener('click', async () => {
     const folio = inputCodigo.value.trim();
     if (!folio) return;
-    ipcRenderer.send('verificar-codigo-acceso', folio);
+    btnVerificar.disabled = true;
+    try {
+      const resultado = await ipcRenderer.invoke('registrar-acceso-visitante', folio);
+      if (resultado.estado === 'RECHAZADO') {
+        textoFail.textContent = resultado.mensaje;
+        UI.abrirModal(modalFail, { alEscape: cerrarFallido });
+        return;
+      }
+      tituloOk.textContent = resultado.estado === 'ENTRADA' ? '¡Bienvenido!' : '¡Hasta pronto!';
+      textoOk.textContent = `${resultado.nombre} · ${resultado.rol} · ${resultado.mensaje}`;
+      inputCodigo.value = '';
+      UI.abrirModal(modalOk);
+    } finally {
+      btnVerificar.disabled = false;
+    }
   });
-
-  // Respuestas del backend
-  ipcRenderer.on('acceso-invalid', () => {
-    UI.abrirModal(modalFail, { alEscape: cerrarFallido });
-  });
-
-  ipcRenderer.on('acceso-valid', (event, data) => {
-    textoOk.innerHTML = `
-      Nombre: ${data.nombre} ${data.apellidoP} ${data.apellidoM}<br>
-      Tipo: ${data.tipo}
-    `;
-    UI.abrirModal(modalOk);
-  });
+  UI.enterAvanza(document.querySelector('.input-group'), { alFinal: () => btnVerificar.click() });
 
   // Cerrar modal “denegado”: vuelve al folio, seleccionado para reescribirlo
   function cerrarFallido() {

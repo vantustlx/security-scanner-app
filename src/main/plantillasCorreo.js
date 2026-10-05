@@ -13,6 +13,7 @@ const COLORES = {
 // Identificadores de las imágenes incrustadas (adjuntos con cid)
 const CID_LOGO_UATX = 'logo-uatx@fcbiyt';
 const CID_LOGO_FCBIYT = 'logo-fcbiyt@fcbiyt';
+const CID_CODIGO_BARRAS = 'codigo-barras@fcbiyt';
 
 function escapar(texto) {
   return String(texto).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -126,4 +127,27 @@ function correoRecuperacion({ nombre, matricula }) {
   };
 }
 
-module.exports = { CID_LOGO_UATX, CID_LOGO_FCBIYT, correoTerminos, correoCredencial, correoRecuperacion };
+function correoPaseVisitante({ nombre, folio, tipo, vigencia }) {
+  const frecuente = tipo === 'Frecuente';
+  const cuando = frecuente ? `hasta el <strong>${escapar(vigencia)}</strong>` : `el <strong>${escapar(vigencia)}</strong>`;
+  return {
+    asunto: 'Tu pase de visitante – FCBIyT',
+    html: layout({
+      titulo: 'Pase de visitante',
+      preencabezado: 'Presenta este código de barras en el lector de la entrada de la facultad.',
+      contenido:
+        parrafo(`Hola <strong>${escapar(nombre)}</strong>:`) +
+        parrafo(`Tu registro como <strong>visitante ${frecuente ? 'frecuente' : 'ocasional'}</strong> quedó listo. Presenta este código de barras en cualquiera de los lectores de la entrada de la facultad:`) +
+        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 20px 0;">
+          <tr><td align="center" style="padding:16px;background:#FFFFFF;">
+            <img src="cid:${CID_CODIGO_BARRAS}" width="300" alt="Código de barras ${escapar(folio)}" style="display:block;border:0;max-width:100%;height:auto;">
+          </td></tr>
+        </table>` +
+        aviso(`Tu folio es <strong>${escapar(folio)}</strong> y es válido ${cuando}. Si no puedes mostrar el código, teclea el folio en la opción "Acceder" del sistema de visitantes.`) +
+        parrafo(`<span style="font-size:13px;color:${COLORES.gris};">También adjuntamos tu pase en PDF por si prefieres imprimirlo.</span>`)
+    }),
+    texto: `Hola ${nombre}:\n\nTu registro como visitante ${frecuente ? 'frecuente' : 'ocasional'} quedó listo. Tu folio es ${folio} y es válido ${frecuente ? 'hasta el' : 'el'} ${vigencia}. Presenta el código de barras adjunto en el lector de la entrada o teclea tu folio en la opción "Acceder".`
+  };
+}
+
+module.exports = { CID_LOGO_UATX, CID_LOGO_FCBIYT, CID_CODIGO_BARRAS, correoTerminos, correoCredencial, correoRecuperacion, correoPaseVisitante };

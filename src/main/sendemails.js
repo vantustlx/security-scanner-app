@@ -1,7 +1,8 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
-const { ipcMain, BrowserWindow } = require('electron');
+const { ipcMain, BrowserWindow, nativeImage } = require('electron');
 const QRCode = require('qrcode');
+const bwipjs = require('bwip-js');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const os = require('os');
@@ -20,26 +21,20 @@ function validarEmail(email) {
   return regex.test(email);
 }
 
-// Genera el gafete de acceso (QR grande centrado) y devuelve la ruta del PDF
-async function generarGafetePDF(nombre, matricula) {
+// Credencial en PDF (gafete de usuario o pase de visitante) con el código centrado.
+// marco: 'decorado' (QR) o 'ninguno' (código de barras: el borde y los acentos impiden leerlo con cámara)
+async function generarCredencialPDF({ titulo, nombre, etiqueta, valor, subtitulo, codigoPNG, anchoCodigo, altoCodigo, archivo, marco = 'decorado' }) {
   const W = 300;
   const H = 510;
   const margen = 22;
   const anchoTexto = W - margen * 2;
-
-  const qrPNG = await QRCode.toBuffer(matricula.toString(), {
-    errorCorrectionLevel: 'M',
-    margin: 1,
-    width: 1000,
-    color: { dark: COLORES.guindaOscuro, light: '#FFFFFF' }
-  });
   const logos = obtenerLogosGafete();
 
-  const pdfPath = path.join(os.tmpdir(), `${matricula}_qr.pdf`);
+  const pdfPath = path.join(os.tmpdir(), archivo);
   const doc = new PDFDocument({
     size: [W, H],
     margin: 0,
-    info: { Title: `Credencial de acceso - ${matricula}`, Author: 'FCBIyT - UATx' }
+    info: { Title: `${titulo} - ${valor}`, Author: 'FCBIyT - UATx' }
   });
   const writeStream = fs.createWriteStream(pdfPath);
   doc.pipe(writeStream);
@@ -51,7 +46,7 @@ async function generarGafetePDF(nombre, matricula) {
   doc.rect(0, 90, W, 32).fill(COLORES.guinda);
   doc.rect(0, 122, W, 3).fill(COLORES.dorado);
   doc.font('Helvetica-Bold').fontSize(12).fillColor('#FFFFFF')
-    .text('CREDENCIAL DE ACCESO', 0, 100, { width: W, align: 'center', characterSpacing: 2 });
+    .text(titulo, 0, 100, { width: W, align: 'center', characterSpacing: 2 });
 
   // Nombre: se reduce la fuente hasta que quepa en una línea (mínimo 11 pt)
   let tamNombre = 18;
@@ -63,25 +58,35 @@ async function generarGafetePDF(nombre, matricula) {
     .text(nombre, margen, 140, { width: anchoTexto, align: 'center' });
 
   doc.font('Helvetica').fontSize(8).fillColor(COLORES.gris)
-    .text('MATRÍCULA', margen, 178, { width: anchoTexto, align: 'center', characterSpacing: 1.5 });
+    .text(etiqueta, margen, 178, { width: anchoTexto, align: 'center', characterSpacing: 1.5 });
   doc.font('Helvetica-Bold').fontSize(15).fillColor(COLORES.texto)
-    .text(matricula.toString(), margen, 189, { width: anchoTexto, align: 'center', characterSpacing: 1 });
+    .text(String(valor), margen, 189, { width: anchoTexto, align: 'center', characterSpacing: 1 });
+  if (subtitulo) {
+    doc.font('Helvetica').fontSize(9).fillColor(COLORES.texto)
+      .text(subtitulo, margen, 212, { width: anchoTexto, align: 'center' });
+  }
 
-  // QR enmarcado en dorado, con acentos cuadrados como en el logo de la FCBIyT
-  const tamQR = 200;
+  // Código enmarcado en dorado, centrado en su zona, con acentos cuadrados como en el logo de la FCBIyT
   const relleno = 9;
-  const marco = tamQR + relleno * 2;
-  const marcoX = (W - marco) / 2;
-  const marcoY = 214;
-  doc.rect(marcoX - 8, marcoY - 8, 14, 14).fill(COLORES.guinda);
-  doc.rect(marcoX - 14, marcoY + 10, 7, 7).fill(COLORES.dorado);
-  doc.rect(marcoX + marco - 6, marcoY + marco - 6, 14, 14).fill(COLORES.guinda);
-  doc.rect(marcoX + marco + 7, marcoY + marco - 17, 7, 7).fill(COLORES.gris);
-  doc.roundedRect(marcoX, marcoY, marco, marco, 10).fillAndStroke('#FFFFFF', COLORES.dorado);
-  doc.image(qrPNG, marcoX + relleno, marcoY + relleno, { width: tamQR });
+  const marcoAncho = anchoCodigo + relleno * 2;
+  const marcoAlto = altoCodigo + relleno * 2;
+  const zonaInicio = subtitulo ? 232 : 214;
+  const zonaFin = 432;
+  const marcoX = (W - marcoAncho) / 2;
+  const marcoY = zonaInicio + Math.max(0, (zonaFin - zonaInicio - marcoAlto) / 2);
+  if (marco === 'decorado') {
+    doc.rect(marcoX - 8, marcoY - 8, 14, 14).fill(COLORES.guinda);
+    doc.rect(marcoX - 14, marcoY + 10, 7, 7).fill(COLORES.dorado);
+    doc.rect(marcoX + marcoAncho - 6, marcoY + marcoAlto - 6, 14, 14).fill(COLORES.guinda);
+    doc.rect(marcoX + marcoAncho + 7, marcoY + marcoAlto - 17, 7, 7).fill(COLORES.gris);
+  }
+  if (marco !== 'ninguno') {
+    doc.roundedRect(marcoX, marcoY, marcoAncho, marcoAlto, 10).fillAndStroke('#FFFFFF', COLORES.dorado);
+  }
+  doc.image(codigoPNG, marcoX + relleno, marcoY + relleno, { width: anchoCodigo, height: altoCodigo });
 
   doc.font('Helvetica').fontSize(8.5).fillColor(COLORES.gris)
-    .text('Presenta este código en el lector de la entrada', margen, marcoY + marco + 11, { width: anchoTexto, align: 'center' });
+    .text('Presenta este código en el lector de la entrada', margen, marcoY + marcoAlto + 11, { width: anchoTexto, align: 'center' });
 
   // Pie institucional
   doc.rect(0, H - 47, W, 3).fill(COLORES.dorado);
@@ -97,6 +102,72 @@ async function generarGafetePDF(nombre, matricula) {
     writeStream.on('error', reject);
   });
   return pdfPath;
+}
+
+// Gafete del usuario: QR grande con su matrícula
+async function generarGafetePDF(nombre, matricula) {
+  const qrPNG = await QRCode.toBuffer(matricula.toString(), {
+    errorCorrectionLevel: 'M',
+    margin: 1,
+    width: 1000,
+    color: { dark: COLORES.guindaOscuro, light: '#FFFFFF' }
+  });
+  return generarCredencialPDF({
+    titulo: 'CREDENCIAL DE ACCESO',
+    nombre,
+    etiqueta: 'MATRÍCULA',
+    valor: matricula,
+    codigoPNG: qrPNG,
+    anchoCodigo: 200,
+    altoCodigo: 200,
+    archivo: `${matricula}_qr.pdf`
+  });
+}
+
+// Code 128 con "V-" + folio: las matrículas son solo dígitos, así no se confunden en los lectores
+function textoCodigoVisitante(folio) {
+  return `V-${folio}`;
+}
+
+// Fondo blanco (en correos con modo oscuro uno transparente queda ilegible) y zona de silencio
+// a los lados, que los lectores necesitan para detectar dónde empieza y termina el código
+async function generarCodigoBarras(folio) {
+  return bwipjs.toBuffer({
+    bcid: 'code128',
+    text: textoCodigoVisitante(folio),
+    scale: 4,
+    height: 14,
+    includetext: true,
+    textxalign: 'center',
+    textsize: 11,
+    backgroundcolor: 'FFFFFF',
+    paddingwidth: 12,
+    paddingheight: 4
+  });
+}
+
+function formatoVigencia(fecha) {
+  return new Date(fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// Pase del visitante: el mismo diseño del gafete con un código de barras
+async function generarPaseVisitantePDF({ nombre, folio, tipo, vigenteHasta, codigoPNG }) {
+  const { width, height } = nativeImage.createFromBuffer(codigoPNG).getSize();
+  const anchoCodigo = 238;
+  return generarCredencialPDF({
+    titulo: 'PASE DE VISITANTE',
+    nombre,
+    etiqueta: 'FOLIO',
+    valor: folio,
+    subtitulo: tipo === 'Frecuente'
+      ? `Visitante frecuente · Vigente hasta el ${formatoVigencia(vigenteHasta)}`
+      : `Visitante ocasional · Válido el ${formatoVigencia(vigenteHasta)}`,
+    codigoPNG,
+    anchoCodigo,
+    altoCodigo: Math.round(anchoCodigo * height / width),
+    archivo: `pase_${folio}.pdf`,
+    marco: 'ninguno'
+  });
 }
 
 function obtenerTransporter() {
@@ -187,6 +258,24 @@ async function enviarCorreoRecuperacion(email, nombre, matricula) {
   }
 }
 
+// Pase del visitante: el código de barras va en el cuerpo del correo y en el PDF adjunto
+async function enviarPaseVisitante({ correo, nombre, folio, tipo, vigenteHasta }) {
+  const codigoPNG = await generarCodigoBarras(folio);
+  const pdfPath = await generarPaseVisitantePDF({ nombre, folio, tipo, vigenteHasta, codigoPNG });
+  try {
+    await enviarCorreo({
+      para: correo,
+      plantilla: plantillas.correoPaseVisitante({ nombre, folio, tipo, vigencia: formatoVigencia(vigenteHasta) }),
+      adjuntos: [
+        { filename: 'codigo-barras.png', content: codigoPNG, cid: plantillas.CID_CODIGO_BARRAS },
+        { filename: `Pase_visitante_${folio}.pdf`, path: pdfPath }
+      ]
+    });
+  } finally {
+    fs.unlink(pdfPath, () => {});
+  }
+}
+
 function setupEmailListeners(window) {
   mainWindow = window;
 
@@ -221,5 +310,7 @@ module.exports = {
   generarGafetePDF,
   enviarCorreoTerminos,
   enviarCredencial,
-  enviarCorreoRecuperacion
+  enviarCorreoRecuperacion,
+  enviarPaseVisitante,
+  textoCodigoVisitante
 };
