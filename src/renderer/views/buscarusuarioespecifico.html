@@ -45,14 +45,39 @@
                         <th>Matrícula</th>
                         <th>Teléfono</th>
                         <th>Estado</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
+                        <th>Fecha de registro</th>
+                        <th>Hora de entrada</th>
+                        <th>Hora de salida</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- Aquí van los resultados -->
                 </tbody>
             </table>
+        </div>
+        <p class="ayuda-tabla">Las horas son del último acceso de hoy. Da clic en el usuario para ver todas sus entradas y salidas del día.</p>
+    </div>
+
+    <!-- Entradas y salidas de hoy del usuario seleccionado -->
+    <div class="modal-overlay" id="modal-accesos">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="accesos-titulo">
+            <div class="modal-header">
+                <h2 id="accesos-titulo">Entradas y salidas de hoy</h2>
+                <button class="modal-cerrar" id="accesos-cerrar" aria-label="Cerrar">&times;</button>
+            </div>
+            <p class="accesos-usuario" id="accesos-usuario"></p>
+            <div class="accesos-lista">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Entrada</th>
+                            <th>Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accesos-cuerpo"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
