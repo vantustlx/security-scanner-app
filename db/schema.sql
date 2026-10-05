@@ -1,6 +1,6 @@
 -- ===========================================================
 -- Esquema de la base de datos sistemaaccesofacultad (MySQL 8.0)
--- Crea la BD, sus tablas y el catálogo de carreras. No incluye datos
+-- Crea la BD, sus tablas y los catálogos (carreras, áreas y turnos). No incluye datos
 -- de usuarios, visitantes ni registros de acceso.
 -- Uso: mysql -u root -p < db/schema.sql
 -- ===========================================================
@@ -17,6 +17,19 @@ CREATE TABLE IF NOT EXISTS `carrera` (
   `nombre_carrera` varchar(100) NOT NULL,
   PRIMARY KEY (`id_carrera`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS `area` (
+  `id_area` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  `requiere_carrera` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'El área se asigna junto con una carrera',
+  PRIMARY KEY (`id_area`),
+  UNIQUE KEY `uq_area_nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Áreas o papeles de las personas en la facultad';
+CREATE TABLE IF NOT EXISTS `turno` (
+  `id_turno` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(30) NOT NULL,
+  PRIMARY KEY (`id_turno`),
+  UNIQUE KEY `uq_turno_nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 CREATE TABLE IF NOT EXISTS `usuario` (
   `matricula` int NOT NULL,
   `nombre` varchar(50) DEFAULT NULL,
@@ -26,14 +39,31 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   `fecha_registro` date DEFAULT NULL,
   `numero_telefono` varchar(15) DEFAULT NULL,
   `correo` varchar(100) DEFAULT NULL,
-  `turno` enum('Matutino','Vespertino') DEFAULT NULL,
-  `rol_facultad` enum('Estudiante','Docente','Administrativo') DEFAULT NULL,
   `estatus` enum('Activo','Inactivo') DEFAULT NULL,
-  `id_carrera` int DEFAULT NULL,
   `fecha_aceptacion_terminos` datetime DEFAULT NULL,
-  PRIMARY KEY (`matricula`),
-  KEY `fk_usuario_carrera` (`id_carrera`),
-  CONSTRAINT `fk_usuario_carrera` FOREIGN KEY (`id_carrera`) REFERENCES `carrera` (`id_carrera`)
+  PRIMARY KEY (`matricula`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS `usuario_area` (
+  `id_usuario_area` int NOT NULL AUTO_INCREMENT,
+  `matricula` int NOT NULL,
+  `id_area` int NOT NULL,
+  `id_carrera` int DEFAULT NULL COMMENT 'Solo en áreas con requiere_carrera',
+  `principal` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Área que se muestra en el lector y en los reportes',
+  PRIMARY KEY (`id_usuario_area`),
+  KEY `idx_usuario_area_matricula` (`matricula`),
+  KEY `idx_usuario_area_area` (`id_area`),
+  KEY `idx_usuario_area_carrera` (`id_carrera`),
+  CONSTRAINT `fk_usuario_area_area` FOREIGN KEY (`id_area`) REFERENCES `area` (`id_area`),
+  CONSTRAINT `fk_usuario_area_carrera` FOREIGN KEY (`id_carrera`) REFERENCES `carrera` (`id_carrera`),
+  CONSTRAINT `fk_usuario_area_usuario` FOREIGN KEY (`matricula`) REFERENCES `usuario` (`matricula`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS `usuario_area_turno` (
+  `id_usuario_area` int NOT NULL,
+  `id_turno` int NOT NULL,
+  PRIMARY KEY (`id_usuario_area`,`id_turno`),
+  KEY `idx_usuario_area_turno_turno` (`id_turno`),
+  CONSTRAINT `fk_uat_turno` FOREIGN KEY (`id_turno`) REFERENCES `turno` (`id_turno`),
+  CONSTRAINT `fk_uat_usuario_area` FOREIGN KEY (`id_usuario_area`) REFERENCES `usuario_area` (`id_usuario_area`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 CREATE TABLE IF NOT EXISTS `visitante` (
   `id_visitante` int NOT NULL AUTO_INCREMENT,
@@ -93,9 +123,7 @@ CREATE TABLE IF NOT EXISTS `registro_pendiente` (
   `fecha_nacimiento` date DEFAULT NULL,
   `numero_telefono` varchar(15) DEFAULT NULL,
   `correo` varchar(100) NOT NULL,
-  `turno` enum('Matutino','Vespertino') DEFAULT NULL,
-  `rol_facultad` enum('Estudiante','Docente','Administrativo') DEFAULT NULL,
-  `id_carrera` int DEFAULT NULL,
+  `areas` json DEFAULT NULL COMMENT '[{id_area, id_carrera, turnos: [id_turno], principal}]',
   `fecha_solicitud` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expira_en` datetime NOT NULL,
   PRIMARY KEY (`token`),
@@ -133,5 +161,21 @@ INSERT  IGNORE INTO `carrera` VALUES (1,'Ingenieria en Computacion'),
 (4,'Ingenieria en sistemas electronicos'),
 (5,'Quimica Industrial'),
 (6,'Matematicas aplicadas');
+
+-- Áreas de la facultad (requiere_carrera = 1: la persona elige carrera en esa área)
+INSERT  IGNORE INTO `area` VALUES (1,'Estudiante',1),
+(2,'Docente',1),
+(3,'Administrativo',1),
+(4,'Dirección',1),
+(5,'Jardinería',0),
+(6,'Limpieza',0),
+(7,'Seguridad',0),
+(8,'Cafetería',0);
+
+-- Turnos (una combinación de área puede tener varios)
+INSERT  IGNORE INTO `turno` VALUES (1,'Matutino'),
+(2,'Vespertino'),
+(3,'Nocturno'),
+(4,'Tiempo completo');
 
 SET FOREIGN_KEY_CHECKS = 1;
