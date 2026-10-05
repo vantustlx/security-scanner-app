@@ -20,8 +20,25 @@ function limpiarFormulario() {
     errores.forEach(error => error.remove());
 }
 
+// Mensajes del modal según el resultado del registro
+const MENSAJES_MODAL = {
+    'usuario-ya-existe': ['Registro ya existente', 'Usuario ya registrado intente cambiar los datos'],
+    'solicitud-pendiente': ['Solicitud pendiente', 'Esta matrícula ya tiene una solicitud de registro esperando la confirmación del usuario por correo'],
+    'error': ['No se pudo enviar el registro', 'Verifique la conexión a internet e intente de nuevo']
+};
+
+function mostrarModal(estado, detalle) {
+    const [titulo, mensaje] = MENSAJES_MODAL[estado] || MENSAJES_MODAL.error;
+    const modal = document.getElementById('modal-usuario-existente');
+    modal.querySelector('h2').textContent = titulo;
+    modal.querySelector('p').textContent = detalle ? `${mensaje} (${detalle})` : mensaje;
+    modal.dataset.limpiar = estado === 'usuario-ya-existe';
+    modal.classList.add('active');
+}
+
 // Botón verde: validar y enviar
-document.getElementById('boton-verde').addEventListener('click', function () {
+document.getElementById('boton-verde').addEventListener('click', async function () {
+    const boton = this;
     const form = document.querySelector('.formulario');
     const campos = form.querySelectorAll('.campo');
     let valido = true;
@@ -43,7 +60,6 @@ document.getElementById('boton-verde').addEventListener('click', function () {
     const turno = document.getElementById('turno');
     const rol = document.getElementById('rol');
     const carrera = document.getElementById('carrera');
-    const estatus = "Inactivo";
 
     const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/;
     const soloNumeros = /^\d+$/;
@@ -95,43 +111,38 @@ if (!/^(\d{4}|\d{8})$/.test(matricula.value)) {
 
 
 
-    if (valido) {
-        // Recopilar datos del formulario
-        const datosUsuario = {
-            matricula: parseInt(matricula.value),
-            nombre: nombre.value,
-            apellido_paterno: apellidoP.value,
-            apellido_materno: apellidoM.value,
-            fecha_nacimiento: fechaNacimiento.value,
-            fecha_registro: new Date().toISOString().split('T')[0],
-            numero_telefono: telefono.value,
-            correo: correo.value,
-            turno: turno.value,
-            rol_facultad: rol.value,
-            id_carrera: parseInt(carrera.value),
-            estatus: estatus,
-        };
+    if (!valido) return;
 
-        // Enviar datos para registrar
-        ipcRenderer.send('registrar-usuario-completo', datosUsuario);
+    // El usuario se guarda hasta que acepte los Términos y Condiciones desde su correo
+    const datosUsuario = {
+        matricula: parseInt(matricula.value),
+        nombre: nombre.value.trim(),
+        apellido_paterno: apellidoP.value.trim(),
+        apellido_materno: apellidoM.value.trim(),
+        fecha_nacimiento: fechaNacimiento.value,
+        numero_telefono: telefono.value,
+        correo: correo.value.trim(),
+        turno: turno.value,
+        rol_facultad: rol.value,
+        id_carrera: parseInt(carrera.value)
+    };
+
+    const textoOriginal = boton.textContent;
+    boton.disabled = true;
+    boton.textContent = 'Enviando...';
+    try {
+        const resultado = await ipcRenderer.invoke('registrar-usuario', datosUsuario);
+        if (resultado.estado === 'enviado') {
+            ipcRenderer.send('navigate', 'registroexitoso');
+            return;
+        }
+        mostrarModal(resultado.estado, resultado.mensaje);
+    } catch (error) {
+        mostrarModal('error', error.message);
+    } finally {
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
     }
-
-    // Escuchar respuesta de si ya existe
-    ipcRenderer.on('usuario-ya-existe', () => {
-        const modal = document.getElementById('modal-usuario-existente');
-        if (modal) modal.classList.add('active');
-    });
-
-    // Escuchar si fue exitoso
-    ipcRenderer.on('registro-exitoso', (event, id) => {
-        console.log('Usuario insertado con ID:', id);
-        ipcRenderer.send('enviar-correo', { nombre: nombre.value, email: correo.value, matricula: matricula.value });
-        ipcRenderer.send('navigate', 'waitconfirm');
-        setTimeout(() => {
-            ipcRenderer.send('apuntador-matricula', { matricula: matricula.value });
-        }, 500);
-    });
-
 });
 
 // Configuración del modal cuando se carga el documento
@@ -143,8 +154,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnAceptar) {
         btnAceptar.addEventListener('click', function () {
             modal.classList.remove('active');
-            // Limpiar el formulario después de cerrar el modal
-            limpiarFormulario();
+            // Limpiar el formulario solo si la matrícula ya estaba registrada
+            if (modal.dataset.limpiar === 'true') limpiarFormulario();
         });
     }
 
@@ -152,8 +163,8 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             modal.classList.remove('active');
-            // Limpiar el formulario después de cerrar el modal
-            limpiarFormulario();
+            // Limpiar el formulario solo si la matrícula ya estaba registrada
+            if (modal.dataset.limpiar === 'true') limpiarFormulario();
         }
     });
 

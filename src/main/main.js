@@ -1,7 +1,9 @@
 const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
-const { setupDBListeners } = require('./database');
+const { setupDBListeners, pool } = require('./database');
 const { setupEmailListeners } = require('./sendemails');
+const { setupNotificaciones } = require('./notificaciones');
+const { setupRegistro } = require('./registro');
 const { generateGroupReportPDF } = require('./utils/pdfGenerator'); 
 const { generateUserReportPDF } = require('./utils/pdfGeneratorspecific'); 
 
@@ -56,6 +58,9 @@ app.whenReady().then(() => {
   // Configurar listeners de email después de crear la ventana
   // porque necesita la referencia a win
   setupEmailListeners(win);
+  setupNotificaciones(pool);
+  // Recoge las confirmaciones de registro recibidas mientras la app estaba cerrada
+  setupRegistro(pool);
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
