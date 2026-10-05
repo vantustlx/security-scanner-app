@@ -21,6 +21,22 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
 
     console.log('Generando PDF para usuario:', usuario.nombre, usuario.apellido_paterno);
 
+    ///////////////////////////////////////////////
+    //console.log("Modificar a partir de aqui")
+
+    const maximo_permitido = 5;
+    const conteo = {};
+
+    const claveDia = (fecha) => new Date(fecha).toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+
+    registros.forEach(r => {
+        const dia = claveDia(r.fecha_entrada);
+        conteo[dia] = (conteo[dia] || 0) + 1;
+    });
+
+    console.log(conteo);
+    ///////////////////////////////////////////////
+
     // Pedir al usuario dónde guardar
     const { filePath } = await dialog.showSaveDialog(mainWindow, {
         title: 'Guardar reporte PDF',
@@ -132,8 +148,13 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
     let rowY = tableStartY + headerHeight;
 
     registros.forEach((registro, index) => {
-        // Alternar colores de fondo
-        const bgColor = index % 2 === 0 ? '#ffffff' : '#f7fafc';
+        const dia = registro.fecha_entrada ? claveDia(registro.fecha_entrada) : null;
+        const excede = dia && conteo[dia] >= maximo_permitido;
+
+        // Rojo claro si el día alcanzó el máximo; si no, el alternado de siempre
+        const bgColor = excede
+            ? '#fed7d7'
+            : (index % 2 === 0 ? '#ffffff' : '#f7fafc');
 
         doc.rect(50, rowY - 1, 512, rowHeight)
             .fill(bgColor);
@@ -145,7 +166,8 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
             .lineWidth(0.5)
             .stroke();
 
-        doc.fillColor('#1a202c');
+        doc.font(excede ? 'Helvetica-Bold' : 'Helvetica')
+            .fillColor(excede ? '#9b2c2c' : '#1a202c');
 
         // 1. Número
         doc.text((index + 1).toString(), columnPositions[0], rowY + 3, {
@@ -156,12 +178,12 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
         // 2. Fecha entrada
         const entrada = registro.fecha_entrada
             ? new Date(registro.fecha_entrada).toLocaleString('es-MX', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit'
-              })
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
             : 'N/A';
 
         doc.text(entrada, columnPositions[1] + 3, rowY + 3, {
@@ -172,12 +194,12 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
         // 3. Fecha salida
         const salida = registro.fecha_salida
             ? new Date(registro.fecha_salida).toLocaleString('es-MX', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit'
-              })
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
             : 'N/A';
 
         doc.text(salida, columnPositions[2] + 3, rowY + 3, {
