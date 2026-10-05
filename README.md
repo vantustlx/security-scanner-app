@@ -30,6 +30,12 @@ Copia `.env.example` como `.env` y completa los valores. Las credenciales solo v
 | `CONFIRMACION_URL`, `CONFIRMACION_API_KEY` | Buzón de confirmaciones (Cloudflare Worker) |
 | `LECTOR_PEATONAL`, `LECTOR_ENTRADA_VEHICULAR`, `LECTOR_SALIDA_VEHICULAR` | Puerto COM de cada escáner (se llenan desde la app) |
 | `CIERRE_HORA` | Hora del cierre diario (por defecto `20:00`) |
+| `QR_SECRETO` | Firma de los QR de las credenciales. Si falta, la app lo genera al iniciar. **Respáldalo**: si cambia, todas las credenciales dejan de servir |
+| `QR_ACEPTAR_SIN_FIRMA` | `si` acepta temporalmente los QR anteriores (solo la matrícula) mientras se reenvían |
+| `ADMIN_INACTIVIDAD_MIN` | Minutos sin uso tras los que se cierra el modo administrador (por defecto 10) |
+| `INICIAR_CON_WINDOWS` | `si` abre la app al iniciar sesión en Windows (solo en la PC de producción) |
+| `RESPALDO_CARPETA`, `RESPALDO_DIAS`, `RESPALDO_MYSQLDUMP` | Respaldo diario de la BD (carpeta, días que se conservan, ruta de `mysqldump.exe`) |
+| `BITACORA_CARPETA`, `BITACORA_DIAS` | Bitácora de la app, un archivo por día |
 
 ## Base de datos
 
@@ -61,7 +67,9 @@ Los escáneres se leen desde el proceso principal, así que funcionan aunque la 
 | 2 · Entrada vehicular | Siempre registra entrada |
 | 3 · Salida vehicular | Siempre cierra la entrada abierta, sin importar por dónde entró |
 
-Las incoherencias no bloquean el paso: se muestran al vigilante con ⚠ y llegan a **Notificaciones** (entrar en vehículo con una entrada abierta, salir sin entrada, usar los lectores vehiculares sin vehículo registrado). Un QR que no es una matrícula o una matrícula inexistente se rechazan y se registran en `accesos_fallidos`. La cámara de la ventana del lector queda como respaldo y registra con el lector que se elija.
+Las incoherencias no bloquean el paso: se muestran al vigilante con ⚠ y llegan a **Notificaciones** (entrar en vehículo con una entrada abierta, salir sin entrada, usar los lectores vehiculares sin vehículo registrado). Un código desconocido, un QR con firma inválida o una matrícula inexistente se rechazan y se registran en `accesos_fallidos`.
+
+El QR de la credencial lleva la matrícula y una firma (`FCB<matrícula>K<firma>`, calculada con `QR_SECRETO`), para que nadie pueda generar el QR de otra persona escribiendo su matrícula. Las credenciales anteriores, que solo traen la matrícula, se rechazan salvo con `QR_ACEPTAR_SIN_FIRMA=si`; se reenvían desde **Modo administrador → Recuperar QR**. La cámara de la ventana del lector queda como respaldo y registra con el lector que se elija.
 
 ## Visitantes
 
@@ -91,6 +99,8 @@ A la hora de `CIERRE_HORA` (por defecto 20:00) la app:
 3. Deja a todos los usuarios con estatus Inactivo y avisa en **Notificaciones**, con un botón para ver el PDF.
 
 Si la app estaba apagada a esa hora, al iniciar cierra las entradas de días anteriores y genera el PDF correspondiente.
+
+Después del cierre se respalda la BD con `mysqldump` en `Documentos\Sistema de Acceso FCBIyT\Respaldos` (o `RESPALDO_CARPETA`) y se conservan 30 días. Si el respaldo falla, llega un aviso a **Notificaciones**. Para restaurar uno: `mysql -u root -p sistemaaccesofacultad < respaldo_AAAA-MM-DD_HHMM.sql`.
 
 ## Registro de usuarios
 
@@ -138,3 +148,21 @@ Si la aplicación se cierra al instante sin mostrar errores, reinstala Electron:
 rm -rf node_modules/electron node_modules/.package-lock.json
 npm install
 ```
+
+`npm run dev` abre la app con las herramientas de desarrollo habilitadas. Con `npm start` están bloqueadas (también Ctrl+R y F5), igual que la navegación a páginas externas.
+
+## Seguridad
+
+- Las vistas del modo administrador solo se abren después de iniciar sesión. La sesión se cierra al volver al inicio o tras `ADMIN_INACTIVIDAD_MIN` minutos sin usar la ventana. Tras 5 contraseñas incorrectas seguidas, el inicio de sesión espera 30 segundos.
+- Los datos personales se validan también en el proceso principal antes de guardarse.
+- La bitácora (`Documentos\Sistema de Acceso FCBIyT\Bitacora`) guarda lo que la app escribe en consola, incluidos los errores, un archivo por día.
+
+## Puesta en producción
+
+1. **MySQL 8** instalado como servicio con inicio **Automático** (`services.msc` → `MySQL80`) y una contraseña fuerte para `root`.
+2. **BD limpia:** `mysql -u root -p < db/schema.sql`. No copies la BD de desarrollo: tiene usuarios y accesos de prueba.
+3. **Usuario de la app:** edita la contraseña en `db/usuario_app.sql`, ejecútalo con root y usa `DB_USER=acceso_app` en `.env`.
+4. **`.env`:** completa todas las variables. Agrega `INICIAR_CON_WINDOWS=si` y apunta `RESPALDO_CARPETA` a una carpeta sincronizada (OneDrive o Google Drive). Guarda una copia del `.env` fuera de la PC: contiene `QR_SECRETO`.
+5. **App:** `npm ci` y `npm start`. En la ventana del lector usa **Configurar lectores** para asignar los tres escáneres.
+6. **Windows:** usa una cuenta estándar (sin permisos de administrador) en la PC de la caseta y desactiva la suspensión automática.
+7. **Gmail:** usa una cuenta institucional con contraseña de aplicación. Gmail permite unos 500 correos al día.
