@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Actualizar Datos Personales</title>
+    <title>Reporte de Usuario Específico</title>
     <link rel="stylesheet" href="../css/stylesgenerarreporteusuariosespecifico.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,31 +15,62 @@
             <h1>REPORTE DE USUARIO ESPECIFICO</h1>
         </div>
 
-        <div class="formulario-filtros">
+        <!-- Paso 1: buscar a las personas que coinciden -->
+        <div class="formulario-filtros" id="filtros">
             <div class="campo">
                 <label>Nombre</label>
-                <input type="text" placeholder="Ejemplo: Jose" name = "nombre">
+                <input type="text" placeholder="Ejemplo: Jose" name="nombre">
             </div>
             <div class="campo">
                 <label>Apellido paterno</label>
-                <input type="text" placeholder="Ejemplo: Hernández " name = "apellidoPaterno">
+                <input type="text" placeholder="Ejemplo: Hernández" name="apellidoPaterno">
             </div>
             <div class="campo">
                 <label>Apellido materno</label>
-                <input type="text" placeholder="Ejemplo: Vázquez" name = "apellidoMaterno">
+                <input type="text" placeholder="Ejemplo: Vázquez" name="apellidoMaterno">
             </div>
-            <div class="campo">
-                <label >Fecha de inicio</label>
-                <input type="date" id="fechaInicio" name="fechaInicio" required>
+            <div class="campo campo-matricula">
+                <label>Matrícula</label>
+                <input type="text" inputmode="numeric" placeholder="Ejemplo: 20222009" name="matricula">
             </div>
+            <button id="btn-buscar" class="btn-generar">Buscar</button>
+        </div>
 
-            <div class="campo">
-                <label >Fecha fin</label>
-                <input type="date" id="fechaFin" name="fechaFin" required>
+        <!-- Paso 2: elegir a la persona -->
+        <div class="resultados" id="resultados" hidden>
+            <p class="resultados-titulo" id="resultados-titulo"></p>
+            <div class="tabla-candidatos">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre completo</th>
+                            <th>Matrícula</th>
+                            <th>Área principal</th>
+                            <th>Correo</th>
+                            <th>Placas</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidatos"></tbody>
+                </table>
             </div>
-            <button id="btn-generar" class="btn-generar">
-                Generar reporte
-            </button>
+        </div>
+
+        <!-- Paso 3: período y generar -->
+        <div class="panel-reporte" id="panel-reporte" hidden>
+            <p class="seleccionado">Usuario seleccionado: <strong id="seleccionado"></strong></p>
+            <div class="fechas-reporte" id="fechas">
+                <div class="campo">
+                    <label>Fecha de inicio (opcional)</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio">
+                </div>
+                <div class="campo">
+                    <label>Fecha fin (opcional)</label>
+                    <input type="date" id="fechaFin" name="fechaFin">
+                </div>
+                <button id="btn-generar" class="btn-generar">Generar reporte</button>
+            </div>
+            <p class="ayuda">Deja las fechas vacías para incluir todo su historial de accesos.</p>
         </div>
     </div>
 

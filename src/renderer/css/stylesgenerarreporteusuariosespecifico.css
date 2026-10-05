@@ -252,3 +252,79 @@ table th {
 .btn-generar:hover {
     background-color: #34492e;
 }
+
+/* Búsqueda en pasos: coincidencias, persona elegida y período del reporte */
+[hidden] {
+    display: none !important;
+}
+
+.formulario-filtros .campo-matricula {
+    flex: 0.8;
+}
+
+.resultados-titulo {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #444;
+}
+
+.tabla-candidatos {
+    max-height: 300px;
+    overflow: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.tabla-candidatos thead th {
+    position: sticky;
+    top: 0;
+}
+
+.tabla-candidatos tbody tr {
+    cursor: pointer;
+}
+
+.tabla-candidatos tbody tr:hover {
+    background-color: #e9f0ff;
+}
+
+.tabla-candidatos tbody tr.seleccionada {
+    background-color: #d6e4ff;
+    box-shadow: inset 4px 0 0 #2c6ecb;
+    font-weight: bold;
+}
+
+.panel-reporte {
+    margin-top: 20px;
+    padding: 15px 20px;
+    border: 1px solid #c9d8f2;
+    border-radius: 8px;
+    background: #f5f8fe;
+}
+
+.seleccionado {
+    margin: 0 0 10px;
+    font-size: 15px;
+}
+
+.fechas-reporte {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.fechas-reporte .campo {
+    flex: 0 1 240px;
+}
+
+.btn-generar:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.ayuda {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: #666;
+}
