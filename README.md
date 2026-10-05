@@ -33,7 +33,7 @@ Copia `.env.example` como `.env` y completa los valores. Las credenciales solo v
 
 ## Base de datos
 
-Crear la base de datos `sistemaaccesofacultad` con sus tablas y el catálogo de carreras:
+Crear la base de datos `sistemaaccesofacultad` con sus tablas y los catálogos de carreras, áreas y turnos:
 
 ```bash
 mysql -u root -p < db/schema.sql
@@ -46,6 +46,7 @@ mysql -u root -p < db/migraciones/2026-10-04_eliminar_huella.sql
 mysql -u root -p < db/migraciones/2026-10-05_registro_con_confirmacion.sql
 mysql -u root -p < db/migraciones/2026-10-05_lectores_y_cierre_diario.sql
 mysql -u root -p < db/migraciones/2026-10-05_visitantes_codigo_barras.sql
+mysql -u root -p < db/migraciones/2026-10-05_areas_usuario.sql
 ```
 
 ## Lector de accesos
@@ -98,6 +99,17 @@ Si la app estaba apagada a esa hora, al iniciar cierra las entradas de días ant
 3. La app consulta el buzón al iniciar y cada minuto. Si el usuario aceptó, se inserta en `usuario` y recibe su credencial con código QR. El resultado (confirmado, rechazado, vencido o error) aparece en **Notificaciones**.
 
 Las solicitudes vencen a las 48 horas (`CONFIRMACION_HORAS_VIGENCIA`).
+
+### Áreas
+
+Una persona puede tener varias áreas en la facultad (por ejemplo, estudiante en la mañana y personal de limpieza en la noche). Cada área se captura como una fila con:
+
+- **Área**: Estudiante, Docente, Administrativo, Dirección, Jardinería, Limpieza, Seguridad o Cafetería.
+- **Carrera**: solo en Estudiante, Docente, Administrativo y Dirección.
+- **Turnos**: uno o varios (Matutino, Vespertino, Nocturno, Tiempo completo).
+- **Principal**: la que se muestra en el lector y en el PDF del cierre diario, por ejemplo `Docente (+1)`.
+
+Se usa un solo QR por persona, sin importar cuántas áreas tenga. Los catálogos viven en las tablas `area`, `turno` y `carrera`; para agregar un área o un turno basta con insertarlo en la BD (`area.requiere_carrera` indica si pide carrera). En la búsqueda y el reporte de grupos, los filtros de área, carrera y turno son opcionales y se aplican a la misma área de la persona.
 
 ## Buzón de confirmaciones (Cloudflare Worker)
 
