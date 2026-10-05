@@ -11,6 +11,7 @@ CREATE DATABASE IF NOT EXISTS sistemaaccesofacultad
 USE sistemaaccesofacultad;
 SET FOREIGN_KEY_CHECKS = 0;
 
+
 CREATE TABLE IF NOT EXISTS `carrera` (
   `id_carrera` int NOT NULL AUTO_INCREMENT,
   `nombre_carrera` varchar(100) NOT NULL,
@@ -60,6 +61,9 @@ CREATE TABLE IF NOT EXISTS `registroacceso` (
   `id_visitante` int DEFAULT NULL,
   `fecha_entrada` datetime DEFAULT NULL,
   `fecha_salida` datetime DEFAULT NULL,
+  `medio_entrada` enum('PEATONAL','VEHICULAR') DEFAULT NULL COMMENT 'Lector por el que entró',
+  `medio_salida` enum('PEATONAL','VEHICULAR') DEFAULT NULL COMMENT 'Lector por el que salió',
+  `cierre_automatico` datetime DEFAULT NULL COMMENT 'Momento en que el sistema cerró una entrada sin salida',
   PRIMARY KEY (`id_registro`),
   KEY `matricula` (`matricula`),
   KEY `id_visitante` (`id_visitante`),
@@ -98,16 +102,27 @@ CREATE TABLE IF NOT EXISTS `registro_pendiente` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Registros que esperan la aceptación de Términos y Condiciones';
 CREATE TABLE IF NOT EXISTS `notificacion` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `tipo` enum('REGISTRO_CONFIRMADO','REGISTRO_RECHAZADO','REGISTRO_EXPIRADO','REGISTRO_ERROR') NOT NULL,
+  `tipo` enum('REGISTRO_CONFIRMADO','REGISTRO_RECHAZADO','REGISTRO_EXPIRADO','REGISTRO_ERROR','ACCESO_INCONSISTENTE','CIERRE_DIARIO') NOT NULL,
   `matricula` int DEFAULT NULL,
   `titulo` varchar(150) NOT NULL,
   `mensaje` text,
+  `archivo` varchar(255) DEFAULT NULL COMMENT 'Ruta del PDF asociado',
   `fecha_hora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `leido` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx_notificacion_fecha` (`fecha_hora`),
   KEY `idx_notificacion_leido` (`leido`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Notificaciones del flujo de registro para el administrador';
+CREATE TABLE IF NOT EXISTS `cierre_diario` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fecha_operacion` date NOT NULL,
+  `tipo` enum('PROGRAMADO','RECUPERACION') NOT NULL COMMENT 'RECUPERACION: días en que la app estaba apagada a la hora del cierre',
+  `ejecutado_en` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `registros_cerrados` int NOT NULL DEFAULT '0',
+  `archivo` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_cierre_fecha_tipo` (`fecha_operacion`,`tipo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Ejecuciones del cierre diario de accesos';
 
 -- Catálogo de carreras
 INSERT  IGNORE INTO `carrera` VALUES (1,'Ingenieria en Computacion'),
