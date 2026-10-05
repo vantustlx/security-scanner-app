@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         SALIDA_VEHICULAR: { numero: 3, nombre: 'Salida vehicular' }
     };
     const DURACION_RESULTADO_MS = 3000;
-    const MAX_HISTORIAL = 25;
+    // Tope por lector para acotar la memoria; el historial se vacía cada día
+    const MAX_HISTORIAL = 300;
 
     const panel = (rol) => document.querySelector(`.panel[data-rol="${rol}"]`);
     const temporizadores = {};
@@ -21,8 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reloj
     // ---------------------------------------------------------------
     const reloj = document.getElementById('reloj');
+    let diaActual = new Date().toDateString();
     const pintarReloj = () => {
-        reloj.textContent = new Date().toLocaleString('es-MX', { dateStyle: 'full', timeStyle: 'medium' });
+        const ahora = new Date();
+        reloj.textContent = ahora.toLocaleString('es-MX', { dateStyle: 'full', timeStyle: 'medium' });
+        // La ventana del lector no se cierra: al cambiar de día se vacían los historiales
+        if (ahora.toDateString() !== diaActual) {
+            diaActual = ahora.toDateString();
+            limpiarHistoriales();
+        }
     };
     pintarReloj();
     setInterval(pintarReloj, 1000);
@@ -105,6 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         lista.prepend(item);
         while (lista.children.length > MAX_HISTORIAL) lista.lastChild.remove();
+    }
+
+    function limpiarHistoriales() {
+        Object.keys(ROLES).forEach((rol) => panel(rol).querySelector('.historial').replaceChildren());
     }
 
     ipcRenderer.on('lectura-acceso', (event, resultado) => {
