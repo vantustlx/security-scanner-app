@@ -45,6 +45,7 @@ Si ya tenías la base de datos creada, respáldala y aplica las migraciones que 
 mysql -u root -p < db/migraciones/2026-10-04_eliminar_huella.sql
 mysql -u root -p < db/migraciones/2026-10-05_registro_con_confirmacion.sql
 mysql -u root -p < db/migraciones/2026-10-05_lectores_y_cierre_diario.sql
+mysql -u root -p < db/migraciones/2026-10-05_visitantes_codigo_barras.sql
 ```
 
 ## Lector de accesos
@@ -60,6 +61,15 @@ Los escáneres se leen desde el proceso principal, así que funcionan aunque la 
 | 3 · Salida vehicular | Siempre cierra la entrada abierta, sin importar por dónde entró |
 
 Las incoherencias no bloquean el paso: se muestran al vigilante con ⚠ y llegan a **Notificaciones** (entrar en vehículo con una entrada abierta, salir sin entrada, usar los lectores vehiculares sin vehículo registrado). Un QR que no es una matrícula o una matrícula inexistente se rechazan y se registran en `accesos_fallidos`. La cámara de la ventana del lector queda como respaldo y registra con el lector que se elija.
+
+## Visitantes
+
+Los visitantes se registran en un solo formulario (**Visitantes → Registro**) eligiendo el tipo: `Ocasional` (válido solo el día del registro) o `Frecuente` (6 meses). No aceptan Términos y Condiciones.
+
+- **Con correo:** reciben un pase con código de barras Code 128 (`V-` + folio) en el cuerpo del correo y en PDF. Lo presentan en cualquiera de los tres lectores.
+- **Sin correo:** el folio se muestra en pantalla y se teclea en **Visitantes → Acceder**.
+
+En ambos casos se alterna entrada/salida en `registroacceso` sin importar el lector, y sin registrar el medio. Un visitante frecuente que se registra de nuevo con el mismo correo conserva su folio, se renueva su vigencia y se le reenvía el pase; uno ocasional recibe un folio nuevo en cada visita.
 
 ### Identificar los tres escáneres
 
