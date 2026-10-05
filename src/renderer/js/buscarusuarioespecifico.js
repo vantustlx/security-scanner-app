@@ -9,15 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Botón de buscar
     document.querySelector('.btn-buscar').addEventListener('click', buscarUsuarioEspecifico);
     
-    // Permitir búsqueda con Enter
-    const inputs = document.querySelectorAll('.form-field input');
-    inputs.forEach(input => {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                buscarUsuarioEspecifico();
-            }
-        });
-    });
+    // Enter avanza entre los campos; en el último, busca
+    UI.enterAvanza(document.querySelector('.formulario-filtros'), { alFinal: buscarUsuarioEspecifico });
     
     
     

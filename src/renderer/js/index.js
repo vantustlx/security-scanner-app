@@ -13,19 +13,7 @@ document.getElementById('login-card-registro').addEventListener('click', () => {
   ipcRenderer.send('navigate', 'registrarusuario'); // carga registrarusuario.html
 });
 
-document.getElementById('login-card-administrador').addEventListener('click', () => {
-  document.getElementById("modal-modo-noti").classList.add("active");
-});
-
-document.getElementById('notis').addEventListener('click', () => {
-  document.getElementById("modal-modo-noti").classList.add("active");
-});
-
-document.getElementById('btn-noti-aceptar').addEventListener('click', () => {
-  document.getElementById("modal-modo-administrador").classList.add("active");
-});
-
-// Configuración del modal cuando se carga el documento
+// Configuración de los modales cuando se carga el documento
 document.addEventListener('DOMContentLoaded', function () {
   const modal = document.getElementById('modal-modo-administrador');
   const modalnoti = document.getElementById('modal-modo-noti');
@@ -33,7 +21,23 @@ document.addEventListener('DOMContentLoaded', function () {
   const btnAceptarNoti = document.getElementById('btn-noti-aceptar');
   const btnCancelar = document.getElementById('btn-cancelar');
   const togglePassword = document.getElementById('toggle-password');
+  const usuarioInput = document.getElementById('usuario');
   const passwordInput = document.getElementById('contraseña');
+
+  // Aviso previo al modo administrador
+  const abrirAviso = () => UI.abrirModal(modalnoti);
+  document.getElementById('login-card-administrador').addEventListener('click', abrirAviso);
+  document.getElementById('notis').addEventListener('click', abrirAviso);
+
+  function cerrarModalAdministrador() {
+    UI.cerrarModal(modal);
+    passwordInput.value = '';
+  }
+
+  btnAceptarNoti.addEventListener('click', () => {
+    UI.cerrarModal(modalnoti);
+    UI.abrirModal(modal, { alEscape: cerrarModalAdministrador }); // enfoca "Usuario"
+  });
 
   togglePassword.addEventListener('click', () => {
     const isPassword = passwordInput.type === 'password';
@@ -42,74 +46,33 @@ document.addEventListener('DOMContentLoaded', function () {
     togglePassword.classList.toggle('fa-eye-slash');
   });
 
+  btnAceptar.addEventListener('click', function () {
+    const usuario = usuarioInput.value.trim();
+    const contraseña = passwordInput.value;
 
-  // Evento para cerrar el modal con el botón Aceptar
-  if (btnAceptar) {
-    btnAceptar.addEventListener('click', function () {
-        const usuario = document.getElementById('usuario').value.trim();
-        const contraseña = document.getElementById('contraseña').value;
-
-        if (usuario === 'admin' && contraseña === 'root') {
-            ipcRenderer.send('navigate', 'administradoropciones');
-        } else {
-            mostrarNotificacion('Usuario o contraseña incorrectos 🤖');
-            modal.classList.add('active');
-            
-            // Enfocar inmediatamente en el campo de contraseña
-            setTimeout(() => {
-                document.getElementById('contraseña').focus();
-                document.getElementById('contraseña').select();
-            }, 0);
-        }
-    });
-}
-
-function mostrarNotificacion(mensaje) {
-    // Crear elemento de notificación tipo toast
-    const toast = document.createElement('div');
-    toast.textContent = mensaje;
-    toast.style.position = 'fixed';
-    toast.style.top = '20px';
-    toast.style.right = '20px';
-    toast.style.backgroundColor = '#ff4444';
-    toast.style.color = 'white';
-    toast.style.padding = '12px 20px';
-    toast.style.borderRadius = '5px';
-    toast.style.zIndex = '10000';
-    toast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-    
-    document.body.appendChild(toast);
-    
-    // Auto-remover después de 3 segundos
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
-  if(btnCancelar) {
-    btnCancelar.addEventListener('click', function(){
-      modal.classList.remove('active');
-    });
-  }
-  if (btnAceptarNoti) {
-    btnAceptarNoti.addEventListener('click', function(){
-      modalnoti.classList.remove('active');
-    }); 
-  }
-
-  // También puedes cerrar el modal al hacer clic fuera de él
-  modal.addEventListener('click', function (e) {
-    if (e.target === modal) {
-      modal.classList.remove('active');
+    if (usuario === 'admin' && contraseña === 'root') {
+      ipcRenderer.send('navigate', 'administradoropciones');
+    } else {
+      UI.notificar('Usuario o contraseña incorrectos 🤖', 'error', 3000);
+      passwordInput.focus();
+      passwordInput.select();
     }
+  });
+
+  // Enter: de "Usuario" pasa a "Contraseña"; en "Contraseña" (o con ambos llenos) ingresa
+  UI.enterAvanza(modal.querySelector('.modal-content'), {
+    alFinal: () => btnAceptar.click(),
+    enviarSiCompleto: true
+  });
+
+  btnCancelar.addEventListener('click', cerrarModalAdministrador);
+
+  // También se cierran al hacer clic fuera de ellos
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) cerrarModalAdministrador();
   });
 
   modalnoti.addEventListener('click', function (e) {
-    if (e.target === modalnoti) {
-      modalnoti.classList.remove('active');
-    }
+    if (e.target === modalnoti) UI.cerrarModal(modalnoti);
   });
-
-  // Para pruebas: Si quieres mostrar el modal automáticamente al cargar la página
-  // Descomenta la siguiente línea:
-  // setTimeout(() => modal.classList.add('active'), 1000);
 });

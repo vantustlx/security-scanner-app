@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Respuestas del backend
   ipcRenderer.on('acceso-invalid', () => {
-    modalFail.classList.add('active');
+    UI.abrirModal(modalFail, { alEscape: cerrarFallido });
   });
 
   ipcRenderer.on('acceso-valid', (event, data) => {
@@ -34,18 +34,23 @@ document.addEventListener('DOMContentLoaded', () => {
       Nombre: ${data.nombre} ${data.apellidoP} ${data.apellidoM}<br>
       Tipo: ${data.tipo}
     `;
-    modalOk.classList.add('active');
+    UI.abrirModal(modalOk);
   });
 
-  // Cerrar modal “denegado”
-  btnFail.addEventListener('click', () => modalFail.classList.remove('active'));
+  // Cerrar modal “denegado”: vuelve al folio, seleccionado para reescribirlo
+  function cerrarFallido() {
+    UI.cerrarModal(modalFail);
+    inputCodigo.focus();
+    inputCodigo.select();
+  }
+  btnFail.addEventListener('click', cerrarFallido);
   modalFail.addEventListener('click', e => {
-    if (e.target === modalFail) modalFail.classList.remove('active');
+    if (e.target === modalFail) cerrarFallido();
   });
 
   // Cerrar modal “éxito”
-  btnOk.addEventListener('click', () => modalOk.classList.remove('active'));
+  btnOk.addEventListener('click', () => UI.cerrarModal(modalOk));
   modalOk.addEventListener('click', e => {
-    if (e.target === modalOk) modalOk.classList.remove('active');
+    if (e.target === modalOk) UI.cerrarModal(modalOk);
   });
 });

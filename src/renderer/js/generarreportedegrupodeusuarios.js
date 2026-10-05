@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('btn-buscar').addEventListener('click', buscarGrupoUsuarios);
     document.getElementById('btn-generar-pdf').addEventListener('click', generarPDF);
+    // Enter avanza entre los filtros; en el último busca
+    UI.enterAvanza(document.querySelector('.formulario-filtros'), {
+        alFinal: () => document.getElementById('btn-buscar').click()
+    });
 
     // Configurar listeners de IPC
     ipcRenderer.on('resultados-grupo-usuarios', (event, resultados) => {
@@ -203,7 +207,7 @@ function obtenerNombreCarrera(idCarrera) {
 
 // Agregar listeners para respuestas del PDF
 ipcRenderer.on('pdf-generado-exito', (event, mensaje) => {
-    alert(`✅ ${mensaje}`);
+    UI.notificar(`✅ ${mensaje}`, 'success');
 });
 
 ipcRenderer.on('pdf-generado-error', (event, error) => {

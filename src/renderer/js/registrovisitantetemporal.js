@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
       telefono:  inputTelefono.value.trim()
     };
 
+    btnRegistrar.disabled = true; // evita registros duplicados por doble clic
     ipcRenderer.send('registrar-visitante-temporal', datos);
   });
 
@@ -91,41 +92,40 @@ document.addEventListener('DOMContentLoaded', () => {
     modalExistente.querySelector('h2').textContent = 'Visitante ya registrado';
     modalExistente.querySelector('p').textContent =
       `Ya tienes un folio permanente: ${folio}`;
-    modalExistente.classList.add('active');
+    btnRegistrar.disabled = false;
+    UI.abrirModal(modalExistente, { alEscape: cerrarExistente });
   });
 
   // 4.2 Registro exitoso → modal de éxito
   ipcRenderer.on('registro-visitante-exitoso', (ev, { folio }) => {
+    btnRegistrar.disabled = false;
     textoFolio.textContent = `Tu folio permanente es: ${folio}`;
-    modalExito.classList.add('active');
+    UI.abrirModal(modalExito, { alEscape: cerrarExito });
   });
 
   // 4.3 Error en backend
   ipcRenderer.on('registro-visitante-error', (ev, err) => {
-    alert(`Error al registrar visitante: ${err}`);
+    btnRegistrar.disabled = false;
+    UI.notificar(`Error al registrar visitante: ${err}`, 'error');
   });
 
   // Cierre de modal “existente”
-  btnAceptarExistente.addEventListener('click', () => {
-    modalExistente.classList.remove('active');
+  function cerrarExistente() {
+    UI.cerrarModal(modalExistente);
     limpiarFormulario();
-  });
+  }
+  btnAceptarExistente.addEventListener('click', cerrarExistente);
   modalExistente.addEventListener('click', e => {
-    if (e.target === modalExistente) {
-      modalExistente.classList.remove('active');
-      limpiarFormulario();
-    }
+    if (e.target === modalExistente) cerrarExistente();
   });
 
   // Cierre de modal “éxito”
-  btnAceptarExito.addEventListener('click', () => {
-    modalExito.classList.remove('active');
+  function cerrarExito() {
+    UI.cerrarModal(modalExito);
     limpiarFormulario();
-  });
+  }
+  btnAceptarExito.addEventListener('click', cerrarExito);
   modalExito.addEventListener('click', e => {
-    if (e.target === modalExito) {
-      modalExito.classList.remove('active');
-      limpiarFormulario();
-    }
+    if (e.target === modalExito) cerrarExito();
   });
 });
