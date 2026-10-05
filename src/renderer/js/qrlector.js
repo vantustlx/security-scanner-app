@@ -4,7 +4,7 @@
 // La cámara y un lector tipo teclado (HID) quedan como respaldo y registran con el rol elegido.
 document.addEventListener('DOMContentLoaded', () => {
     const { ipcRenderer } = require('electron');
-    const { Html5Qrcode } = require('html5-qrcode');
+    const { Html5Qrcode, Html5QrcodeSupportedFormats } = require('html5-qrcode');
 
     const ROLES = {
         PEATONAL: { numero: 1, nombre: 'Peatonal' },
@@ -73,7 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const contenido = [crear('span', 'tipo', r.estado === 'RECHAZADO' ? 'RECHAZADO' : r.estado)];
         if (r.nombre) {
             contenido.push(crear('p', 'nombre', r.nombre));
-            contenido.push(crear('p', 'detalle', `Matrícula ${r.matricula}${r.rol ? ' · ' + r.rol : ''}`));
+            contenido.push(crear('p', 'detalle', r.visitante
+                ? `Folio ${r.folio} · ${r.rol}`
+                : `Matrícula ${r.matricula}${r.rol ? ' · ' + r.rol : ''}`));
         } else {
             contenido.push(crear('p', 'nombre', r.mensaje));
         }
@@ -303,10 +305,14 @@ document.addEventListener('DOMContentLoaded', () => {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(stream => {
                 stream.getTracks().forEach(track => track.stop());
-                const qrScanner = new Html5Qrcode("img-qr");
+                // QR de usuarios y código de barras (Code 128) de los pases de visitante
+                const qrScanner = new Html5Qrcode("img-qr", {
+                    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.CODE_128],
+                    verbose: false
+                });
                 return qrScanner.start(
                     { facingMode: "environment" },
-                    { fps: 15, qrbox: { width: 120, height: 120 } },
+                    { fps: 15, qrbox: { width: 150, height: 110 } },
                     (decodedText) => procesarRespaldo(decodedText, "camara"),
                     () => { /* frames sin QR: se ignoran para no saturar la consola */ }
                 ).then(() => {

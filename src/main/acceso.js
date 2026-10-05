@@ -4,6 +4,7 @@
 // Lector 2 · Entrada vehicular ... siempre registra entrada
 // Lector 3 · Salida vehicular .... siempre cierra la entrada abierta (sin importar por dónde entró)
 // Las incoherencias no bloquean el paso: se muestran al vigilante y se notifican al administrador.
+// Visitantes ("V-" + folio): entran y salen por cualquier lector; se alterna entrada/salida.
 const { ipcMain, BrowserWindow } = require('electron');
 const config = require('./config');
 const { crearNotificacion, registrarAccesoFallido } = require('./notificaciones');
@@ -16,6 +17,9 @@ const LECTORES = {
 
 // Solo dígitos: evita que un QR ajeno (texto o URL) coincida con la matrícula 0
 const MATRICULA_VALIDA = /^\d{1,9}$/;
+// Pase de visitante: el código de barras contiene "V-" + folio; en "Acceder" se teclea solo el folio
+const CODIGO_VISITANTE = /^V-([A-Z0-9]{6,10})$/;
+const FOLIO_VISITANTE = /^[A-Z0-9]{6,10}$/;
 
 let pool;
 const ultimasLecturas = new Map(); // "LECTOR:matricula" -> ms de la última lectura
@@ -51,7 +55,8 @@ function esRepetida(lector, matricula) {
 }
 
 async function rechazar(base, texto, tipoError, mensaje) {
-  await registrarAccesoFallido(texto, tipoError, `${mensaje} (lector ${base.numero} · ${LECTORES[base.lector].nombre})`)
+  const donde = base.lector ? `lector ${base.numero} · ${LECTORES[base.lector].nombre}` : base.origen;
+  await registrarAccesoFallido(texto, tipoError, `${mensaje} (${donde})`)
     .catch((e) => console.error('[ACCESO] No se pudo registrar el acceso fallido:', e));
   return { ...base, estado: 'RECHAZADO', mensaje };
 }
@@ -74,11 +79,14 @@ async function registrarAcceso(textoLeido, lector, origen) {
     return { ...base, estado: 'REPETIDO' };
   }
 
-  if (!MATRICULA_VALIDA.test(texto)) {
-    resultado = await rechazar(base, texto, 'QR_INVALIDO', 'Código QR no válido');
+  const visitante = CODIGO_VISITANTE.exec(texto.toUpperCase());
+  if (!visitante && !MATRICULA_VALIDA.test(texto)) {
+    resultado = await rechazar(base, texto, 'QR_INVALIDO', 'Código no válido');
   } else {
     try {
-      resultado = await registrarEnBD(base, Number(texto), info);
+      resultado = visitante
+        ? await registrarVisitanteEnBD(base, visitante[1])
+        : await registrarEnBD(base, Number(texto), info);
     } catch (error) {
       console.error('[ACCESO] Error al registrar el acceso:', error);
       resultado = { ...base, estado: 'RECHAZADO', mensaje: 'Error del sistema, intenta de nuevo' };
@@ -189,6 +197,76 @@ async function registrarEnBD(base, matricula, info) {
   return resultado;
 }
 
+// Visitantes: entran y salen por cualquiera de los tres lectores (o tecleando el folio);
+// se alterna entrada/salida sin registrar el medio ni el estatus
+async function registrarVisitanteEnBD(base, folio) {
+  const conexion = await pool.getConnection();
+  try {
+    await conexion.beginTransaction();
+    const [[visitante]] = await conexion.query(
+      `SELECT id_visitante, nombre, apellido_paterno, apellido_materno, tipo, vigente_hasta
+         FROM visitante WHERE codigo_acceso = ? FOR UPDATE`,
+      [folio]
+    );
+    if (!visitante) {
+      await conexion.rollback();
+      return await rechazar(base, folio, 'VISITANTE_NO_VALIDO', 'Folio de visitante no válido');
+    }
+    if (!visitante.vigente_hasta || new Date(visitante.vigente_hasta) < new Date()) {
+      await conexion.rollback();
+      return await rechazar(base, folio, 'VISITANTE_VENCIDO', 'Pase de visitante vencido');
+    }
+
+    let [[abierto]] = await conexion.query(
+      `SELECT id_registro, fecha_entrada FROM registroacceso
+        WHERE id_visitante = ? AND fecha_salida IS NULL AND cierre_automatico IS NULL
+        ORDER BY fecha_entrada DESC LIMIT 1 FOR UPDATE`,
+      [visitante.id_visitante]
+    );
+    // Una entrada de otro día sin salida no convierte la visita de hoy en salida
+    if (abierto && new Date(abierto.fecha_entrada) < inicioDeHoy()) {
+      await conexion.query('UPDATE registroacceso SET cierre_automatico = NOW() WHERE id_registro = ?', [abierto.id_registro]);
+      abierto = null;
+    }
+
+    if (abierto) {
+      await conexion.query('UPDATE registroacceso SET fecha_salida = NOW() WHERE id_registro = ?', [abierto.id_registro]);
+    } else {
+      await conexion.query('INSERT INTO registroacceso (id_visitante, fecha_entrada) VALUES (?, NOW())', [visitante.id_visitante]);
+    }
+    await conexion.commit();
+
+    const estado = abierto ? 'SALIDA' : 'ENTRADA';
+    return {
+      ...base,
+      estado,
+      visitante: true,
+      folio,
+      nombre: nombreCompleto(visitante),
+      rol: `Visitante ${visitante.tipo.toLowerCase()}`,
+      mensaje: estado === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada'
+    };
+  } catch (error) {
+    await conexion.rollback().catch(() => {});
+    throw error;
+  } finally {
+    conexion.release();
+  }
+}
+
+// Folio tecleado en "Acceder" (para quien no trae el pase en el celular)
+async function registrarFolioVisitante(textoFolio) {
+  const folio = String(textoFolio || '').trim().toUpperCase().replace(/^V-/, '');
+  const base = { lector: null, origen: 'folio', hora: new Date().toISOString(), avisos: [], placas: [] };
+  if (!FOLIO_VISITANTE.test(folio)) return rechazar(base, folio, 'VISITANTE_NO_VALIDO', 'Folio de visitante no válido');
+  try {
+    return await registrarVisitanteEnBD(base, folio);
+  } catch (error) {
+    console.error('[ACCESO] Error al registrar el folio del visitante:', error);
+    return { ...base, estado: 'RECHAZADO', mensaje: 'Error del sistema, intenta de nuevo' };
+  }
+}
+
 // Para asociar placas: solo consulta, no registra ningún acceso
 async function buscarUsuario(matricula) {
   const texto = String(matricula || '').trim();
@@ -205,6 +283,7 @@ function setupAcceso(poolDB) {
   // Lecturas de la cámara o de un lector tipo teclado en la ventana del lector
   ipcMain.handle('registrar-acceso', (event, { texto, lector, origen }) => registrarAcceso(texto, lector, origen || 'camara'));
   ipcMain.handle('buscar-usuario-por-matricula', (event, matricula) => buscarUsuario(matricula));
+  ipcMain.handle('registrar-acceso-visitante', (event, folio) => registrarFolioVisitante(folio));
 }
 
 module.exports = { LECTORES, setupAcceso, registrarAcceso };

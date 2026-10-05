@@ -287,3 +287,12 @@ h1 {
 .modal-btn:hover {
     background-color: #4a7544;
 }
+/* Folio del visitante en el modal de registro exitoso */
+.folio-visitante {
+    font-family: "Courier New", monospace;
+    font-size: 34px;
+    font-weight: bold;
+    letter-spacing: 6px;
+    color: #6B1719;
+    margin: 4px 0 12px;
+}

@@ -2,7 +2,7 @@ const { ipcRenderer } = require('electron');
 
 
 document.getElementById('registro-visitantes').addEventListener('click', () => {
-  ipcRenderer.send('navigate', 'registrovisitantes');
+  ipcRenderer.send('navigate', 'registrovisitante');
 });
 
 document.getElementById('guest-access').addEventListener('click', () => {

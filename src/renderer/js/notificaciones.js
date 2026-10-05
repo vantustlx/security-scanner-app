@@ -10,7 +10,9 @@ const TIPOS = {
     CIERRE_DIARIO: ['Cierre del día', 'info'],
     ACCESO_MATRICULA_NO_ENCONTRADA: ['Matrícula no encontrada', 'error'],
     ACCESO_QR_INVALIDO: ['QR inválido', 'error'],
-    ACCESO_USUARIO_SIN_SALIDA_HORARIO: ['Registro incompleto', 'warning']
+    ACCESO_USUARIO_SIN_SALIDA_HORARIO: ['Registro incompleto', 'warning'],
+    ACCESO_VISITANTE_NO_VALIDO: ['Folio de visitante no válido', 'error'],
+    ACCESO_VISITANTE_VENCIDO: ['Pase de visitante vencido', 'warning']
 };
 
 function crearDetalle(etiqueta, valor) {
