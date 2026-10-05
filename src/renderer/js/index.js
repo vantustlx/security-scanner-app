@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (resultado.ok) {
       ipcRenderer.send('navigate', 'administradoropciones');
     } else {
-      UI.notificar(`${resultado.error} 🤖`, 'error', 3000);
+      UI.notificar(resultado.error, 'error', 3000);
       passwordInput.focus();
       passwordInput.select();
     }
