@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
-const { ipcMain } = require('electron');
+const { ipcMain, nativeImage } = require('electron');
 const http = require('http');
 const QRCode = require('qrcode');
 const PDFDocument = require('pdfkit');
@@ -11,9 +11,116 @@ let mainWindow;
 let listenersConfigured = false; // Bandera para evitar registro múltiple
 let confirmationServer = null; // Referencia al servidor HTTP
 
+// Paleta tomada de los logos de la UATx y la FCBIyT
+const COLORES = {
+  guinda: '#6B1719',
+  guindaOscuro: '#2B0A0D',
+  dorado: '#C49A40',
+  gris: '#9B9B9B',
+  texto: '#333333',
+  rosaClaro: '#EADEDE'
+};
+
+const ASSETS_DIR = path.join(__dirname, '..', 'renderer', 'assets');
+let logosGafete = null;
+
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
+}
+
+// Los logos originales pesan varios MB: se reducen una sola vez para no inflar cada PDF
+function obtenerLogosGafete() {
+  if (!logosGafete) {
+    const reducir = (archivo, ancho) => nativeImage
+      .createFromPath(path.join(ASSETS_DIR, archivo))
+      .resize({ width: ancho, quality: 'best' })
+      .toPNG();
+    logosGafete = {
+      uatx: reducir('logo_uatx.png', 360),
+      fcbiyt: reducir('logo_FCBIyT.png', 960)
+    };
+  }
+  return logosGafete;
+}
+
+// Genera el gafete de acceso (QR grande centrado) y devuelve la ruta del PDF
+async function generarGafetePDF(nombre, matricula) {
+  const W = 300;
+  const H = 510;
+  const margen = 22;
+  const anchoTexto = W - margen * 2;
+
+  const qrPNG = await QRCode.toBuffer(matricula.toString(), {
+    errorCorrectionLevel: 'M',
+    margin: 1,
+    width: 1000,
+    color: { dark: COLORES.guindaOscuro, light: '#FFFFFF' }
+  });
+  const logos = obtenerLogosGafete();
+
+  const pdfPath = path.join(os.tmpdir(), `${matricula}_qr.pdf`);
+  const doc = new PDFDocument({
+    size: [W, H],
+    margin: 0,
+    info: { Title: `Credencial de acceso - ${matricula}`, Author: 'FCBIyT - UATx' }
+  });
+  const writeStream = fs.createWriteStream(pdfPath);
+  doc.pipe(writeStream);
+
+  // Encabezado con los logos institucionales
+  doc.image(logos.uatx, margen, 16, { fit: [62, 62] });
+  doc.image(logos.fcbiyt, W - margen - 170, 16, { fit: [170, 62], align: 'right', valign: 'center' });
+
+  doc.rect(0, 90, W, 32).fill(COLORES.guinda);
+  doc.rect(0, 122, W, 3).fill(COLORES.dorado);
+  doc.font('Helvetica-Bold').fontSize(12).fillColor('#FFFFFF')
+    .text('CREDENCIAL DE ACCESO', 0, 100, { width: W, align: 'center', characterSpacing: 2 });
+
+  // Nombre: se reduce la fuente hasta que quepa en una línea (mínimo 11 pt)
+  let tamNombre = 18;
+  doc.font('Helvetica-Bold');
+  while (tamNombre > 11 && doc.fontSize(tamNombre).widthOfString(nombre) > anchoTexto) {
+    tamNombre -= 0.5;
+  }
+  doc.fontSize(tamNombre).fillColor(COLORES.guinda)
+    .text(nombre, margen, 140, { width: anchoTexto, align: 'center' });
+
+  doc.font('Helvetica').fontSize(8).fillColor(COLORES.gris)
+    .text('MATRÍCULA', margen, 178, { width: anchoTexto, align: 'center', characterSpacing: 1.5 });
+  doc.font('Helvetica-Bold').fontSize(15).fillColor(COLORES.texto)
+    .text(matricula.toString(), margen, 189, { width: anchoTexto, align: 'center', characterSpacing: 1 });
+
+  // QR enmarcado en dorado, con acentos cuadrados como en el logo de la FCBIyT
+  const tamQR = 200;
+  const relleno = 9;
+  const marco = tamQR + relleno * 2;
+  const marcoX = (W - marco) / 2;
+  const marcoY = 214;
+  doc.rect(marcoX - 8, marcoY - 8, 14, 14).fill(COLORES.guinda);
+  doc.rect(marcoX - 14, marcoY + 10, 7, 7).fill(COLORES.dorado);
+  doc.rect(marcoX + marco - 6, marcoY + marco - 6, 14, 14).fill(COLORES.guinda);
+  doc.rect(marcoX + marco + 7, marcoY + marco - 17, 7, 7).fill(COLORES.gris);
+  doc.roundedRect(marcoX, marcoY, marco, marco, 10).fillAndStroke('#FFFFFF', COLORES.dorado);
+  doc.image(qrPNG, marcoX + relleno, marcoY + relleno, { width: tamQR });
+
+  doc.font('Helvetica').fontSize(8.5).fillColor(COLORES.gris)
+    .text('Presenta este código en el lector de la entrada', margen, marcoY + marco + 11, { width: anchoTexto, align: 'center' });
+
+  // Pie institucional
+  doc.rect(0, H - 47, W, 3).fill(COLORES.dorado);
+  doc.rect(0, H - 44, W, 44).fill(COLORES.guinda);
+  doc.font('Helvetica-Bold').fontSize(8).fillColor('#FFFFFF')
+    .text('UNIVERSIDAD AUTÓNOMA DE TLAXCALA', 0, H - 34, { width: W, align: 'center', characterSpacing: 1 });
+  doc.font('Helvetica').fontSize(7.5).fillColor(COLORES.rosaClaro)
+    .text('Facultad de Ciencias Básicas, Ingeniería y Tecnología', 0, H - 20, { width: W, align: 'center' });
+
+  doc.end();
+  await new Promise((resolve, reject) => {
+    writeStream.on('finish', resolve);
+    writeStream.on('error', reject);
+  });
+  return pdfPath;
 }
 
 function setupEmailListeners(window) {
@@ -35,29 +142,7 @@ function setupEmailListeners(window) {
     ipcMain.on('enviar-correo', async (event, datos) => {
     const { email, nombre, matricula } = datos;
 
-    // Generar el código QR como dataURL
-    const qrDataURL = await QRCode.toDataURL(matricula.toString());
-
-    // Crear PDF con el QR
-    const pdfPath = path.join(os.tmpdir(), `${matricula}_qr.pdf`);
-    const doc = new PDFDocument();
-    const writeStream = fs.createWriteStream(pdfPath);
-    doc.pipe(writeStream);
-
-    doc.fontSize(20).text(`Registro para: ${nombre}`, { align: 'center' });
-    doc.moveDown();
-    doc.text(`Matrícula: ${matricula}`, { align: 'center' });
-
-    // Convertir base64 a imagen en el PDF
-    doc.image(qrDataURL, {
-      fit: [200, 200],
-      align: 'center',
-      valign: 'center'
-    });
-
-    doc.end();
-
-    await new Promise((resolve) => writeStream.on('finish', resolve));
+    const pdfPath = await generarGafetePDF(nombre, matricula);
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -192,26 +277,7 @@ function iniciarServidorConfirmacion() {
 }
 
 async function enviarCorreoRecuperacion(email, nombre, matricula) {
-    const qrDataURL = await QRCode.toDataURL(matricula.toString());
-    const pdfPath = path.join(os.tmpdir(), `${matricula}_qr.pdf`);
-    
-    // Crear PDF con el QR
-    const doc = new PDFDocument();
-    const writeStream = fs.createWriteStream(pdfPath);
-    doc.pipe(writeStream);
-
-    doc.fontSize(20).text(`Recuperación de código QR para: ${nombre}`, { align: 'center' });
-    doc.moveDown();
-    doc.text(`Matrícula: ${matricula}`, { align: 'center' });
-
-    doc.image(qrDataURL, {
-        fit: [200, 200],
-        align: 'center',
-        valign: 'center'
-    });
-
-    doc.end();
-    await new Promise((resolve) => writeStream.on('finish', resolve));
+    const pdfPath = await generarGafetePDF(nombre, matricula);
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -247,4 +313,4 @@ async function enviarCorreoRecuperacion(email, nombre, matricula) {
     }
 }
 
-module.exports = { setupEmailListeners,validarEmail,enviarCorreoRecuperacion, iniciarServidorConfirmacion};
+module.exports = { setupEmailListeners,validarEmail,enviarCorreoRecuperacion, iniciarServidorConfirmacion, generarGafetePDF};
