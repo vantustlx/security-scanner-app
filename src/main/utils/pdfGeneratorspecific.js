@@ -21,6 +21,22 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
 
     console.log('Generando PDF para usuario:', usuario.nombre, usuario.apellido_paterno);
 
+    ///////////////////////////////////////////////
+    //console.log("Modificar a partir de aqui jsjs")
+
+    const maximo_permitido = 5;
+    const conteo = {};
+
+    const claveDia = (fecha) => new Date(fecha).toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+
+    registros.forEach(r => {
+        const dia = claveDia(r.fecha_entrada);
+        conteo[dia] = (conteo[dia] || 0) + 1;
+    });
+
+    console.log(conteo);
+    ///////////////////////////////////////////////
+
     // Pedir al usuario dónde guardar
     const { filePath } = await dialog.showSaveDialog(mainWindow, {
         title: 'Guardar reporte PDF',
@@ -132,11 +148,16 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
     let rowY = tableStartY + headerHeight;
 
     registros.forEach((registro, index) => {
-        // Alternar colores de fondo
-        const bgColor = index % 2 === 0 ? '#ffffff' : '#f7fafc';
+    const dia = registro.fecha_entrada ? claveDia(registro.fecha_entrada) : null;
+    const excede = dia && conteo[dia] >= maximo_permitido;
 
-        doc.rect(50, rowY - 1, 512, rowHeight)
-            .fill(bgColor);
+    // Rojo claro si el día alcanzó el máximo; si no, el alternado de siempre
+    const bgColor = excede
+        ? '#fed7d7'
+        : (index % 2 === 0 ? '#ffffff' : '#f7fafc');
+
+    doc.rect(50, rowY - 1, 512, rowHeight)
+        .fill(bgColor);
 
         // Línea divisoria
         doc.moveTo(50, rowY + rowHeight - 1)
@@ -144,6 +165,9 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
             .strokeColor('#e2e8f0')
             .lineWidth(0.5)
             .stroke();
+
+        doc.font(excede ? 'Helvetica-Bold' : 'Helvetica')
+        .fillColor(excede ? '#9b2c2c' : '#1a202c');
 
         doc.fillColor('#1a202c');
 
