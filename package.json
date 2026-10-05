@@ -28,6 +28,7 @@
     "cross-env": "^10.1.0",
     "electron": "^35.1.2",
     "playwright": "^1.56.1"
+
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.1",

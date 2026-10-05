@@ -169,6 +169,7 @@ async function generateUserReportPDF(usuario, registros, rangoFechas, mainWindow
         doc.font(excede ? 'Helvetica-Bold' : 'Helvetica')
         .fillColor(excede ? '#9b2c2c' : '#1a202c');
 
+
         doc.fillColor('#1a202c');
 
         // 1. Número
