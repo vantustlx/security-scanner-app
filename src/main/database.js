@@ -26,6 +26,10 @@ const connection = mysql.createConnection(dbConfig);
 // Pool con promesas para los módulos que usan async/await y transacciones (registro, notificaciones)
 const pool = mysql.createPool({ ...dbConfig, connectionLimit: 4 }).promise();
 
+// Placas asociadas al usuario "u", separadas por coma (NULL si no tiene vehículo)
+const SQL_PLACAS = `(SELECT GROUP_CONCAT(v.placa ORDER BY v.placa SEPARATOR ', ')
+                       FROM vehiculo v WHERE v.matricula = u.matricula)`;
+
 function setupDBListeners() {
     // Verificar la conexión
     connection.connect((err) => {
@@ -261,7 +265,11 @@ ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
             u.matricula,
             u.numero_telefono,
             r.fecha_entrada,
-            r.fecha_salida
+            r.fecha_salida,
+            r.medio_entrada,
+            r.medio_salida,
+            r.cierre_automatico,
+            ${SQL_PLACAS} AS placas
         FROM usuario u
         INNER JOIN registroacceso r ON u.matricula = r.matricula
         WHERE ${filtro.sql}
@@ -296,49 +304,48 @@ ipcMain.on('buscar-grupo-usuarios-con-fechas', (event, filtros) => {
 });
 
 
-// Buscar registros de un usuario específico con rango de fechas
-ipcMain.on('buscar-usuario-especifico-reporte', (event, filtros) => {
-    const { nombre, apellidoPaterno, apellidoMaterno, fechaInicio, fechaFin } = filtros;
-    console.log('🔍 Buscando registros de usuario específico:', filtros);
+// Reporte de usuario específico, paso 1: candidatos que coinciden (activos o no; el reporte es histórico)
+ipcMain.handle('buscar-usuarios-reporte', async (event, { nombre = '', apellidoPaterno = '', apellidoMaterno = '', matricula = '' } = {}) => {
+    const [usuarios] = await pool.query(
+        `SELECT u.matricula, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo, u.estatus,
+                ${SQL_PLACAS} AS placas
+           FROM usuario u
+          WHERE (? = '' OR u.nombre LIKE CONCAT('%', ?, '%'))
+            AND (? = '' OR u.apellido_paterno LIKE CONCAT('%', ?, '%'))
+            AND (? = '' OR u.apellido_materno LIKE CONCAT('%', ?, '%'))
+            AND (? = '' OR u.matricula = ?)
+          ORDER BY u.apellido_paterno, u.apellido_materno, u.nombre
+          LIMIT 100`,
+        [nombre, nombre, apellidoPaterno, apellidoPaterno, apellidoMaterno, apellidoMaterno, matricula, matricula]
+    );
+    return adjuntarAreas(usuarios, pool);
+});
+
+// Reporte de usuario específico, paso 2: datos del usuario elegido y sus accesos (sin fechas = todo su historial)
+ipcMain.handle('datos-reporte-usuario', async (event, { matricula, fechaInicio, fechaFin }) => {
+    const [[usuario]] = await pool.query(
+        `SELECT u.matricula, u.nombre, u.apellido_paterno, u.apellido_materno, u.numero_telefono, u.correo,
+                u.estatus, u.fecha_registro, ${SQL_PLACAS} AS placas
+           FROM usuario u
+          WHERE u.matricula = ?`,
+        [matricula]
+    );
+    if (!usuario) throw new Error('El usuario ya no existe');
 
     let query = `
-        SELECT 
-            u.matricula,
-            u.nombre,
-            u.apellido_paterno,
-            u.apellido_materno,
-            u.numero_telefono,
-            u.correo,
-            r.fecha_entrada,
-            r.fecha_salida
-        FROM usuario u
-        INNER JOIN registroacceso r ON u.matricula = r.matricula
-        WHERE 
-            u.nombre = ? 
-            AND u.apellido_paterno = ? 
-            AND u.apellido_materno = ?
-    `;
-
-    const params = [nombre, apellidoPaterno, apellidoMaterno];
-
-    // Filtro de fechas
-    if (fechaInicio && fechaFin) {
-        query += ` 
-            AND DATE(r.fecha_entrada) BETWEEN ? AND ?
-        `;
-        params.push(fechaInicio, fechaFin);
+        SELECT fecha_entrada, fecha_salida, medio_entrada, medio_salida, cierre_automatico
+          FROM registroacceso
+         WHERE matricula = ?`;
+    const params = [matricula];
+    if (fechaInicio) {
+        query += ' AND fecha_entrada >= ?';
+        params.push(fechaInicio);
     }
-
-    query += ` ORDER BY r.fecha_entrada ASC;`;
-
-    pool.query(query, params)
-        .then(([results]) => adjuntarAreas(results, pool))
-        .then((results) => {
-            console.log(`${results.length} registros encontrados para el usuario`);
-            event.reply('resultados-usuario-especifico', results);
-        })
-        .catch((err) => {
-            console.error('Error al buscar usuario específico:', err);
-            event.reply('busqueda-usuario-especifico-error', err.message);
-        });
+    if (fechaFin) {
+        query += ' AND fecha_entrada < ? + INTERVAL 1 DAY';
+        params.push(fechaFin);
+    }
+    const [registros] = await pool.query(`${query} ORDER BY fecha_entrada`, params);
+    const [conAreas] = await adjuntarAreas([usuario], pool);
+    return { usuario: conAreas, registros };
 });
