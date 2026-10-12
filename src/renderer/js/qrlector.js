@@ -42,7 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function sonar(estado, conAvisos) {
         try {
             audio = audio || new AudioContext();
-            const tonos = estado === 'RECHAZADO' ? [[220, 0.35]] : conAvisos ? [[660, 0.12], [440, 0.2]] : [[880, 0.12]];
+            const tonos = estado === 'RECHAZADO' ? [[220, 0.35]]
+                : estado === 'REPETIDO' ? [[520, 0.08], [520, 0.08]]
+                : conAvisos ? [[660, 0.12], [440, 0.2]] : [[880, 0.12]];
             let t = audio.currentTime;
             for (const [frecuencia, duracion] of tonos) {
                 const osc = audio.createOscillator();
@@ -75,10 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
         caja.replaceChildren(crear('p', 'espera', 'Esperando lectura...'));
     }
 
+    const ETIQUETAS = { ENTRADA: 'Entrada', SALIDA: 'Salida', RECHAZADO: 'Rechazo', REPETIDO: 'Repetida' };
+
     function mostrarResultado(r) {
         const caja = panel(r.lector).querySelector('.resultado');
         caja.className = `resultado activo ${r.estado}`;
-        const contenido = [crear('span', 'tipo', r.estado === 'RECHAZADO' ? 'RECHAZADO' : r.estado)];
+        const contenido = [crear('span', 'tipo', r.estado === 'REPETIDO' ? 'LECTURA REPETIDA' : r.estado)];
         if (r.nombre) {
             contenido.push(crear('p', 'nombre', r.nombre));
             contenido.push(crear('p', 'detalle', r.visitante
@@ -87,9 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             contenido.push(crear('p', 'nombre', r.mensaje));
         }
-        if (r.placas && r.placas.length) {
-            contenido.push(crear('p', 'placas', `🚗 ${r.placas.join(' · ')}`));
+        // Vehículo del usuario (nunca de visitantes). En los lectores vehiculares se indica también
+        // cuando no tiene uno registrado; en el peatonal solo se muestra si lo tiene.
+        if (r.matricula !== undefined && !r.visitante) {
+            if (r.placas && r.placas.length) {
+                contenido.push(crear('p', 'placas', `🚗 ${r.placas.join(' · ')}`));
+            } else if (r.lector !== 'PEATONAL') {
+                contenido.push(crear('p', 'placas sin-vehiculo', '🚗 Sin vehículo registrado'));
+            }
         }
+        if (r.estado === 'REPETIDO') contenido.push(crear('p', 'detalle', r.mensaje));
         if (r.avisos && r.avisos.length) {
             const lista = crear('ul', 'avisos');
             r.avisos.forEach((a) => lista.appendChild(crear('li', null, `⚠ ${a}`)));
@@ -108,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (r.avisos && r.avisos.length) item.title = r.avisos.join('\n');
         item.append(
             crear('span', 'hora', new Date(r.hora).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' })),
-            crear('span', `etiqueta ${r.estado}`, r.estado === 'RECHAZADO' ? 'Rechazo' : r.estado === 'ENTRADA' ? 'Entrada' : 'Salida'),
+            crear('span', `etiqueta ${r.estado}`, ETIQUETAS[r.estado] || r.estado),
             crear('span', null, r.nombre || r.mensaje)
         );
         lista.prepend(item);
@@ -120,7 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     ipcRenderer.on('lectura-acceso', (event, resultado) => {
-        if (!ROLES[resultado.lector] || resultado.estado === 'REPETIDO') return;
+        // Las relecturas del escáner (sin nombre) no se muestran; la doble lectura de una persona sí
+        if (!ROLES[resultado.lector] || (resultado.estado === 'REPETIDO' && !resultado.nombre)) return;
         mostrarResultado(resultado);
         agregarHistorial(resultado);
         sonar(resultado.estado, resultado.avisos && resultado.avisos.length);

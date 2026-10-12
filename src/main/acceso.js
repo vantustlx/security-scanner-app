@@ -1,10 +1,11 @@
 // acceso.js — registro de entradas y salidas desde los lectores (serial, cámara o lector tipo teclado)
 //
-// Lector 1 · Peatonal ............ alterna entrada/salida
-// Lector 2 · Entrada vehicular ... siempre registra entrada
-// Lector 3 · Salida vehicular .... siempre cierra la entrada abierta (sin importar por dónde entró)
+// Los tres lectores (1 · Peatonal, 2 · Entrada vehicular, 3 · Salida vehicular) registran entradas y
+// salidas: el movimiento lo decide el último estado de la persona, no el lector. Si tiene una entrada
+// abierta de hoy, la lectura es su salida; si no, es una entrada. El lector solo define el medio
+// (peatonal o vehicular) y, en los vehiculares, se muestran las placas del usuario.
 // Las incoherencias no bloquean el paso: se muestran al vigilante y se notifican al administrador.
-// Visitantes ("V-" + folio): entran y salen por cualquier lector; se alterna entrada/salida.
+// Visitantes ("V-" + folio): mismas reglas, sin medio ni datos de vehículo.
 const { ipcMain, BrowserWindow } = require('electron');
 const config = require('./config');
 const { crearNotificacion, registrarAccesoFallido } = require('./notificaciones');
@@ -34,6 +35,21 @@ function inicioDeHoy() {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
   return hoy;
+}
+
+// Doble lectura: la persona ya registró un movimiento hace menos de LECTOR_INTERVALO_MIN_SEG segundos
+// (en cualquier lector). No se registra nada; se avisa al vigilante para que no lo tome como falla.
+async function lecturaRepetida(conexion, columna, id) {
+  const [[ultimo]] = await conexion.query(
+    `SELECT fecha_salida IS NOT NULL AS fue_salida,
+            TIMESTAMPDIFF(SECOND, COALESCE(fecha_salida, fecha_entrada), NOW()) AS segundos
+       FROM registroacceso
+      WHERE ${columna} = ?
+      ORDER BY fecha_entrada DESC, id_registro DESC LIMIT 1`,
+    [id]
+  );
+  if (!ultimo || ultimo.segundos >= config.lectores.intervaloMinimoSegundos) return null;
+  return `Ya registró su ${ultimo.fue_salida ? 'salida' : 'entrada'} hace ${Math.max(0, ultimo.segundos)} s; lectura ignorada`;
 }
 
 function formatoHora(fecha) {
@@ -123,6 +139,18 @@ async function registrarEnBD(base, matricula, info) {
 
     const [vehiculos] = await conexion.query('SELECT placa FROM vehiculo WHERE matricula = ? ORDER BY placa', [matricula]);
     const placas = vehiculos.map((v) => v.placa);
+    const datos = {
+      matricula,
+      nombre: nombreCompleto(usuario),
+      rol: areaPrincipal((await obtenerAreasDeUsuarios([matricula], conexion)).get(matricula)),
+      placas
+    };
+
+    const repetida = await lecturaRepetida(conexion, 'matricula', matricula);
+    if (repetida) {
+      await conexion.rollback();
+      return { ...base, ...datos, estado: 'REPETIDO', mensaje: repetida };
+    }
 
     let [[abierto]] = await conexion.query(
       `SELECT id_registro, fecha_entrada, medio_entrada FROM registroacceso
@@ -142,20 +170,10 @@ async function registrarEnBD(base, matricula, info) {
       await cerrarAbierto(`Tenía una entrada del ${formatoHora(abierto.fecha_entrada)} sin salida; se cerró automáticamente`);
     }
 
-    let tipo;
-    if (base.lector === 'PEATONAL') {
-      tipo = abierto ? 'SALIDA' : 'ENTRADA';
-    } else if (base.lector === 'ENTRADA_VEHICULAR') {
-      if (abierto) {
-        await cerrarAbierto(`Entró en vehículo con una entrada abierta desde ${formatoHora(abierto.fecha_entrada)} sin salida registrada`);
-      }
-      tipo = 'ENTRADA';
-    } else {
-      tipo = 'SALIDA';
-      if (!abierto) avisos.push('Salió en vehículo sin una entrada registrada');
-    }
+    // El mismo criterio en los tres lectores: con entrada abierta sale, sin ella entra
+    const tipo = abierto ? 'SALIDA' : 'ENTRADA';
 
-    if (base.lector !== 'PEATONAL' && placas.length === 0) {
+    if (info.medio === 'VEHICULAR' && placas.length === 0) {
       avisos.push(`${tipo === 'ENTRADA' ? 'Entró' : 'Salió'} en vehículo sin vehículo registrado`);
     }
 
@@ -166,23 +184,18 @@ async function registrarEnBD(base, matricula, info) {
       );
       await conexion.query("UPDATE usuario SET estatus = 'Activo' WHERE matricula = ?", [matricula]);
     } else {
-      if (abierto) {
-        await conexion.query(
-          'UPDATE registroacceso SET fecha_salida = NOW(), medio_salida = ? WHERE id_registro = ?',
-          [info.medio, abierto.id_registro]
-        );
-      }
+      await conexion.query(
+        'UPDATE registroacceso SET fecha_salida = NOW(), medio_salida = ? WHERE id_registro = ?',
+        [info.medio, abierto.id_registro]
+      );
       await conexion.query("UPDATE usuario SET estatus = 'Inactivo' WHERE matricula = ?", [matricula]);
     }
 
     await conexion.commit();
     resultado = {
       ...base,
+      ...datos,
       estado: tipo,
-      matricula,
-      nombre: nombreCompleto(usuario),
-      rol: areaPrincipal((await obtenerAreasDeUsuarios([matricula], conexion)).get(matricula)),
-      placas,
       avisos,
       mensaje: tipo === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada'
     };
@@ -223,6 +236,13 @@ async function registrarVisitanteEnBD(base, folio) {
       await conexion.rollback();
       return await rechazar(base, folio, 'VISITANTE_VENCIDO', 'Pase de visitante vencido');
     }
+    const datos = { visitante: true, folio, nombre: nombreCompleto(visitante), rol: `Visitante ${visitante.tipo.toLowerCase()}` };
+
+    const repetida = await lecturaRepetida(conexion, 'id_visitante', visitante.id_visitante);
+    if (repetida) {
+      await conexion.rollback();
+      return { ...base, ...datos, estado: 'REPETIDO', mensaje: repetida };
+    }
 
     let [[abierto]] = await conexion.query(
       `SELECT id_registro, fecha_entrada FROM registroacceso
@@ -246,11 +266,8 @@ async function registrarVisitanteEnBD(base, folio) {
     const estado = abierto ? 'SALIDA' : 'ENTRADA';
     return {
       ...base,
+      ...datos,
       estado,
-      visitante: true,
-      folio,
-      nombre: nombreCompleto(visitante),
-      rol: `Visitante ${visitante.tipo.toLowerCase()}`,
       mensaje: estado === 'ENTRADA' ? 'Entrada registrada' : 'Salida registrada'
     };
   } catch (error) {
