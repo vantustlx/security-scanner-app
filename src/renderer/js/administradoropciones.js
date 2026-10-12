@@ -28,6 +28,10 @@ document.getElementById('login-card-generar').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'generarreportes');
 });
 
+document.getElementById('login-card-gestion-masiva').addEventListener('click', () => {
+    ipcRenderer.send('navigate', 'gestionmasiva');
+});
+
 // "Hace 5 minutos", "Hace 2 horas"... para el menú de la campana
 function tiempoRelativo(fecha) {
     const minutos = Math.round((Date.now() - new Date(fecha)) / 60000);

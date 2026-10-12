@@ -6,7 +6,8 @@ const config = require('./config');
 const VISTAS_ADMIN = new Set([
   'administradoropciones', 'notificaciones', 'recuperarqr', 'actualizardatospersonales',
   'buscarusuariosactivos', 'buscargrupodeusuarios', 'buscarusuarioespecifico',
-  'generarreportes', 'generarreportedegrupodeusuarios', 'generarreporteusuarioespecifico'
+  'generarreportes', 'generarreportedegrupodeusuarios', 'generarreporteusuarioespecifico',
+  'gestionmasiva'
 ]);
 const VISTA_INICIO = path.join(__dirname, '..', 'renderer', 'views', 'index.html');
 const REVISION_MS = 30 * 1000;
