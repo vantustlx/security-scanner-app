@@ -15,6 +15,7 @@ const { generateUserReportPDF } = require('./utils/pdfGeneratorspecific');
 const { protegerVentana, quitarMenu } = require('./seguridad');
 const { setupSesionAdmin } = require('./sesionAdmin');
 const { setupBitacora } = require('./bitacora');
+const { setupGestionMasiva } = require('./gestionMasiva');
 const config = require('./config');
 
 
@@ -152,6 +153,7 @@ app.whenReady().then(async () => {
   setupAcceso(pool);
   setupVisitantes(pool);
   setupAreas(pool);
+  setupGestionMasiva(pool);
   createWindow();
   crearVentanaLector();
   // Configurar listeners de email después de crear la ventana

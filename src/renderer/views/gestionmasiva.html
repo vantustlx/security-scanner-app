@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión y Envío Masivo de QR</title>
+    <link rel="stylesheet" href="../css/stylesbuscargrupodeusuarios.css">
+    <link rel="stylesheet" href="../../../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <style>
+        .progress-container {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .progress-bar-bg {
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 20px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            background: #4CAF50;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .acciones-masivas {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #f1f1f1;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+        .btn-enviar {
+            background-color: #28a745;
+        }
+        .btn-enviar:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="../assets/logo.png" alt="Logo" class="logo">
+            <h1>GESTIÓN Y ENVÍO MASIVO DE CREDENCIALES QR</h1>
+        </div>
+
+        <div class="formulario-filtros">
+            <div class="campo">
+                <label for="area">Área</label>
+                <select id="area" name="area"></select>
+            </div>
+
+            <div class="campo">
+                <label for="carrera">Carrera</label>
+                <select id="carrera" name="carrera"></select>
+            </div>
+
+            <div class="campo">
+                <label for="turno">Turno</label>
+                <select id="turno" name="turno"></select>
+            </div>
+
+            <div class="campo">
+                <label for="busqueda">Buscar (Nombre / Matrícula)</label>
+                <input type="text" id="busqueda" placeholder="Ej. Juan o 2021...">
+            </div>
+
+            <div class="campo boton-buscar">
+                <button class="btn btn-buscar" id="btn-buscar">Buscar</button>
+            </div>
+        </div>
+
+        <div class="progress-container" id="progress-container">
+            <h3 id="progress-status">Enviando credenciales... (0 / 0)</h3>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+            <p id="progress-detail" style="margin-top: 8px; font-size: 14px; color: #555;"></p>
+        </div>
+
+        <div class="acciones-masivas">
+            <div>
+                <label style="cursor: pointer; font-weight: bold;">
+                    <input type="checkbox" id="select-all" style="transform: scale(1.2); margin-right: 5px;"> Seleccionar todos los resultados
+                </label>
+                <span id="selected-count" style="margin-left: 15px; font-weight: bold; color: #555;">0 seleccionados</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" id="btn-descargar-locales" style="background-color: #17a2b8;" disabled>
+                    <i class="fas fa-file-pdf"></i> Descargar PDFs Locales
+                </button>
+                <button class="btn btn-enviar" id="btn-enviar-masivo" disabled>
+                    <i class="fas fa-paper-plane"></i> Enviar QRs por Correo
+                </button>
+            </div>
+        </div>
+
+        <div class="list-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;"><i class="fas fa-check"></i></th>
+                        <th>Matrícula</th>
+                        <th>Nombre completo</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6" style="text-align: center;">Utiliza los filtros y haz clic en "Buscar" para listar usuarios</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="btn btn-regresar" id="btn-regresar">Regresar</button>
+
+    <script src="../js/ui.js"></script>
+    <script src="../js/areasUsuario.js"></script>
+    <script src="../js/gestionmasiva.js"></script>
+</body>
+</html>

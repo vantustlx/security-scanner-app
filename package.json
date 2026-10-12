@@ -23,6 +23,7 @@
     "nodemailer": "^10.0.15",
     "pdfkit": "^0.17.2",
     "qrcode": "^1.5.4",
-    "serialport": "^13.0.0"
+    "serialport": "^13.0.0",
+    "xlsx": "^0.18.5"
   }
 }
