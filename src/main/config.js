@@ -43,8 +43,11 @@ const config = {
     ENTRADA_VEHICULAR: process.env.LECTOR_ENTRADA_VEHICULAR || null,
     SALIDA_VEHICULAR: process.env.LECTOR_SALIDA_VEHICULAR || null,
     baudios: Number(process.env.LECTOR_BAUDIOS) || 9600,
-    // Lecturas repetidas del mismo QR en el mismo lector dentro de este lapso se ignoran
-    antirreboteSegundos: Number(process.env.LECTOR_ANTIRREBOTE_SEG) || 8
+    // Lecturas repetidas del mismo QR en el mismo lector dentro de este lapso se ignoran sin avisar
+    antirreboteSegundos: Number(process.env.LECTOR_ANTIRREBOTE_SEG) || 8,
+    // Una persona que se vuelve a escanear (en cualquier lector) antes de este lapso desde su último
+    // movimiento no cambia de entrada a salida: se muestra como lectura repetida (0 lo desactiva)
+    intervaloMinimoSegundos: /^\d+$/.test(process.env.LECTOR_INTERVALO_MIN_SEG || '') ? Number(process.env.LECTOR_INTERVALO_MIN_SEG) : 15
   },
   cierre: {
     hora: process.env.CIERRE_HORA || '20:00',

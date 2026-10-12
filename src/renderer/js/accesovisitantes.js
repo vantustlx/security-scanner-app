@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.abrirModal(modalFail, { alEscape: cerrarFallido });
         return;
       }
-      tituloOk.textContent = resultado.estado === 'ENTRADA' ? '¡Bienvenido!' : '¡Hasta pronto!';
+      const titulos = { ENTRADA: '¡Bienvenido!', SALIDA: '¡Hasta pronto!', REPETIDO: 'Ya estaba registrado' };
+      tituloOk.textContent = titulos[resultado.estado] || '';
       textoOk.textContent = `${resultado.nombre} · ${resultado.rol} · ${resultado.mensaje}`;
       inputCodigo.value = '';
       UI.abrirModal(modalOk);

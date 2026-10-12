@@ -108,6 +108,7 @@ body {
 .resultado.ENTRADA { background: #e8f5e9; border-color: var(--ok); }
 .resultado.SALIDA { background: #e3f2fd; border-color: var(--salida); }
 .resultado.RECHAZADO { background: #ffebee; border-color: var(--error); }
+.resultado.REPETIDO { background: #f3f1ee; border-color: var(--gris); }
 .resultado .tipo {
     align-self: center;
     padding: 4px 14px;
@@ -119,9 +120,11 @@ body {
 .resultado.ENTRADA .tipo { background: var(--ok); }
 .resultado.SALIDA .tipo { background: var(--salida); }
 .resultado.RECHAZADO .tipo { background: var(--error); }
+.resultado.REPETIDO .tipo { background: var(--gris); }
 .resultado .nombre { margin: 10px 0 2px; font-size: 22px; font-weight: bold; color: #222; }
 .resultado .detalle { margin: 0; color: var(--gris); font-size: 14px; }
 .resultado .placas { margin: 10px 0 0; font-size: 18px; font-weight: bold; color: var(--guinda); letter-spacing: 1px; }
+.resultado .placas.sin-vehiculo { color: var(--gris); font-size: 15px; letter-spacing: 0; }
 .resultado .avisos { margin: 10px 0 0; padding: 0; list-style: none; color: var(--aviso); font-size: 14px; font-weight: bold; }
 
 .historial {
@@ -139,6 +142,7 @@ body {
 .historial .ENTRADA { color: var(--ok); }
 .historial .SALIDA { color: var(--salida); }
 .historial .RECHAZADO { color: var(--error); }
+.historial .REPETIDO { color: var(--gris); }
 .historial .con-aviso::after { content: ' ⚠'; color: var(--aviso); }
 
 .respaldo {

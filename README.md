@@ -61,13 +61,15 @@ Al iniciar, la app abre dos ventanas: la principal (menú y modo administrador) 
 
 Los escáneres se leen desde el proceso principal, así que funcionan aunque la ventana del lector no tenga el foco o esté minimizada.
 
-| Lector | Regla |
-|---|---|
-| 1 · Peatonal | Alterna entrada y salida |
-| 2 · Entrada vehicular | Siempre registra entrada |
-| 3 · Salida vehicular | Siempre cierra la entrada abierta, sin importar por dónde entró |
+Los tres lectores (1 · Peatonal, 2 · Entrada vehicular, 3 · Salida vehicular) registran entradas y salidas. El movimiento lo decide el último estado de la persona, no el lector:
 
-Las incoherencias no bloquean el paso: se muestran al vigilante con ⚠ y llegan a **Notificaciones** (entrar en vehículo con una entrada abierta, salir sin entrada, usar los lectores vehiculares sin vehículo registrado). Un código desconocido, un QR con firma inválida o una matrícula inexistente se rechazan y se registran en `accesos_fallidos`.
+- Si tiene una entrada abierta de hoy, la lectura es su **salida**; si no (incluido su primer escaneo), es una **entrada**.
+- El lector solo define el medio que se guarda (`PEATONAL` o `VEHICULAR`).
+- Una entrada sin salida de un día anterior se cierra automáticamente y la lectura cuenta como entrada.
+- **Doble lectura:** el mismo QR en el mismo lector dentro de `LECTOR_ANTIRREBOTE_SEG` (8 s) se ignora sin avisar, porque el escáner relee mientras se sostiene. Si la persona se vuelve a escanear en cualquier lector antes de `LECTOR_INTERVALO_MIN_SEG` (15 s) desde su último movimiento, no se registra nada y el lector muestra *Lectura repetida*.
+- En los lectores vehiculares se muestran las placas del usuario, o *Sin vehículo registrado*. A los visitantes nunca se les muestra información de vehículo.
+
+Las incoherencias no bloquean el paso: se muestran al vigilante con ⚠ y llegan a **Notificaciones** (usar un lector vehicular sin vehículo registrado, entrada de un día anterior sin salida). Un código desconocido, un QR con firma inválida o una matrícula inexistente se rechazan y se registran en `accesos_fallidos`.
 
 El QR de la credencial lleva la matrícula y una firma (`FCB<matrícula>K<firma>`, calculada con `QR_SECRETO`), para que nadie pueda generar el QR de otra persona escribiendo su matrícula. Las credenciales anteriores, que solo traen la matrícula, se rechazan salvo con `QR_ACEPTAR_SIN_FIRMA=si`; se reenvían desde **Modo administrador → Recuperar QR**. La cámara de la ventana del lector queda como respaldo y registra con el lector que se elija.
 
