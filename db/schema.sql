@@ -165,12 +165,7 @@ INSERT  IGNORE INTO `carrera` VALUES (1,'Ingenieria en Computacion'),
 -- Áreas de la facultad (requiere_carrera = 1: la persona elige carrera en esa área)
 INSERT  IGNORE INTO `area` VALUES (1,'Estudiante',1),
 (2,'Docente',1),
-(3,'Administrativo',1),
-(4,'Dirección',1),
-(5,'Jardinería',0),
-(6,'Limpieza',0),
-(7,'Seguridad',0),
-(8,'Cafetería',0);
+(3,'Administrativo',1);
 
 -- Turnos (una combinación de área puede tener varios)
 INSERT  IGNORE INTO `turno` VALUES (1,'Matutino'),
