@@ -10,19 +10,39 @@
 <body>
     <div class="container">
         <main class="history-container">
+            <!-- Encabezado fijo: las acciones no se desplazan aunque lleguen más notificaciones -->
             <div class="history-header">
                 <h2>Notificaciones</h2>
+                <div class="history-acciones">
+                    <button type="button" class="accion" id="btn-marcar-leidas">
+                        <i class="fas fa-check-double"></i> Marcar todo como leído
+                    </button>
+                    <button type="button" class="accion peligro" id="btn-limpiar">
+                        <i class="fas fa-trash-can"></i> Limpiar todo
+                    </button>
+                </div>
             </div>
 
             <div id="lista-notificaciones">
                 <p class="history-empty">Cargando notificaciones...</p>
             </div>
 
-            <a class="delete-button" id="btn-marcar-leidas">Marcar todo como leído</a>
             <button id="btn-volver" class="back-button">
                 Regresar
             </button>
         </main>
+    </div>
+
+    <!-- Confirmación de "Limpiar todo" -->
+    <div class="modal-overlay" id="modal-limpiar">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="limpiar-titulo">
+            <h3 id="limpiar-titulo">¿Limpiar todas las notificaciones?</h3>
+            <p id="limpiar-texto">Se eliminarán definitivamente de la base de datos.</p>
+            <div class="modal-botones">
+                <button type="button" class="accion" id="limpiar-cancelar">Cancelar</button>
+                <button type="button" class="accion peligro" id="limpiar-confirmar">Limpiar todo</button>
+            </div>
+        </div>
     </div>
       <script src="../js/ui.js"></script>
       <script src="../js/notificaciones.js"></script>

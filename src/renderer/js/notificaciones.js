@@ -17,65 +17,86 @@ const TIPOS = {
     ACCESO_VISITANTE_VENCIDO: ['Pase de visitante vencido', 'warning']
 };
 
-function crearDetalle(etiqueta, valor) {
-    const detalle = document.createElement('div');
-    detalle.className = 'history-detail';
-    const strong = document.createElement('strong');
-    strong.textContent = etiqueta;
-    const span = document.createElement('span');
-    span.textContent = valor;
-    detalle.append(strong, span);
-    return detalle;
+const ICONOS = { success: 'fa-circle-check', warning: 'fa-triangle-exclamation', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+
+function crear(etiqueta, clase, texto) {
+    const el = document.createElement(etiqueta);
+    if (clase) el.className = clase;
+    if (texto !== undefined) el.textContent = texto;
+    return el;
 }
 
-function crearItem(notificacion, indice) {
+function icono(clase) {
+    return crear('i', `fas ${clase}`);
+}
+
+function crearItem(notificacion) {
     const [etiqueta, estilo] = TIPOS[notificacion.tipo] || ['Acceso fallido', 'error'];
     const fecha = new Date(notificacion.fecha_hora);
 
-    const item = document.createElement('div');
-    item.className = `history-item ${estilo}${notificacion.leido ? '' : ' unread'}`;
+    const item = crear('div', `history-item ${estilo}${notificacion.leido ? '' : ' unread'}`);
+    const circulo = crear('div', 'history-icono');
+    circulo.appendChild(icono(ICONOS[estilo] || 'fa-bell'));
 
-    const titulo = document.createElement('div');
-    titulo.className = 'history-title';
-    titulo.textContent = `${indice}. ${notificacion.titulo}`;
+    const cuerpo = crear('div', 'history-cuerpo');
+    const titulo = crear('h3', 'history-titulo', notificacion.titulo);
+    if (!notificacion.leido) titulo.appendChild(crear('span', 'history-nuevo', 'Nuevo'));
+    const mensaje = crear('p', 'history-mensaje',
+        notificacion.mensaje || `Matrícula / número de trabajador: ${notificacion.matricula}`);
 
-    const mensaje = document.createElement('p');
-    mensaje.textContent = notificacion.mensaje || `Matrícula / número de trabajador: ${notificacion.matricula}`;
-
-    const detalles = document.createElement('div');
-    detalles.className = 'history-details';
-    detalles.append(
-        crearDetalle('Hora', fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })),
-        crearDetalle('Fecha', fecha.toLocaleDateString('es-MX')),
-        crearDetalle('Tipo', etiqueta)
-    );
-
-    item.append(titulo, mensaje, detalles);
+    const hora = crear('span');
+    hora.append(icono('fa-clock'), fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }));
+    const dia = crear('span');
+    dia.append(icono('fa-calendar'), fecha.toLocaleDateString('es-MX'));
+    const meta = crear('div', 'history-meta');
+    meta.append(hora, dia, crear('span', 'history-tipo', etiqueta));
+    cuerpo.append(titulo, mensaje, meta);
 
     // El cierre diario adjunta un PDF con quienes no registraron su salida
     if (notificacion.tieneArchivo) {
-        const boton = document.createElement('button');
-        boton.className = 'history-pdf';
-        boton.textContent = 'Ver PDF';
+        const boton = crear('button', 'history-pdf', 'Ver PDF');
         boton.addEventListener('click', async () => {
             const resultado = await ipcRenderer.invoke('abrir-archivo-notificacion', notificacion.id);
             if (!resultado.ok) UI.notificar(`No se pudo abrir el PDF: ${resultado.error}`, 'error');
         });
-        item.appendChild(boton);
+        cuerpo.appendChild(boton);
     }
+
+    const eliminar = crear('button', 'history-eliminar');
+    eliminar.type = 'button';
+    eliminar.title = 'Eliminar notificación';
+    eliminar.setAttribute('aria-label', 'Eliminar notificación');
+    eliminar.appendChild(icono('fa-xmark'));
+    eliminar.addEventListener('click', async () => {
+        eliminar.disabled = true;
+        try {
+            const resultado = await ipcRenderer.invoke('eliminar-notificacion', notificacion.id);
+            if (!resultado.ok) throw new Error(resultado.error);
+            // La lista se recarga con 'notificaciones-actualizadas'
+        } catch (error) {
+            eliminar.disabled = false;
+            UI.notificar(`No se pudo eliminar: ${error.message}`, 'error');
+        }
+    });
+
+    item.append(circulo, cuerpo, eliminar);
     return item;
 }
+
+let total = 0;
 
 async function cargarNotificaciones() {
     const lista = document.getElementById('lista-notificaciones');
     try {
         const { notificaciones, sinLeer } = await ipcRenderer.invoke('obtener-notificaciones');
+        total = notificaciones.length;
         lista.innerHTML = '';
         if (!notificaciones.length) {
             lista.innerHTML = '<p class="history-empty">No hay notificaciones.</p>';
         }
-        notificaciones.forEach((notificacion, i) => lista.appendChild(crearItem(notificacion, i + 1)));
-        document.getElementById('btn-marcar-leidas').classList.toggle('disabled', sinLeer === 0);
+        notificaciones.forEach((notificacion) => lista.appendChild(crearItem(notificacion)));
+        document.getElementById('btn-marcar-leidas').disabled = sinLeer === 0;
+        document.getElementById('btn-limpiar').disabled = total === 0;
     } catch (error) {
         console.error('Error al cargar notificaciones:', error);
         lista.innerHTML = '<p class="history-empty">No se pudieron cargar las notificaciones.</p>';
@@ -89,6 +110,29 @@ document.getElementById('btn-volver').addEventListener('click', () => {
 document.getElementById('btn-marcar-leidas').addEventListener('click', async () => {
     await ipcRenderer.invoke('marcar-notificaciones-leidas');
     cargarNotificaciones();
+});
+
+// "Limpiar todo" pide confirmación: el borrado es definitivo
+const modalLimpiar = document.getElementById('modal-limpiar');
+document.getElementById('btn-limpiar').addEventListener('click', () => {
+    document.getElementById('limpiar-texto').textContent =
+        `Se eliminarán definitivamente las notificaciones mostradas, incluidos los intentos de acceso fallidos. ` +
+        'Los PDF del cierre diario se conservan en su carpeta.';
+    UI.abrirModal(modalLimpiar, { enfocar: document.getElementById('limpiar-cancelar') });
+});
+document.getElementById('limpiar-cancelar').addEventListener('click', () => UI.cerrarModal(modalLimpiar));
+document.getElementById('limpiar-confirmar').addEventListener('click', async () => {
+    const boton = document.getElementById('limpiar-confirmar');
+    boton.disabled = true;
+    try {
+        await ipcRenderer.invoke('limpiar-notificaciones');
+        UI.cerrarModal(modalLimpiar);
+        UI.notificar('Se eliminaron todas las notificaciones', 'success');
+    } catch (error) {
+        UI.notificar(`No se pudieron eliminar: ${error.message}`, 'error');
+    } finally {
+        boton.disabled = false;
+    }
 });
 
 // Se recarga sola cuando llega una confirmación de registro mientras está abierta
