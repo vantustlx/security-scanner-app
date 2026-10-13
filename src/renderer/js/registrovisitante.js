@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const vigencia = new Date(r.vigenteHasta).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('titulo-exito').textContent = r.renovado ? '¡Registro renovado!' : '¡Registro exitoso!';
     document.getElementById('texto-folio').textContent = r.folio;
+    document.getElementById('texto-motivo').textContent = `Motivo de la visita: ${r.motivo}`;
     document.getElementById('texto-vigencia').textContent = r.tipo === 'Frecuente'
       ? `Visitante frecuente · vigente hasta el ${vigencia}`
       : `Visitante ocasional · válido solo hoy (${vigencia})`;

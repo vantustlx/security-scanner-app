@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             contenido.push(crear('p', 'detalle', r.visitante
                 ? `Folio ${r.folio} · ${r.rol}`
                 : `Matrícula ${r.matricula}${r.rol ? ' · ' + r.rol : ''}`));
+            if (r.visitante && r.motivo) contenido.push(crear('p', 'motivo', `Motivo: ${r.motivo}`));
         } else {
             contenido.push(crear('p', 'nombre', r.mensaje));
         }

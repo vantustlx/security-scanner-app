@@ -116,7 +116,7 @@ async function registrarVisitante(datos) {
   }
 
   console.log(`[VISITANTES] ${renovado ? 'Renovado' : 'Registrado'} visitante ${d.tipo} con folio ${folio}`);
-  return { estado: 'ok', folio, tipo: d.tipo, vigenteHasta: vigenteHasta.toISOString(), correo: d.correo, correoEnviado, errorCorreo, renovado };
+  return { estado: 'ok', folio, tipo: d.tipo, motivo: d.motivo, vigenteHasta: vigenteHasta.toISOString(), correo: d.correo, correoEnviado, errorCorreo, renovado };
 }
 
 function setupVisitantes(poolDB) {
