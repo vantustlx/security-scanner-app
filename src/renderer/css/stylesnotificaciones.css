@@ -7,38 +7,188 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Encabezado fijo: título a la izquierda y acciones arriba a la derecha */
 .history-header {
-    text-align: center;
-    margin-bottom: 30px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    margin: -20px -20px 24px;
+    padding: 18px 20px 14px;
+    background: white;
     border-bottom: 2px solid #e1e4e8;
+    border-radius: 8px 8px 0 0;
 }
 
+.history-acciones {
+    display: flex;
+    gap: 10px;
+}
+
+.accion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border: 1px solid #d6d0ca;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    font-family: Ubuntu, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.accion:hover {
+    background: #f6f3ef;
+}
+
+.accion.peligro {
+    border-color: #6B1719;
+    background: #6B1719;
+    color: white;
+}
+
+.accion.peligro:hover {
+    background: #4A0E12;
+}
+
+.accion:disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Tarjeta de notificación: ícono, contenido (título, texto, hora) y botón de eliminar */
 .history-item {
-    padding: 15px;
-    margin-bottom: 15px;
-    background: #f6f8fa;
-    border-radius: 15px;
-    border-left: 8px solid #9B9B9B;
+    position: relative;
+    display: flex;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    gap: 14px;
+    padding: 16px 52px 16px 18px;
+    margin-bottom: 14px;
+    background: white;
+    border: 1px solid #ece6e1;
+    border-left: 5px solid #9B9B9B;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s;
 }
 
+.history-item:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.history-item.success { border-left-color: #2e8b57; --color-tipo: #2e8b57; }
+.history-item.warning { border-left-color: #f66a0a; --color-tipo: #f66a0a; }
+.history-item.error { border-left-color: #6B1719; --color-tipo: #6B1719; }
+.history-item.info { border-left-color: #C49A40; --color-tipo: #C49A40; }
+
+/* Sin leer: fondo cálido y título más marcado; leídas: más tenues */
 .history-item.unread {
-    background: #e5f0fb;
+    background: #fbf7f0;
 }
 
-.history-item.success {
-    border-left-color: #2e8b57;
+.history-item:not(.unread) .history-cuerpo {
+    opacity: 0.75;
 }
 
-.history-item.warning {
-    border-left-color: #f66a0a;
+.history-icono {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--color-tipo, #6B6B6B);
+    background: color-mix(in srgb, var(--color-tipo, #9B9B9B) 12%, white);
 }
 
-.history-item.error {
-    border-left-color: #6B1719;
+.history-cuerpo {
+    flex: 1;
+    min-width: 0;
 }
 
-.history-item.info {
-    border-left-color: #C49A40;
+.history-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-family: Ubuntu, sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #222;
+}
+
+.history-item.unread .history-titulo {
+    font-weight: 700;
+}
+
+.history-nuevo {
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #6B1719;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.history-mensaje {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #444;
+}
+
+.history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: #6B6B6B;
+}
+
+.history-meta i {
+    margin-right: 4px;
+}
+
+.history-tipo {
+    padding: 2px 10px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-tipo, #9B9B9B) 12%, white);
+    color: var(--color-tipo, #6B6B6B);
+    font-weight: 600;
+}
+
+.history-eliminar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #8a8a8a;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.history-eliminar:hover {
+    background: #f3e5e5;
+    color: #6B1719;
 }
 
 .history-pdf {
@@ -59,70 +209,49 @@
 .history-empty {
     text-align: center;
     color: #6B6B6B;
+    padding: 30px 0;
 }
 
-.delete-button.disabled {
-    opacity: 0.5;
-    pointer-events: none;
+/* Confirmación de "Limpiar todo" */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 100;
 }
 
-.history-title {
-    font-size: 24px;
-    font-family: Ubuntu;
-    font-weight: 700;
-    letter-spacing: 3px;
+.modal-overlay.active {
+    display: flex;
 }
 
-p {
-    font-size: 14px;
-    font-family: Open Sans;
-    font-weight: 400;
-    line-height: 32px;
-    letter-spacing: 0px;
-}
-
-.history-details {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 10px;
-    font-size: 14px;
-    font-family: Open Sans;
-    font-weight: 400;
-    line-height: 25px;
-    letter-spacing: 0px;
-}
-
-.history-detail {
+.modal-content {
+    width: min(440px, calc(100% - 32px));
+    padding: 24px;
+    border-radius: 12px;
     background: white;
-    padding: 8px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
-.history-detail strong {
-    display: block;
-    color: #586069;
-    font-size: 12px;
+.modal-content h3 {
+    margin: 0 0 8px;
+    font-family: Ubuntu, sans-serif;
+    color: #6B1719;
 }
 
-.delete-button {
-    display: block;
-    text-align: center;
-    margin-top: 30px;
-    padding: 10px;
-    background: #767676;
-    color: white;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    font-family: Ubuntu;
-    cursor: pointer;
+.modal-content p {
+    margin: 0 0 20px;
+    line-height: 1.5;
 }
 
-.delete-button:hover {
-    background-color: #4e4e4e;
+.modal-botones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
+
 /* Estilos para las notificaciones */
 .notification-item {
     padding: 12px;

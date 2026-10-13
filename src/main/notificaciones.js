@@ -50,6 +50,36 @@ async function marcarTodasLeidas() {
   await pool.query('UPDATE accesos_fallidos SET leido = 1 WHERE leido = 0');
 }
 
+// Borra un aviso ('n<id>') o un intento de acceso fallido ('a<id>') de la BD.
+// Los PDF del cierre diario se quedan en su carpeta.
+async function eliminarNotificacion(idNotificacion) {
+  const id = /^([na])(\d+)$/.exec(String(idNotificacion));
+  if (!id) return { ok: false, error: 'Notificación no válida' };
+  const tabla = id[1] === 'n' ? 'notificacion' : 'accesos_fallidos';
+  await pool.query(`DELETE FROM ${tabla} WHERE id = ?`, [Number(id[2])]);
+  avisarCambio();
+  return { ok: true };
+}
+
+// "Limpiar todo": avisos e intentos fallidos, en una sola transacción
+async function limpiarNotificaciones() {
+  const conexion = await pool.getConnection();
+  try {
+    await conexion.beginTransaction();
+    await conexion.query('DELETE FROM notificacion');
+    await conexion.query('DELETE FROM accesos_fallidos');
+    await conexion.commit();
+  } catch (error) {
+    await conexion.rollback().catch(() => {});
+    throw error;
+  } finally {
+    conexion.release();
+  }
+  console.log('[NOTIFICACION] Se limpiaron todas las notificaciones');
+  avisarCambio();
+  return { ok: true };
+}
+
 // La ruta del PDF se toma de la BD, nunca del renderer
 async function abrirArchivo(idNotificacion) {
   const id = /^n(\d+)$/.exec(String(idNotificacion));
@@ -65,6 +95,8 @@ function setupNotificaciones(poolDB) {
   ipcMain.handle('obtener-notificaciones', (event, { limite } = {}) => obtenerNotificaciones(limite));
   ipcMain.handle('marcar-notificaciones-leidas', () => marcarTodasLeidas());
   ipcMain.handle('abrir-archivo-notificacion', (event, id) => abrirArchivo(id));
+  ipcMain.handle('eliminar-notificacion', (event, id) => eliminarNotificacion(id));
+  ipcMain.handle('limpiar-notificaciones', () => limpiarNotificaciones());
 }
 
 module.exports = { setupNotificaciones, crearNotificacion, registrarAccesoFallido };
