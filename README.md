@@ -53,6 +53,7 @@ mysql -u root -p < db/migraciones/2026-10-05_registro_con_confirmacion.sql
 mysql -u root -p < db/migraciones/2026-10-05_lectores_y_cierre_diario.sql
 mysql -u root -p < db/migraciones/2026-10-05_visitantes_codigo_barras.sql
 mysql -u root -p < db/migraciones/2026-10-05_areas_usuario.sql
+mysql -u root -p < db/migraciones/2026-10-12_quitar_areas.sql
 ```
 
 ## Lector de accesos
@@ -114,10 +115,10 @@ Las solicitudes vencen a las 48 horas (`CONFIRMACION_HORAS_VIGENCIA`).
 
 ### Áreas
 
-Una persona puede tener varias áreas en la facultad (por ejemplo, estudiante en la mañana y personal de limpieza en la noche). Cada área se captura como una fila con:
+Una persona puede tener varias áreas en la facultad (por ejemplo, estudiante en la mañana y administrativo en la tarde). Cada área se captura como una fila con:
 
-- **Área**: Estudiante, Docente, Administrativo, Dirección, Jardinería, Limpieza, Seguridad o Cafetería.
-- **Carrera**: solo en Estudiante, Docente, Administrativo y Dirección.
+- **Área**: Estudiante, Docente o Administrativo.
+- **Carrera**: en las tres áreas.
 - **Turnos**: uno o varios (Matutino, Vespertino, Nocturno, Tiempo completo).
 - **Principal**: la que se muestra en el lector y en el PDF del cierre diario, por ejemplo `Docente (+1)`.
 

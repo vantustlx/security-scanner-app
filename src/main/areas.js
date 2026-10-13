@@ -122,7 +122,7 @@ async function adjuntarAreas(filas, db = pool) {
   return filas.map((f) => ({ ...f, areas: mapa.get(Number(f.matricula)) || [] }));
 }
 
-// "Estudiante (Ing. en Computación · Matutino, Vespertino); Limpieza (Nocturno)"
+// "Estudiante (Ing. en Computación · Matutino, Vespertino); Administrativo (Ing. Química · Nocturno)"
 function resumenAreas(areas = []) {
   return areas.map((a) => {
     const detalle = [a.carrera, a.turnos.map((t) => t.nombre).join(', ')].filter(Boolean).join(' · ');
