@@ -91,12 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             contenido.push(crear('p', 'nombre', r.mensaje));
         }
-        // Vehículo del usuario (nunca de visitantes). En los lectores vehiculares se indica también
-        // cuando no tiene uno registrado; en el peatonal solo se muestra si lo tiene.
-        if (r.matricula !== undefined && !r.visitante) {
+        // Vehículo del usuario: solo en los lectores vehiculares (nunca en el peatonal ni para visitantes),
+        // con sus placas o indicando que no tiene uno registrado
+        if (r.matricula !== undefined && !r.visitante && r.lector !== 'PEATONAL') {
             if (r.placas && r.placas.length) {
                 contenido.push(crear('p', 'placas', `🚗 ${r.placas.join(' · ')}`));
-            } else if (r.lector !== 'PEATONAL') {
+            } else {
                 contenido.push(crear('p', 'placas sin-vehiculo', '🚗 Sin vehículo registrado'));
             }
         }
