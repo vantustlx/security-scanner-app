@@ -224,7 +224,7 @@ async function registrarVisitanteEnBD(base, folio) {
   try {
     await conexion.beginTransaction();
     const [[visitante]] = await conexion.query(
-      `SELECT id_visitante, nombre, apellido_paterno, apellido_materno, tipo, vigente_hasta
+      `SELECT id_visitante, nombre, apellido_paterno, apellido_materno, tipo, motivo, vigente_hasta
          FROM visitante WHERE codigo_acceso = ? FOR UPDATE`,
       [folio]
     );
@@ -236,7 +236,9 @@ async function registrarVisitanteEnBD(base, folio) {
       await conexion.rollback();
       return await rechazar(base, folio, 'VISITANTE_VENCIDO', 'Pase de visitante vencido');
     }
-    const datos = { visitante: true, folio, nombre: nombreCompleto(visitante), rol: `Visitante ${visitante.tipo.toLowerCase()}` };
+    const datos = {
+      visitante: true, folio, nombre: nombreCompleto(visitante), rol: `Visitante ${visitante.tipo.toLowerCase()}`, motivo: visitante.motivo
+    };
 
     const repetida = await lecturaRepetida(conexion, 'id_visitante', visitante.id_visitante);
     if (repetida) {

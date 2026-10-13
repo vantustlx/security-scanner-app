@@ -123,6 +123,7 @@ body {
 .resultado.REPETIDO .tipo { background: var(--gris); }
 .resultado .nombre { margin: 10px 0 2px; font-size: 22px; font-weight: bold; color: #222; }
 .resultado .detalle { margin: 0; color: var(--gris); font-size: 14px; }
+.resultado .motivo { margin: 8px 0 0; font-size: 16px; font-weight: bold; color: var(--guinda); }
 .resultado .placas { margin: 10px 0 0; font-size: 18px; font-weight: bold; color: var(--guinda); letter-spacing: 1px; }
 .resultado .placas.sin-vehiculo { color: var(--gris); font-size: 15px; letter-spacing: 0; }
 .resultado .avisos { margin: 10px 0 0; padding: 0; list-style: none; color: var(--aviso); font-size: 14px; font-weight: bold; }
