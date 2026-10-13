@@ -373,7 +373,152 @@ h1 {
     text-align: center;
     font-family: 'Ubuntu', sans-serif;
 }
-#modal-exito-final h2 {
-    color: #2e7d32;
-    font-weight: bold;
+
+/* ========== Búsqueda con coincidencias y placas del usuario ========== */
+[hidden] {
+    display: none !important;
+}
+
+.resultados {
+    margin-top: -10px;
+}
+
+.resultados-titulo {
+    margin: 0 0 8px;
+    color: #fff;
+    font-size: 14px;
+    opacity: 0.85;
+}
+
+.tabla-resultados {
+    max-height: 240px;
+    overflow-y: auto;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.tabla-resultados table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+.tabla-resultados th {
+    position: sticky;
+    top: 0;
+    padding: 9px 12px;
+    background: #f1ede8;
+    text-align: left;
+    font-weight: 500;
+}
+
+.tabla-resultados td {
+    padding: 8px 12px;
+    border-top: 1px solid #eee;
+}
+
+.tabla-resultados tbody tr {
+    cursor: pointer;
+}
+
+.tabla-resultados tbody tr:hover,
+.tabla-resultados tbody tr:focus {
+    background: #eef5ec;
+    outline: none;
+}
+
+.tabla-resultados td.sin-resultados {
+    text-align: center;
+    color: #777;
+    cursor: default;
+}
+
+#modal-placas {
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+.modal-content.modal-placas {
+    max-width: 460px;
+}
+
+.modal-content .placas-usuario {
+    margin-bottom: 16px;
+}
+
+.lista-placas {
+    margin: 0 0 18px;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+
+.lista-placas li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.lista-placas .placa {
+    flex: 1;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: #333;
+}
+
+.lista-placas .sin-placas {
+    justify-content: center;
+    color: #888;
+}
+
+.btn-placa {
+    padding: 5px 10px;
+    border: 1px solid #5a8f53;
+    border-radius: 4px;
+    background: #fff;
+    color: #4a7544;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-placa:hover {
+    background: #eef5ec;
+}
+
+.btn-placa.peligro {
+    border-color: #b23131;
+    color: #b23131;
+}
+
+.btn-placa.peligro:hover {
+    background: #fbeaea;
+}
+
+.modal-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.modal-btn.secundario {
+    background-color: #fff;
+    border: 1px solid #b9b9b9;
+    color: #444;
+}
+
+.modal-btn.secundario:hover {
+    background-color: #f2f2f2;
+}
+
+.modal-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
 }

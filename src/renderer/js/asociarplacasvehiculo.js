@@ -1,107 +1,234 @@
 const { ipcRenderer } = require('electron');
 
-let currentUser = null;  // Guarda aquí el usuario encontrado
+// Placas de vehículo (modo administrador): se busca a la persona con coincidencias parciales,
+// y al elegirla se administran sus placas (puede tener varias).
+const REGEX_PLACA = /^[A-Z]{3}-\d{3}-[A-Z]$/;
+const CAMPOS = ['nombre', 'apellidoP', 'apellidoM', 'matricula', 'correo'];
+const ESPERA_BUSQUEDA_MS = 250;
+
+let usuarioActual = null; // persona elegida en la tabla
+let placaEnEdicion = null; // placa que se está cambiando (null = agregar una nueva)
+let ultimaBusqueda = 0;   // descarta respuestas de búsquedas anteriores
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Botón “Regresar”
+  const modalPlacas = document.getElementById('modal-placas');
+  const inputPlaca = document.getElementById('placa');
+  const errorPlaca = document.getElementById('error-placa');
+  const btnGuardar = document.getElementById('btn-guardar-placa');
+  const btnCancelarEdicion = document.getElementById('btn-cancelar-edicion');
+  let temporizador = null;
+
+  // Volver a "Acceder" cierra la sesión del administrador (es una vista pública)
   document.getElementById('boton-rojo').addEventListener('click', () => {
     ipcRenderer.send('navigate', 'acceder');
   });
 
-  const modalFallida = document.getElementById('modal-asociacion-fallida');
-  const modalPlaca = document.getElementById('modal-user-exito');
-  const btnAsociar = document.getElementById('btn-asociar');
-  const mostrarFallida = () => UI.abrirModal(modalFallida);
+  // ---------------------------------------------------------------
+  // Búsqueda con coincidencias
+  // ---------------------------------------------------------------
+  const valor = (id) => document.getElementById(id).value.trim();
+  const crear = (etiqueta, texto) => {
+    const el = document.createElement(etiqueta);
+    if (texto !== undefined) el.textContent = texto;
+    return el;
+  };
 
-  // 1) Buscar usuario por matrícula (solo consulta: no registra entrada ni salida)
-  document.getElementById('boton-verde').addEventListener('click', async () => {
-    const matricula = document.getElementById('matricula').value.trim();
-    if (!matricula) return;
-    const user = await ipcRenderer.invoke('buscar-usuario-por-matricula', matricula);
-    if (!user) {
-      mostrarFallida();
+  async function buscar() {
+    clearTimeout(temporizador);
+    const filtros = Object.fromEntries(CAMPOS.map((c) => [c, valor(c)]));
+    const resultados = document.getElementById('resultados');
+    if (!Object.values(filtros).some(Boolean)) {
+      resultados.hidden = true;
       return;
     }
-    currentUser = user;  // { nombre, apellido_paterno, apellido_materno, matricula }
-    // Cada búsqueda empieza con el campo de placa limpio y enfocado
+    const numero = ++ultimaBusqueda;
+    let usuarios;
+    try {
+      usuarios = await ipcRenderer.invoke('buscar-usuarios-placas', filtros);
+    } catch (error) {
+      UI.notificar(`Error en la búsqueda: ${error.message}`, 'error');
+      return;
+    }
+    if (numero !== ultimaBusqueda) return;
+
+    const cuerpo = document.getElementById('tabla-usuarios');
+    cuerpo.replaceChildren();
+    resultados.hidden = false;
+    document.getElementById('resultados-titulo').textContent = usuarios.length
+      ? `${usuarios.length === 20 ? 'Primeras 20' : usuarios.length} coincidencia(s). Elige a la persona para administrar sus placas.`
+      : '';
+    if (!usuarios.length) {
+      const fila = crear('tr');
+      const celda = crear('td', 'No se encontraron usuarios con esos datos');
+      celda.colSpan = 4;
+      celda.className = 'sin-resultados';
+      fila.appendChild(celda);
+      cuerpo.appendChild(fila);
+      return;
+    }
+    usuarios.forEach((usuario) => {
+      const fila = crear('tr');
+      fila.tabIndex = 0;
+      fila.title = 'Administrar las placas de esta persona';
+      [
+        [usuario.nombre, usuario.apellido_paterno, usuario.apellido_materno].filter(Boolean).join(' '),
+        usuario.matricula,
+        usuario.correo || '—',
+        usuario.placas || '—'
+      ].forEach((texto) => fila.appendChild(crear('td', String(texto ?? ''))));
+      const elegir = () => abrirPlacas(usuario);
+      fila.addEventListener('click', elegir);
+      fila.addEventListener('keydown', (e) => { if (e.key === 'Enter') elegir(); });
+      cuerpo.appendChild(fila);
+    });
+  }
+
+  CAMPOS.forEach((id) => {
+    document.getElementById(id).addEventListener('input', () => {
+      clearTimeout(temporizador);
+      temporizador = setTimeout(buscar, ESPERA_BUSQUEDA_MS);
+    });
+  });
+  document.getElementById('boton-verde').addEventListener('click', buscar);
+  document.querySelector('.formulario').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('input')) {
+      e.preventDefault();
+      buscar();
+    }
+  });
+
+  // ---------------------------------------------------------------
+  // Placas de la persona elegida
+  // ---------------------------------------------------------------
+  function modoAgregar() {
+    placaEnEdicion = null;
     inputPlaca.value = '';
     errorPlaca.style.display = 'none';
-    UI.abrirModal(modalPlaca);
-  });
-
-  // Cerrar modal de “usuario no encontrado”
-  document.getElementById('btn-aceptar-asociacion').addEventListener('click', () => {
-    UI.cerrarModal(modalFallida);
-  });
-
-  // Preparo validación de placa
-  const inputPlaca = document.getElementById('placa');
-  let errorPlaca = document.getElementById('error-placa');
-  if (!errorPlaca) {
-    errorPlaca = document.createElement('p');
-    errorPlaca.id = 'error-placa';
-    Object.assign(errorPlaca.style, {
-      color: 'red',
-      fontSize: '12px',
-      marginTop: '8px',
-      display: 'none'
-    });
-    inputPlaca.parentNode.appendChild(errorPlaca);
+    document.getElementById('etiqueta-placa').textContent = 'Agregar placa';
+    btnGuardar.textContent = 'Agregar';
+    btnCancelarEdicion.hidden = true;
   }
-  const regexPlaca = /^[A-Z]{3}-\d{3}-[A-Z]$/;
 
-  // Enter en el campo de placa asocia
-  UI.enterAvanza(modalPlaca.querySelector('.modal-content'), { alFinal: () => btnAsociar.click() });
+  function mostrarError(mensaje) {
+    errorPlaca.textContent = mensaje;
+    errorPlaca.style.display = 'block';
+    inputPlaca.focus();
+  }
 
-  // 4) Click en “Asociar”
-  btnAsociar.addEventListener('click', () => {
-    if (!currentUser) return;
+  async function cargarPlacas() {
+    const lista = document.getElementById('lista-placas');
+    const placas = await ipcRenderer.invoke('placas-de-usuario', usuarioActual.matricula);
+    lista.replaceChildren();
+    if (!placas.length) {
+      lista.appendChild(crear('li', 'Sin placas registradas')).className = 'sin-placas';
+      return;
+    }
+    placas.forEach((placa) => {
+      const item = crear('li');
+      const texto = crear('span', placa);
+      texto.className = 'placa';
+
+      const editar = crear('button', 'Cambiar');
+      editar.type = 'button';
+      editar.className = 'btn-placa';
+      editar.addEventListener('click', () => {
+        placaEnEdicion = placa;
+        inputPlaca.value = placa;
+        errorPlaca.style.display = 'none';
+        document.getElementById('etiqueta-placa').textContent = `Nueva placa en lugar de ${placa}`;
+        btnGuardar.textContent = 'Guardar cambio';
+        btnCancelarEdicion.hidden = false;
+        inputPlaca.focus();
+        inputPlaca.select();
+      });
+
+      // Quitar pide un segundo clic para confirmar
+      const quitar = crear('button', 'Quitar');
+      quitar.type = 'button';
+      quitar.className = 'btn-placa peligro';
+      let confirmar = null;
+      quitar.addEventListener('click', async () => {
+        if (!confirmar) {
+          quitar.textContent = '¿Quitar?';
+          confirmar = setTimeout(() => { quitar.textContent = 'Quitar'; confirmar = null; }, 4000);
+          return;
+        }
+        clearTimeout(confirmar);
+        const resultado = await ipcRenderer.invoke('quitar-placa', { matricula: usuarioActual.matricula, placa });
+        if (!resultado.ok) UI.notificar(resultado.error, 'error');
+        else UI.notificar(`Placa ${placa} quitada`, 'success');
+        if (placaEnEdicion === placa) modoAgregar();
+        await cargarPlacas();
+        buscar();
+      });
+
+      item.append(texto, editar, quitar);
+      lista.appendChild(item);
+    });
+  }
+
+  async function abrirPlacas(usuario) {
+    usuarioActual = usuario;
+    document.getElementById('placas-usuario').textContent =
+      `${[usuario.nombre, usuario.apellido_paterno, usuario.apellido_materno].filter(Boolean).join(' ')} · Matrícula ${usuario.matricula}`;
+    modoAgregar();
+    await cargarPlacas();
+    UI.abrirModal(modalPlacas, { enfocar: inputPlaca, alEscape: cerrarPlacas });
+  }
+
+  function cerrarPlacas() {
+    UI.cerrarModal(modalPlacas);
+    usuarioActual = null;
+  }
+
+  // Se escribe en mayúsculas mientras se teclea
+  inputPlaca.addEventListener('input', () => {
+    const posicion = inputPlaca.selectionStart;
+    inputPlaca.value = inputPlaca.value.toUpperCase();
+    inputPlaca.setSelectionRange(posicion, posicion);
+  });
+
+  async function guardarPlaca() {
+    if (!usuarioActual) return;
     const placa = inputPlaca.value.trim().toUpperCase();
-    if (!regexPlaca.test(placa)) {
-      errorPlaca.textContent = 'Error, número de placas no válido';
-      errorPlaca.style.display = 'block';
+    if (!REGEX_PLACA.test(placa)) {
+      mostrarError('Número de placa no válido (formato ABC-123-D)');
+      return;
+    }
+    btnGuardar.disabled = true; // evita guardar dos veces por doble clic
+    try {
+      const resultado = placaEnEdicion
+        ? await ipcRenderer.invoke('actualizar-placa', { matricula: usuarioActual.matricula, anterior: placaEnEdicion, nueva: placa })
+        : await ipcRenderer.invoke('agregar-placa', { matricula: usuarioActual.matricula, placa });
+      if (!resultado.ok) {
+        mostrarError(resultado.error);
+        return;
+      }
+      UI.notificar(placaEnEdicion ? `Placa cambiada a ${placa}` : `Placa ${placa} agregada`, 'success');
+      modoAgregar();
+      await cargarPlacas();
+      buscar(); // actualiza la columna de placas de la tabla
       inputPlaca.focus();
-      return;
+    } catch (error) {
+      mostrarError(`No se pudo guardar: ${error.message}`);
+    } finally {
+      btnGuardar.disabled = false;
     }
-    errorPlaca.style.display = 'none';
-
-    // Llamo al backend para guardar la asociación
-    btnAsociar.disabled = true; // evita asociar dos veces por doble clic
-    ipcRenderer.send('asociar-placa', {
-      matricula: currentUser.matricula,
-      placa
-    });
-  });
-
-  // 5) Manejo de la respuesta de asociación
-  ipcRenderer.on('asociacion-exitosa', (event, { success }) => {
-    btnAsociar.disabled = false;
-    if (!success) {
-      mostrarFallida();
-      return;
-    }
-
-    // Cierro modal anterior y abro el de éxito final
-    UI.cerrarModal(modalPlaca);
-    const texto = document.getElementById('texto-exito');
-    texto.innerHTML = `
-      Nombre: ${UI.escapar(currentUser.nombre)} ${UI.escapar(currentUser.apellido_paterno)} ${UI.escapar(currentUser.apellido_materno)}<br>
-      Matrícula: ${UI.escapar(currentUser.matricula)}<br>
-      Placas: ${UI.escapar(inputPlaca.value.trim().toUpperCase())}
-    `;
-    UI.abrirModal(document.getElementById('modal-exito-final'), { alEscape: regresarAlMenu });
-  });
-
-  // 6) Si hay error en la consulta de asociación
-  ipcRenderer.on('asociacion-error', (event, errorMsg) => {
-    btnAsociar.disabled = false;
-    console.error('Error al asociar placa:', errorMsg);
-    mostrarFallida();
-  });
-
-  // 7) Regresar tras “Aceptar” del éxito final
-  function regresarAlMenu() {
-    ipcRenderer.send('navigate', 'acceder');
   }
-  document.getElementById('btn-aceptar-final').addEventListener('click', regresarAlMenu);
+
+  btnGuardar.addEventListener('click', guardarPlaca);
+  inputPlaca.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      guardarPlaca();
+    }
+  });
+  btnCancelarEdicion.addEventListener('click', () => {
+    modoAgregar();
+    inputPlaca.focus();
+  });
+  document.getElementById('btn-cerrar-placas').addEventListener('click', cerrarPlacas);
+  modalPlacas.addEventListener('click', (e) => {
+    if (e.target === modalPlacas) cerrarPlacas();
+  });
 });

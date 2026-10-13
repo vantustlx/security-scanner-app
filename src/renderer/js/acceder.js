@@ -22,8 +22,14 @@ document.addEventListener('DOMContentLoaded', function() {
         ipcRenderer.send('mostrar-lector');
     });
 
-    // Los accesos en vehículo los registran los lectores 2 y 3; aquí solo se asocian las placas
+    // Los accesos en vehículo los registran los lectores 2 y 3; aquí solo se asocian las placas.
+    // Es una vista del administrador: el inicio pide su contraseña y después la abre.
     document.getElementById('vehicle-access').addEventListener('click', () => {
-        ipcRenderer.send('navigate', 'asociarplacasvehiculo');
+        try {
+            sessionStorage.setItem('destinoAdmin', 'asociarplacasvehiculo');
+        } catch (e) {
+            // Sin sessionStorage, el inicio de sesión lleva al menú del administrador
+        }
+        ipcRenderer.send('navigate', 'index');
     });
 });

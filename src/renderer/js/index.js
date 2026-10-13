@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', function () {
   const usuarioInput = document.getElementById('usuario');
   const passwordInput = document.getElementById('contraseña');
 
+  // Vista del administrador pedida desde una pantalla pública (p. ej. asociar placas desde "Acceder"):
+  // se abre directo el inicio de sesión y, con la contraseña correcta, esa vista en lugar del menú
+  const DESTINOS_ADMIN = ['asociarplacasvehiculo'];
+  let destino = null;
+  try {
+    destino = DESTINOS_ADMIN.includes(sessionStorage.getItem('destinoAdmin')) ? sessionStorage.getItem('destinoAdmin') : null;
+    sessionStorage.removeItem('destinoAdmin');
+  } catch (e) {
+    destino = null;
+  }
+
   // Aviso previo al modo administrador
   const abrirAviso = () => UI.abrirModal(modalnoti);
   document.getElementById('login-card-administrador').addEventListener('click', abrirAviso);
@@ -32,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function cerrarModalAdministrador() {
     UI.cerrarModal(modal);
     passwordInput.value = '';
+    destino = null;
   }
 
   btnAceptarNoti.addEventListener('click', () => {
@@ -54,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     if (resultado.ok) {
-      ipcRenderer.send('navigate', 'administradoropciones');
+      ipcRenderer.send('navigate', destino || 'administradoropciones');
     } else {
       UI.notificar(resultado.error, 'error', 3000);
       passwordInput.focus();
@@ -78,4 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
   modalnoti.addEventListener('click', function (e) {
     if (e.target === modalnoti) UI.cerrarModal(modalnoti);
   });
+
+  if (destino) UI.abrirModal(modal, { alEscape: cerrarModalAdministrador });
 });
