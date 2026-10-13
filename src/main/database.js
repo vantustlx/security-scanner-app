@@ -27,6 +27,9 @@ const connection = mysql.createConnection(dbConfig);
 // Pool con promesas para los módulos que usan async/await y transacciones (registro, notificaciones)
 const pool = mysql.createPool({ ...dbConfig, connectionLimit: 4 }).promise();
 
+// Formato de placa que acepta la app (igual que la pantalla de placas)
+const REGEX_PLACA = /^[A-Z]{3}-\d{3}-[A-Z]$/;
+
 // Placas asociadas al usuario "u", separadas por coma (NULL si no tiene vehículo)
 const SQL_PLACAS = `(SELECT GROUP_CONCAT(v.placa ORDER BY v.placa SEPARATOR ', ')
                        FROM vehiculo v WHERE v.matricula = u.matricula)`;
@@ -85,16 +88,78 @@ function setupDBListeners() {
 
     // 5) y 6) El registro de entradas/salidas y la búsqueda por matrícula están en acceso.js
 
-    // 7) ASOCIAR PLACA → INSERTAR EN vehiculo
-    ipcMain.on('asociar-placa', (event, { matricula, placa }) => {
-        const insertQuery = 'INSERT INTO vehiculo (matricula, placa) VALUES (?, ?)';
-        connection.query(insertQuery, [matricula, placa], (err, results) => {
-            if (err) {
-                console.error('Error al insertar en vehiculo:', err);
-                return event.reply('asociacion-error', err.message);
-            }
-            event.reply('asociacion-exitosa', { success: results.affectedRows > 0 });
-        });
+    // 7) PLACAS DE VEHÍCULO (modo administrador): búsqueda con coincidencias y alta, cambio y baja
+    ipcMain.handle('buscar-usuarios-placas', async (event, filtros = {}) => {
+        // Coincidencias parciales; la colación de la BD (utf8mb4_0900_ai_ci) ignora mayúsculas y acentos
+        const texto = (v) => String(v ?? '').trim();
+        const condiciones = [];
+        const params = [];
+        const filtrar = (columna, valor) => {
+            if (!texto(valor)) return;
+            condiciones.push(`${columna} LIKE CONCAT('%', ?, '%')`);
+            params.push(texto(valor));
+        };
+        filtrar('u.nombre', filtros.nombre);
+        filtrar('u.apellido_paterno', filtros.apellidoP);
+        filtrar('u.apellido_materno', filtros.apellidoM);
+        filtrar('CAST(u.matricula AS CHAR)', filtros.matricula);
+        filtrar('u.correo', filtros.correo);
+        if (!condiciones.length) return [];
+        const [usuarios] = await pool.query(
+            `SELECT u.matricula, u.nombre, u.apellido_paterno, u.apellido_materno, u.correo, ${SQL_PLACAS} AS placas
+               FROM usuario u
+              WHERE ${condiciones.join(' AND ')}
+              ORDER BY u.apellido_paterno, u.apellido_materno, u.nombre
+              LIMIT 20`,
+            params
+        );
+        return usuarios;
+    });
+
+    ipcMain.handle('placas-de-usuario', async (event, matricula) => {
+        const [filas] = await pool.query('SELECT placa FROM vehiculo WHERE matricula = ? ORDER BY placa', [matricula]);
+        return filas.map((f) => f.placa);
+    });
+
+    // Una placa pertenece a una sola persona (es la llave de vehiculo)
+    async function errorDePlacaRepetida(placa, matricula) {
+        const [[dueno]] = await pool.query('SELECT matricula FROM vehiculo WHERE placa = ?', [placa]);
+        if (!dueno) return 'La placa ya está registrada';
+        return Number(dueno.matricula) === Number(matricula)
+            ? 'El usuario ya tiene esa placa'
+            : `La placa ya está asociada a otra persona (matrícula ${dueno.matricula})`;
+    }
+
+    const validarPlaca = (placa) => REGEX_PLACA.test(String(placa || ''));
+
+    ipcMain.handle('agregar-placa', async (event, { matricula, placa }) => {
+        if (!validarPlaca(placa)) return { ok: false, error: 'Número de placa no válido (formato ABC-123-D)' };
+        try {
+            await pool.query('INSERT INTO vehiculo (matricula, placa) VALUES (?, ?)', [matricula, placa]);
+            return { ok: true };
+        } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') return { ok: false, error: await errorDePlacaRepetida(placa, matricula) };
+            if (error.code === 'ER_NO_REFERENCED_ROW_2') return { ok: false, error: 'El usuario ya no existe' };
+            throw error;
+        }
+    });
+
+    ipcMain.handle('actualizar-placa', async (event, { matricula, anterior, nueva }) => {
+        if (!validarPlaca(nueva)) return { ok: false, error: 'Número de placa no válido (formato ABC-123-D)' };
+        if (anterior === nueva) return { ok: true };
+        try {
+            const [resultado] = await pool.query(
+                'UPDATE vehiculo SET placa = ? WHERE placa = ? AND matricula = ?', [nueva, anterior, matricula]);
+            return resultado.affectedRows ? { ok: true } : { ok: false, error: 'La placa anterior ya no existe' };
+        } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') return { ok: false, error: await errorDePlacaRepetida(nueva, matricula) };
+            throw error;
+        }
+    });
+
+    ipcMain.handle('quitar-placa', async (event, { matricula, placa }) => {
+        const [resultado] = await pool.query('DELETE FROM vehiculo WHERE placa = ? AND matricula = ?', [placa, matricula]);
+        return resultado.affectedRows ? { ok: true } : { ok: false, error: 'La placa ya no existe' };
     });
 
     // 8) a 10) El registro de visitantes está en visitantes.js y su acceso en acceso.js
